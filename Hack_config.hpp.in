@@ -1,0 +1,20 @@
+#ifndef HACK_CONFIG_HPP
+#define HACK_CONFIG_HPP
+
+#include <string_view>
+
+namespace Hack::cmake
+{
+
+inline constexpr auto project_name          = std::string_view( "@PROJECT_NAME@" );
+inline constexpr auto project_version       = std::string_view( "@PROJECT_VERSION@" );
+inline constexpr auto project_description   = std::string_view( "@PROJECT_DESCRIPTION@" );
+inline constexpr auto project_version_major = @PROJECT_VERSION_MAJOR@;
+inline constexpr auto project_version_minor = @PROJECT_VERSION_MINOR@;
+inline constexpr auto project_version_patch = @PROJECT_VERSION_PATCH@;
+inline constexpr auto project_version_tweak = @PROJECT_VERSION_TWEAK@;
+
+
+}		// namespace Hack::cmake
+
+#endif

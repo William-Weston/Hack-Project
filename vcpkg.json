@@ -1,0 +1,18 @@
+{
+   "version-semver" : "0.0.1",
+   "dependencies" :
+   [
+      {
+         "name": "sdl2"
+      },
+
+      {
+         "name": "imgui",
+         "features": [
+            "sdl2-binding",
+            "sdl2-renderer-binding"
+         ]
+      }
+   ]
+
+}
