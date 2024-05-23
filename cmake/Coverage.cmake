@@ -37,7 +37,7 @@ function( AddCoverage target )
       COMMAND ${LCOV_PATH} -d . --zerocounters
       COMMAND $<TARGET_FILE:${target}>
       COMMAND ${LCOV_PATH} -d . --capture -o coverage.info 
-      COMMAND ${LCOV_PATH} -r coverage.info '/usr/include/*' 
+      COMMAND ${LCOV_PATH} -r coverage.info '/usr/include/*' --ignore-errors unused
                            -o filtered.info
       COMMAND ${GENHTML_PATH} -o coverage-${target} 
                               filtered.info --legend
