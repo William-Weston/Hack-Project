@@ -49,6 +49,10 @@ include( Coverage )
 CleanCoverage( Hack_Assembler )
 EnableCoverage( Hack_Assembler )
 
+include( StaticAnalyzers )
+AddCppCheck( Hack_Assembler )
+AddClangTidy( Hack_Assembler )
+
 
 # =====================================
 # 	TEST SUITE
