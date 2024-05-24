@@ -42,16 +42,16 @@ class Assembler final
 public:
 
    // assemble from file that may contain labels and variables
-   auto assemble( std::istream& file )                       -> std::vector<std::string>;
+   auto assemble( std::istream& file )                             -> std::vector<std::string>;
 
    // assemble instructions containing no labels or variables
-   auto assemble( std::span<std::string const> instruction ) -> std::vector<std::string>;
+   auto assemble( std::span<std::string const> instruction ) const -> std::vector<std::string>;
 
    // assemble_expected from file that may contain labels and variables
-   auto assemble_expected( std::istream& file )              -> tl::expected<std::vector<std::string>, Code_Line>;
+   auto assemble_expected( std::istream& file )                    -> tl::expected<std::vector<std::string>, Code_Line>;
    
    // assemble one assembly instruction, not containing labels or variables, to binary
-   auto assemble( std::string_view instruction ) const       -> std::optional<std::string>;
+   auto assemble( std::string_view instruction ) const             -> std::optional<std::string>;
 
 
 private:

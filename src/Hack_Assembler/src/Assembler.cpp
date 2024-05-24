@@ -11,28 +11,31 @@
 #include "Assembler.h"
 
 #include "Code_Generator.h"
+#include "Code_Line.h" 
 #include "Hack/Utilities/exceptions.hpp"           // parse_error
-#include "Hack/Utilities/utilities.hpp"            // to_uint_t
+#include "Hack/Utilities/utilities.hpp"            // to_uint_t, is_alpha
 
-#include <algorithm>    // sort
-#include <cassert>      // assert
-#include <charconv>     // from_chars
-#include <cstdint>      // uint16_t
+#include <tl/expected.hpp>
+
+#include <algorithm>                               // sort
+#include <cassert>                                 // assert
 #include <cctype>
+#include <ios>                                     // ios_base
 #include <istream>
 #include <optional>
-#include <stdexcept>    // runtime_error
+#include <span>
 #include <string>
-#include <tl/expected.hpp>
-#include <utility>      // move
+#include <string_view>
+#include <utility>                                 // move
+#include <vector>
+#include <tuple>
 
 // ------------------------------------------------------------------------------------------------
 namespace   // helper function declarations -------------------------------------------------------
 {
-   auto is_alpha( char c ) -> bool;
    auto remove_whitespace( std::string text )               -> std::string;
    auto trim_line_comments( std::string_view text )         -> std::string_view;
-   auto to_binary_16_string( std::string_view )             -> std::optional<std::string>;
+   auto to_binary_16_string( std::string_view number )      -> std::optional<std::string>;
    auto digit_to_char( int digit, int base )                -> char;
    auto to_binary16( int number )                           -> std::optional<std::string>;
    auto int_to_binary_string( int number )                  -> std::string;
@@ -72,7 +75,7 @@ Hack::Assembler::assemble( std::istream& file ) -> std::vector<std::string>
 
 
 auto 
-Hack::Assembler::assemble( std::span<std::string const> instructions )  -> std::vector<std::string>
+Hack::Assembler::assemble( std::span<std::string const> instructions )  const -> std::vector<std::string>
 {
    auto result = std::vector<std::string>();
    result.reserve( instructions.size() );
@@ -127,15 +130,17 @@ Hack::Assembler::assemble_expected( std::istream& file ) -> tl::expected<std::ve
       }
    }
 
-   return tl::expected<std::vector<std::string>, Code_Line>( result );
+   return { result };
 }
 
 
 auto 
 Hack::Assembler::assemble( std::string_view instruction ) const -> std::optional<std::string>
 {
-   if ( instruction.size() == 0 )   return std::nullopt;
-
+   if ( instruction.empty() )
+   {
+      return std::nullopt;
+   }
    // a instruction
    if ( instruction[0] == '@' )              
    {
@@ -180,7 +185,7 @@ Hack::Assembler::first_pass( std::istream& file ) -> void
       auto const result = remove_whitespace( line );     // cppcheck-suppress[accessMoved]
 
       // don't load comments or empty lines
-      if ( result.starts_with( "//" ) || result.size() == 0 )
+      if ( result.starts_with( "//" ) || result.empty() )
       {
          ++current_line_no;
          continue;
@@ -243,12 +248,12 @@ Hack::Assembler::second_pass( std::istream& file ) -> std::vector<Code_Line>
       auto result = remove_whitespace( line );           // cppcheck-suppress[accessMoved]
 
       // don't load comments, empty lines or labels
-      if ( !( result.starts_with( "//" ) || result.size() == 0 || result.starts_with( '(' ) ) )
+      if ( !( result.starts_with( "//" ) || result.empty() || result.starts_with( '(' ) ) )
       {
          // trim line comments
          auto trimmed = trim_line_comments( result );
 
-         if ( trimmed.starts_with( '@' ) && trimmed.size() > 1 && is_alpha( trimmed.at( 1 ) ) )    // variable, label or predefined symbol
+         if ( trimmed.starts_with( '@' ) && trimmed.size() > 1 && Hack::Utils::is_alpha( trimmed.at( 1 ) ) )    // variable, label or predefined symbol
          {
             // check symbol table
             trimmed.remove_prefix( 1 );
@@ -320,11 +325,6 @@ Hack::Assembler::process_c_instruction( std::string_view instruction ) const -> 
 namespace   // helper function definitions --------------------------------------------------------
 {
 
-auto
-is_alpha( char ch ) -> bool
-{
-   return std::isalpha( static_cast<unsigned char>( ch ) );
-}
 
 auto 
 remove_whitespace( std::string text )  -> std::string
@@ -395,11 +395,12 @@ to_binary16( int const number )  -> std::optional<std::string>
    auto const length  = tmp.size();
 
    if ( length > 16 )             // overflow check
+   {   
       return std::nullopt;
-      
+   }  
    auto const padding = 16 - length;
 
-   return std::optional<std::string>( std::string( padding, '0' ) + tmp );
+   return { std::string( padding, '0' ) + tmp };
 }
 
 auto 
@@ -421,7 +422,7 @@ to_binary_16_string( std::string_view const number )  -> std::optional<std::stri
 auto
 parse_c_instruction( std::string_view instruction ) -> std::tuple<std::string, std::string, std::string>
 {
-   assert( instruction.size() != 0 );
+   assert( ! instruction.empty() );
 
    auto current_pos = 0ul;
 
@@ -446,8 +447,10 @@ parse_c_instruction( std::string_view instruction ) -> std::tuple<std::string, s
    current_pos = comp_end;
 
    if ( has_semicolon )
+   {
       ++current_pos;
-
+   }
+   
    auto const jump_size = instruction.size() - current_pos;
    auto const jump      = instruction.substr( current_pos, jump_size );
 
