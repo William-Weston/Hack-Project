@@ -40,6 +40,8 @@ target_include_directories( Hack_Assembler
 
 
 target_link_libraries( Hack_Assembler 
+   PUBLIC
+      tl::expected
    PRIVATE
       Hack::project_warnings
       Hack::Utilities

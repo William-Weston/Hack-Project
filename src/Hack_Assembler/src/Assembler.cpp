@@ -19,11 +19,11 @@
 #include <charconv>     // from_chars
 #include <cstdint>      // uint16_t
 #include <cctype>
-#include <expected>
 #include <istream>
 #include <optional>
 #include <stdexcept>    // runtime_error
 #include <string>
+#include <tl/expected.hpp>
 #include <utility>      // move
 
 // ------------------------------------------------------------------------------------------------
@@ -106,7 +106,7 @@ Hack::Assembler::assemble( std::span<std::string const> instructions )  -> std::
 // TODO: exception handling 
 // assemble from file that may contain labels and variables
 auto 
-Hack::Assembler::assemble_expected( std::istream& file ) -> std::expected<std::vector<std::string>, Code_Line>
+Hack::Assembler::assemble_expected( std::istream& file ) -> tl::expected<std::vector<std::string>, Code_Line>
 {
    auto const code = prepare( file );     // TODO: this throws
 
@@ -123,11 +123,11 @@ Hack::Assembler::assemble_expected( std::istream& file ) -> std::expected<std::v
       }
       else
       {
-         return std::unexpected<Code_Line>( line );
+         return tl::unexpected<Code_Line>( line );
       }
    }
 
-   return std::expected<std::vector<std::string>, Code_Line>( result );
+   return tl::expected<std::vector<std::string>, Code_Line>( result );
 }
 
 

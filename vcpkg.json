@@ -12,6 +12,10 @@
             "sdl2-binding",
             "sdl2-renderer-binding"
          ]
+      },
+
+      {
+         "name": "tl-expected"
       }
    ]
 
