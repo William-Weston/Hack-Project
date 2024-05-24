@@ -174,10 +174,10 @@ Hack::Assembler::first_pass( std::istream& file ) -> void
    auto current_line_no        = 1zu;
    auto current_instruction_no = 0;
 
-   while ( std::getline( file, line ) )
+   while ( std::getline( file, line ) )                  // cppcheck-suppress[accessMoved]
    {
       // remove whitespace
-      auto const result = remove_whitespace( line );
+      auto const result = remove_whitespace( line );     // cppcheck-suppress[accessMoved]
 
       // don't load comments or empty lines
       if ( result.starts_with( "//" ) || result.size() == 0 )
@@ -237,10 +237,10 @@ Hack::Assembler::second_pass( std::istream& file ) -> std::vector<Code_Line>
    auto current_line_no = 1;
    auto variable_no     = 16;
 
-   while ( std::getline( file, line ) )
+   while ( std::getline( file, line ) )                  // cppcheck-suppress[accessMoved]
    {
       // remove whitespace
-      auto result = remove_whitespace( line );
+      auto result = remove_whitespace( line );           // cppcheck-suppress[accessMoved]
 
       // don't load comments, empty lines or labels
       if ( !( result.starts_with( "//" ) || result.size() == 0 || result.starts_with( '(' ) ) )
