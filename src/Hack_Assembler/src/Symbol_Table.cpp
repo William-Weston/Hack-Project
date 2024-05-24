@@ -11,6 +11,7 @@
 #include "Symbol_Table.h"
 
 #include <string>
+#include <string_view>
 #include <unordered_map>
 
 
