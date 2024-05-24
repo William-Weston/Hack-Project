@@ -60,7 +60,7 @@ private:
    float            speed_{ 0.33F };            // instructions per second to execute on Hack Computer
    bool             play_{ false };             // run the program in the Hack computer ROM
    bool             step_{ false };             // execute the next instruction
-   bool             running_{ false };          // is the emulator running
+   bool             running_{ true };          // is the emulator running
    bool             open_new_file_{ false };
 
    auto handle_events() -> void;

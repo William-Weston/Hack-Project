@@ -16,6 +16,7 @@
 #include "Definitions.h"
 #include "GUI_Frame.h"
 #include "SDL_InitError.h"
+#include "SDL_events.h"
 #include "Utilities.h"
 
 #include <Hack/Computer.h>
@@ -43,7 +44,7 @@
 #include <utility>         // move
 #include <vector>
 
-namespace 
+namespace
 {
    auto file_error_popup( std::string_view error_msg  )     -> bool;
    auto parse_error_popup( std::string_view error_msg )     -> bool;
@@ -59,8 +60,6 @@ Hack::Emulator::Emulator( std::string_view title, int x_pos, int y_pos, int widt
       window_{ core_.window() },
       renderer_{ core_.renderer() }
 {
-   
-   running_ = true;     // if initialization succeeds, running_ = true
 }
 
 

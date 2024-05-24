@@ -11,8 +11,11 @@
 
 #include "Screen_Texture.h"
 
-#include <Hack/Computer.h>
+#include "Hack/Computer.h"
+
 #include <SDL.h>
+#include <SDL_render.h>
+#include <SDL_pixels.h>
 
 #include <array>
 #include <bitset>

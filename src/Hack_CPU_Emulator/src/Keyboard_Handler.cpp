@@ -10,7 +10,7 @@
  */
 #include "Keyboard_Handler.h"
 
-#include <SDL.h>
+#include <SDL_keyboard.h>
 
 
 auto 
