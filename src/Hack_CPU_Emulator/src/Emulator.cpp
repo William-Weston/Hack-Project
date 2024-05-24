@@ -12,6 +12,8 @@
  * 
  */
 #include "Emulator.h"
+
+#include "Definitions.h"
 #include "GUI_Frame.h"
 #include "SDL_InitError.h"
 #include "Utilities.h"
@@ -53,7 +55,7 @@ namespace
 
 Hack::Emulator::Emulator( std::string_view title, int x_pos, int y_pos, int width, int height, bool fullscreen )
    :  core_( title, x_pos, y_pos, width, height, fullscreen ),
-      screen_texture_( computer_.screen_cbegin(), computer_.screen_cend(), core_.window(), core_.renderer() ),
+      screen_texture_( computer_.screen_cbegin(), computer_.screen_cend(), core_.renderer() ),
       window_{ core_.window() },
       renderer_{ core_.renderer() }
 {

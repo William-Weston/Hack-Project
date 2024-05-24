@@ -17,14 +17,12 @@
 #include <array>
 #include <bitset>
 
+
 Hack::Screen_Texture::Screen_Texture( Computer::Screen_const_iterator start, 
                                       Computer::Screen_const_iterator finish, 
-                                      SDL_Window* window, 
                                       SDL_Renderer* renderer )
    :  start_{ start },
       finish_{ finish },
-      window_{ window },
-      renderer_{ renderer },
       texture_{ SDL_CreateTexture( renderer, SDL_PIXELFORMAT_ARGB8888, SDL_TEXTUREACCESS_STATIC, width, height ) }
                                                                                 
 {

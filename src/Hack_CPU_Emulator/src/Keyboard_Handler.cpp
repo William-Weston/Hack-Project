@@ -10,16 +10,17 @@
  */
 #include "Keyboard_Handler.h"
 
+#include <SDL.h>
 
 
 auto 
 Hack::Keyboard_Handler::onKeyDown() noexcept -> void
 {
-   keystates_ = SDL_GetKeyboardState( 0 );
+   keystates_ = SDL_GetKeyboardState( nullptr );
 }
 
 auto 
 Hack::Keyboard_Handler::onKeyUp()   noexcept -> void
 {
-   keystates_ = SDL_GetKeyboardState( 0 );
+   keystates_ = SDL_GetKeyboardState( nullptr );
 }

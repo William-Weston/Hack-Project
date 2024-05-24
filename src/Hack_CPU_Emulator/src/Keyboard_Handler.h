@@ -70,7 +70,7 @@ Hack::Keyboard_Handler::isKeyUp( SDL_Scancode key )   const noexcept -> bool
 constexpr auto 
 Hack::Keyboard_Handler::isShiftDown() const noexcept -> bool
 {
-   return isKeyDown( SDL_SCANCODE_LSHIFT ) | isKeyDown( SDL_SCANCODE_RSHIFT );
+   return isKeyDown( SDL_SCANCODE_LSHIFT ) || isKeyDown( SDL_SCANCODE_RSHIFT );
 }
 
 constexpr auto 

@@ -22,7 +22,6 @@ public:
 
    Screen_Texture( Computer::Screen_const_iterator start, 
                    Computer::Screen_const_iterator finish, 
-                   SDL_Window* window, 
                    SDL_Renderer* renderer ); 
    
    ~Screen_Texture();
@@ -40,8 +39,7 @@ private:
 
    iterator const start_; 
    iterator const finish_;
-   SDL_Window*    window_{};
-   SDL_Renderer*  renderer_{};
+
    SDL_Texture*   texture_{}; 
 };
 
