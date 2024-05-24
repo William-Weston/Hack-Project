@@ -12,7 +12,8 @@ Checks: "*,
         -hicpp-uppercase-literal-suffix,
         -cppcoreguidelines-non-private-member-variables-in-classes,
         -misc-non-private-member-variables-in-classes,
-        -hicpp-exception-baseclass
+        -hicpp-exception-baseclass,
+        -misc-include-cleaner
 "
 WarningsAsErrors: ''
 HeaderFilterRegex: ''
