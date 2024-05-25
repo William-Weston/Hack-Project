@@ -13,7 +13,7 @@
 #include "Code_Generator.h"
 #include "Code_Line.h" 
 #include "Hack/Utilities/exceptions.hpp"           // parse_error
-#include "Hack/Utilities/utilities.hpp"            // to_uint_t, is_alpha
+#include "Hack/Utilities/utilities.hpp"            // to_uint_t, is_alpha, to_binary16_string
 
 #include <tl/expected.hpp>
 
@@ -35,10 +35,6 @@ namespace   // helper function declarations ------------------------------------
 {
    auto remove_whitespace( std::string text )               -> std::string;
    auto trim_line_comments( std::string_view text )         -> std::string_view;
-   auto to_binary_16_string( std::string_view number )      -> std::optional<std::string>;
-   auto digit_to_char( int digit, int base )                -> char;
-   auto to_binary16( int number )                           -> std::optional<std::string>;
-   auto int_to_binary_string( int number )                  -> std::string;
    auto parse_c_instruction( std::string_view instruction ) -> std::tuple<std::string, std::string, std::string>;
 }
 
@@ -286,7 +282,14 @@ Hack::Assembler::process_a_instruction( std::string_view instruction ) const -> 
 {
    instruction.remove_prefix( 1 );        // remove '@'
 
-   return to_binary_16_string( instruction );
+   auto result = Hack::Utils::to_binary16_string( instruction );
+
+   if ( !result || result->at( 0 ) == '1' )     // a instruction can NOT begin with a '1'
+   {
+      return std::nullopt;
+   }
+
+   return result;
 }
 
 
@@ -348,75 +351,6 @@ trim_line_comments( std::string_view text )         -> std::string_view
    return text;
 }
 
-
-auto
-int_to_binary_string( int number ) -> std::string
-{
-   static constexpr auto base = 2;
-
-   auto stack = std::vector<char>();
-
-   while ( number >= base )
-   {
-      int  const  remainder = number % base;
-      char const digit      = digit_to_char( remainder, base );
-
-      stack.push_back( digit );
-      number = ( number - remainder ) / base;
-   }
-
-   stack.push_back( digit_to_char( number, base ) );
-
-   return std::string( stack.rbegin(), stack.rend() );
-}
-
-
-auto
-digit_to_char( int const digit, int const base ) -> char
-{
-   assert( base > 0 && "Error: base must be greater than zero" );
-   assert( digit < base && "Error: digit must be less than base" );
-
-   if ( base <= 10 || digit < 10 )
-   {
-        // ASCII code 48 is '0'
-      return static_cast< char >( digit + 48 );
-   }
-
-     // numbers starting at 10 are represented with letters starting at A which is ASCII code 65
-   return static_cast< char >( 55 + digit );
-}
-
-
-auto 
-to_binary16( int const number )  -> std::optional<std::string>
-{
-   auto const tmp     = int_to_binary_string( number );
-   auto const length  = tmp.size();
-
-   if ( length > 16 )             // overflow check
-   {   
-      return std::nullopt;
-   }  
-   auto const padding = 16 - length;
-
-   return { std::string( padding, '0' ) + tmp };
-}
-
-auto 
-to_binary_16_string( std::string_view const number )  -> std::optional<std::string>
-{
-   // convert to uint16_t
-   auto const result = Hack::Utils::to_uint16_t( number );
-
-   if ( !result || ( *result > 32'767 ) )
-   {
-      return std::nullopt;
-   }
-
-   // convert to binary string
-   return to_binary16( *result );
-}
 
 // instruction must not be empty
 auto
