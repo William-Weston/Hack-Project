@@ -11,14 +11,19 @@ function( AddClangTidy target )
          get_target_property( TARGET_PCH ${target} INTERFACE_PRECOMPILE_HEADERS )
 
          if( "${TARGET_PCH}" STREQUAL "TARGET_PCH-NOTFOUND" )
+
             get_target_property( TARGET_PCH ${target} PRECOMPILE_HEADERS )
+
          endif()
 
          if( NOT ( "${TARGET_PCH}" STREQUAL "TARGET_PCH-NOTFOUND" ) )
+
             message( WARNING
                "clang-tidy cannot be enabled with non-clang compiler and PCH, clang-tidy fails to handle gcc's PCH file"
             )
+            
             return()
+
          endif()
 
       endif()
@@ -34,7 +39,9 @@ function( AddClangTidy target )
 
       # set standard
       if( NOT "${CMAKE_CXX_STANDARD}" STREQUAL "" )
+
          set( CLANG_TIDY_OPTIONS ${CLANG_TIDY_OPTIONS} -extra-arg=-std=c++${CMAKE_CXX_STANDARD} )
+
       endif()
 
       set_target_properties( ${target}
@@ -47,7 +54,7 @@ function( AddClangTidy target )
 
    else()
 
-      message( WARNING "clang-tidy requested but executable not found" )
+      message( WARNING "clang-tidy requested for ${target} but executable not found" )
 
    endif()
 
@@ -78,15 +85,51 @@ function( AddCppCheck target )
       )
 
       set_target_properties( ${target}
-         PROPERTIES CXX_CPPCHECK 
-            "${CPPCHECK_OPTIONS}"
+         PROPERTIES 
+            CXX_CPPCHECK 
+               "${CPPCHECK_OPTIONS}"
       )
 
       message( STATUS "cppcheck enabled on target: ${target}" )
+
    else()
 
-      message( WARNING "cppcheck requested but executable not found" )
+      message( WARNING "cppcheck requested for ${target} but executable not found" )
 
    endif()
+
+endfunction() 
+
+
+function( AddIWYU target )
+
+   find_program( IWYU_PATH NAMES iwyu include-what-you-use )
+
+   if ( IWYU_PATH )
+
+      set( IWYU_OPTIONS 
+         "${IWYU_PATH}"
+         "-Xiwyu"
+         "any"
+         "-Xiwyu"
+         "iwyu"
+         "-Xiwyu"
+         "-I ${CMAKE_CXX_IMPLICIT_INCLUDE_DIRECTORIES}"
+      )
+
+      set_target_properties( ${target}
+         PROPERTIES 
+            CXX_INCLUDE_WHAT_YOU_USE
+               ${IWYU_OPTIONS}
+      )
+
+      message( STATUS "cppcheck enabled on target: ${target}" )
+
+   else()
+
+      message( WARNING "iwyu requested but executable not found" )
+
+   endif()
+
 
 endfunction()

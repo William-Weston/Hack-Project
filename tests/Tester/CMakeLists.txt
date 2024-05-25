@@ -16,3 +16,6 @@ target_link_libraries( main
       Hack::hack_config
       Hack::project_warnings
 )
+
+include( StaticAnalyzers )
+AddIWYU( main )
