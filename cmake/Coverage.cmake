@@ -13,12 +13,11 @@ endfunction()
 function( EnableCoverage target )
 
    message( STATUS "Enabling Coverage on ${target}" )
-   if ( CMAKE_BUILD_TYPE STREQUAL Debug 
-        AND 
+   if ( CMAKE_BUILD_TYPE STREQUAL Debug AND 
         ( CMAKE_CXX_COMPILER_ID STREQUAL "GNU" OR CMAKE_CXX_COMPILER_ID MATCHES ".*Clang" ) 
       )
       
-      target_compile_options( ${target} PRIVATE --coverage -fno-inline )
+      target_compile_options( ${target} PRIVATE --coverage -fno-inline -fkeep-inline-functions -fkeep-static-consts )
       target_link_options( ${target} PUBLIC --coverage )
    endif()
 
