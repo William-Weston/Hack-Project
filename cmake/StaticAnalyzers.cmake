@@ -50,7 +50,7 @@ function( AddClangTidy target )
                "${CLANG_TIDY_OPTIONS}"
       )
       
-      message( STATUS "clang-tidy enabled on target: ${target}" )
+      message( STATUS "Enabling clang-tidy on target: ${target}" )
 
    else()
 
@@ -90,7 +90,7 @@ function( AddCppCheck target )
                "${CPPCHECK_OPTIONS}"
       )
 
-      message( STATUS "cppcheck enabled on target: ${target}" )
+      message( STATUS "Enabling cppcheck on target: ${target}" )
 
    else()
 
@@ -123,7 +123,7 @@ function( AddIWYU target )
                ${IWYU_OPTIONS}
       )
 
-      message( STATUS "iwyu enabled on target: ${target}" )
+      message( STATUS "Enabling iwyu on target: ${target}" )
 
    else()
 
@@ -143,7 +143,7 @@ function( AddLWYU target )
                LINK_WHAT_YOU_USE ON
       )
 
-      message( STATUS "link what you use enabled on target: ${target}" )
+      message( STATUS "Enabling link what you use on target: ${target}" )
 
    else()
 
@@ -153,3 +153,28 @@ function( AddLWYU target )
 
 endfunction()
 
+
+function( EnableSanitizers 
+   target 
+   ENABLE_CLANGTIDY
+   ENABLE_CPPCHECK
+   ENABLE_IWYU
+   ENABLE_LWYU
+)
+   if ( ${ENABLE_CLANGTIDY} )
+      AddClangTidy( ${target} )
+   endif()
+
+   if ( ${ENABLE_CPPCHECK} )
+      AddCppCheck( ${target} )
+   endif()
+
+   if ( ${ENABLE_IWYU} )
+      AddIWYU( ${target} )
+   endif()
+
+   if ( ${ENABLE_LWYU} )
+      AddLWYU( ${target} )
+   endif()
+
+endfunction()
