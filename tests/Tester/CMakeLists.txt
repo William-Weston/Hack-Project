@@ -19,3 +19,4 @@ target_link_libraries( main
 
 include( StaticAnalyzers )
 AddIWYU( main )
+AddLWYU( main )

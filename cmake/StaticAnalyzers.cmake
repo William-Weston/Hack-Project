@@ -123,7 +123,7 @@ function( AddIWYU target )
                ${IWYU_OPTIONS}
       )
 
-      message( STATUS "cppcheck enabled on target: ${target}" )
+      message( STATUS "iwyu enabled on target: ${target}" )
 
    else()
 
@@ -131,5 +131,25 @@ function( AddIWYU target )
 
    endif()
 
+endfunction()
+
+
+function( AddLWYU target )
+
+   if( CMAKE_CXX_COMPILER_ID MATCHES ".*Clang" OR CMAKE_CXX_COMPILER_ID MATCHES "GNU" )
+   
+      set_target_properties( ${target}
+            PROPERTIES
+               LINK_WHAT_YOU_USE ON
+      )
+
+      message( STATUS "link what you use enabled on target: ${target}" )
+
+   else()
+
+      message( WARNING "Your compiler ${CMAKE_CXX_COMPILER_ID} does not support link what you use" )
+
+   endif()
 
 endfunction()
+
