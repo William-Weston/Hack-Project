@@ -9,9 +9,14 @@
  * 
  */
 #include "Utilities.h"
-#include "Hack/Assembler.h"            // Assembler
 
-#include <fstream>                     // ifstream
+#include "Hack/Assembler.h"               // for Assembler
+#include "Hack/Utilities/utilities.hpp"   // for binary_to_uint16
+
+#include <fstream>                        // for basic_ifstream, basic_istream
+#include <optional>                       // for optional
+#include <utility>                        // for move
+
 
 auto 
 Hack::EMULATOR::Utils::open_hack_file( std::string const& path ) -> std::vector<std::uint16_t>

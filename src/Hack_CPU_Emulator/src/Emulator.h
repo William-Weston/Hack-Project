@@ -11,21 +11,21 @@
 #ifndef HACK_2024_03_15_EMULATOR_H
 #define HACK_2024_03_15_EMULATOR_H
 
-#include "Definitions.h"            // UserError
-#include "GUI_Core.h"
-#include "Keyboard_Handler.h"
-#include "Screen_Texture.h"
 
-#include <Hack/Assembler.h>
-#include <Hack/Computer.h>
-#include <Hack/Disassembler.h>
+#include "Definitions.h"        // for UserError, RAMFormat, ROMF...
+#include "GUI_Core.h"           // for GUI_Core
+#include "Keyboard_Handler.h"   // for Keyboard_Handler
+#include "Screen_Texture.h"     // for Screen_Texture
 
-#include <SDL.h>
+#include <Hack/Assembler.h>     // for Assembler
+#include <Hack/Computer.h>      // for Computer
+#include <Hack/Disassembler.h>  // for Disassembler
 
-#include <optional> 
-#include <string>
-#include <string_view>
-
+#include <SDL_render.h>         // for SDL_Renderer
+#include <SDL_video.h>          // for SDL_Window
+#include <optional>             // for optional
+#include <string>               // for string
+#include <string_view>          // for string_view
 
 
 namespace Hack

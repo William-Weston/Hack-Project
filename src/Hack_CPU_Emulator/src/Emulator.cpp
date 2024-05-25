@@ -13,36 +13,36 @@
  */
 #include "Emulator.h"
 
-#include "Definitions.h"
-#include "GUI_Frame.h"
-#include "SDL_InitError.h"
-#include "SDL_events.h"
-#include "Utilities.h"
+#include "Definitions.h"                      // for UserError, Error_t, RAM...
+#include "GUI_Frame.h"                        // for GUI_Frame
+#include "Hack/Assembler.h"                   // for Assembler
+#include "Hack/Disassembler.h"                // for Disassembler
+#include "Hack/Memory.h"                      // for Memory
+#include "SDL_events.h"                       // for SDL_PollEvent, SDL_KEYDOWN
+#include "Utilities.h"                        // for FileError, open_asm_file
 
-#include <Hack/Computer.h>
-#include <Hack/Utilities/exceptions.hpp>
-#include <Hack/Utilities/utilities.hpp>
-#include <ImGuiFileDialog/ImGuiFileDialog.h>
-#include <ImGuiSugar/imgui_sugar.hpp>
+#include <Hack/Computer.h>                    // for Computer
+#include <Hack/Utilities/exceptions.hpp>      // for operator<<, ParseErrorData
+#include <Hack/Utilities/utilities.hpp>       // for binary_to_uint16, signe...
 
-#include <imgui.h>
-#include <imgui_stdlib.h>              
-#include <imgui_impl_sdl2.h>
-#include <imgui_impl_sdlrenderer2.h>
-#include <SDL.h>
+#include <ImGuiFileDialog/ImGuiFileDialog.h>  // for FileDialog, FileDialogC...
+#include <ImGuiSugar/imgui_sugar.hpp>         // for BooleanGuard, with_Styl...
 
-#include <charconv>        // from_chars
-#include <cstdint> 
-#include <exception>       // exception 
-#include <expected>
-#include <fstream> 
-#include <iostream>
-#include <iterator>
-#include <stdexcept>       // out_of_range
-#include <string>
-#include <string_view>
-#include <utility>         // move
-#include <vector>
+#include <imgui.h>                            // for SameLine, Button, ImVec2
+#include <imgui_impl_sdl2.h>                  // for ImGui_ImplSDL2_ProcessE...
+#include <imgui_stdlib.h>                     // for InputText
+#include <SDL_scancode.h>                     // for SDL_SCANCODE_0, SDL_SCA...
+
+#include <cstdint>                            // for uint16_t
+#include <exception>                          // for exception
+#include <iostream>                           // for basic_ostream, operator<<
+#include <span>                               // for span
+#include <stdexcept>                          // for out_of_range
+#include <string>                             // for allocator, operator+
+#include <string_view>                        // for string_view
+#include <utility>                            // for move
+#include <vector>                             // for vector
+
 
 namespace
 {

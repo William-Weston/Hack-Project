@@ -1,12 +1,22 @@
+/**
+ * @file utilities.cpp
+ * @author William Weston (wjtWeston@protonmail.com)
+ * @brief 
+ * @version 0.1
+ * @date 2024-05-25
+ * 
+ * @copyright Copyright (c) 2024
+ * 
+ */
 #include "utilities.hpp"
 
-#include <array>
-#include <cctype>          // tolower, toupper
-#include <charconv>        // from_chars, to_chars
-#include <cstdint>
-#include <fstream>         // ifstream
-#include <optional>        // nullopt, optional
-#include <string>
+#include <array>           // for array
+#include <cctype>          // for islower, isalnum, isalpha, isblank, iscntrl, isg...
+#include <charconv>        // for to_chars, to_chars_result
+#include <cstdint>         // for int16_t, uint16_t
+#include <optional>        // for optional, nullopt
+#include <string>          // for string, allocator
+#include <utility>         // for move
 
 // ------------------------------------------------------------------------------------------------
 namespace   // helper function declarations -------------------------------------------------------

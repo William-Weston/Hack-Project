@@ -11,7 +11,8 @@
 #ifndef HACK_2024_03_19_KEYBOARD_HANDLER_H
 #define HACK_2024_03_19_KEYBOARD_HANDLER_H
 
-#include <SDL2/SDL.h>
+#include <SDL_scancode.h>        // for SDL_Scancode, SDL_SCANCODE_LSHIFT, SDL_SCA...
+#include <SDL_stdinc.h>          // for Uint8
 
 namespace Hack
 {

@@ -10,13 +10,16 @@
  */
 #include "Disassembler.h"
 
-#include "Hack/Utilities/utilities.hpp"
+#include "Hack/Utilities/utilities.hpp"  // for to_binary16_string
 
-#include <cassert>
-#include <charconv>             // from_chars
-#include <cstdint>              // int16_t
-#include <optional>
-#include <string_view>
+#include <cassert>                       // for assert
+#include <charconv>                      // for from_chars, from_chars_result
+#include <cstdint>                       // for int16_t, uint16_t
+#include <optional>                      // for optional, nullopt
+#include <string_view>                   // for string_view, hash, operator==
+#include <system_error>                  // for errc
+#include <utility>                       // for pair, move
+
 
 
 auto 

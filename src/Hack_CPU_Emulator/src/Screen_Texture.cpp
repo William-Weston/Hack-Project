@@ -8,17 +8,16 @@
  * @copyright Copyright (c) 2024
  * 
  */
-
 #include "Screen_Texture.h"
 
-#include "Hack/Computer.h"
+#include "Hack/Computer.h"  // for Computer
 
-#include <SDL.h>
-#include <SDL_render.h>
-#include <SDL_pixels.h>
+#include <SDL_pixels.h>     // for SDL_PIXELFORMAT_ARGB8888
+#include <SDL_render.h>     // for SDL_CreateTexture, SDL_DestroyTexture
+#include <SDL_stdinc.h>     // for Uint32
+#include <array>            // for array
+#include <bitset>           // for bitset
 
-#include <array>
-#include <bitset>
 
 
 Hack::Screen_Texture::Screen_Texture( Computer::Screen_const_iterator start, 

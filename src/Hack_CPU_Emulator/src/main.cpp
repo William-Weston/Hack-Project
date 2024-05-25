@@ -9,11 +9,14 @@
  * 
  */
 
+#include "Emulator.h"       // for Emulator
+#include "SDL_InitError.h"  // for SDL_InitError
 
-#include "Emulator.h"
-#include "SDL_InitError.h"
-#include <cstdlib>                  // EXIT_SUCCESS, EXIT_FAILURE
-#include <iostream>
+#include <cstdlib>          // for EXIT_FAILURE, EXIT_SUCCESS
+#include <exception>        // for exception
+#include <iostream>         // for operator<<, basic_ostream, char_traits, cerr
+
+
 
 auto main( int, char*[] ) -> int
 {

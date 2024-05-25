@@ -11,8 +11,11 @@
 #ifndef HACK_2024_03_16_GUI_CORE_H
 #define HACK_2024_03_16_GUI_CORE_H
 
-#include <memory>       // unique_ptr
-#include <SDL2/SDL.h>
+#include <SDL_render.h>       // for SDL_Renderer, SDL_DestroyRenderer
+#include <SDL_video.h>        // for SDL_Window, SDL_DestroyWindow
+
+#include <memory>             // for unique_ptr
+#include <string_view>        // for string_view
 
 namespace Hack
 {

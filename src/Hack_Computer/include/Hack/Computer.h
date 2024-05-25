@@ -11,15 +11,14 @@
 #ifndef HACK_EMULATOR_2024_03_11_COMPUTER_H
 #define HACK_EMULATOR_2024_03_11_COMPUTER_H
 
+#include "CPU.h"     // for CPU
+#include "Memory.h"  // for Memory
 
-#include "Memory.h"
-#include "CPU.h"
-
-#include <array>
-#include <concepts>
-#include <cstdint>   
-#include <span>
-#include <type_traits>        // same_as
+#include <array>     // for array
+#include <concepts>  // for same_as
+#include <cstdint>   // for uint16_t
+#include <iterator>  // for input_iterator, iter_value_t, sentinel_for
+#include <span>      // for span
 
 namespace Hack
 {

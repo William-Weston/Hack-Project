@@ -13,17 +13,16 @@
 
 // ------------------------------------------ includes --------------------------------------------
 
-#include <bit>             // bit_cast
-#include <charconv>        // from_chars
-#include <cstddef>         // size_t
-#include <cstdint>         // int16_t, uint16_t
-#include <exception>       // exception
-#include <functional>      // hash
-#include <optional>
-#include <string>
-#include <string_view>
-#include <utility>         // move
-#include <vector>
+#include <bit>                // for bit_cast
+#include <charconv>           // for from_chars, from_chars_result
+#include <cstddef>            // for size_t
+#include <cstdint>            // for uint16_t, int16_t
+#include <iosfwd>             // for ifstream
+#include <optional>           // for optional, nullopt
+#include <string>             // for string, char_traits
+#include <string_view>        // for string_view, hash
+#include <system_error>       // for errc
+#include <vector>             // for vector
 
 
 // ------------------------------------------------------------------------------------------------

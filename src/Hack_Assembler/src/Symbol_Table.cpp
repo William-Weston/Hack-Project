@@ -10,10 +10,10 @@
  */
 #include "Symbol_Table.h"
 
-#include <string>
-#include <string_view>
-#include <unordered_map>
-
+#include <string>             // for operator==, string
+#include <string_view>        // for operator==, string_view
+#include <unordered_map>      // for unordered_map, _Node_const_iterator
+#include <utility>            // for pair
 
 auto 
 Hack::Symbol_Table::add_entry( std::string_view symbol, int address ) -> void

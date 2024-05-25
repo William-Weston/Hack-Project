@@ -22,17 +22,17 @@
 #ifndef HACK_2024_03_21_ASSEMBLER_H
 #define HACK_2024_03_21_ASSEMBLER_H
 
-#include "Code_Line.h"
-#include "Symbol_Table.h"
+#include "Code_Line.h"           // for Code_Line
+#include "Symbol_Table.h"        // for Symbol_Table
 
-#include <cstdint>         // uint16_t
-#include <tl/expected.hpp>
-#include <iosfwd> 
-#include <optional>
-#include <span>
-#include <string>
-#include <string_view>
-#include <vector>
+#include <iosfwd>                // for istream
+#include <optional>              // for optional
+#include <span>                  // for span
+#include <string>                // for string
+#include <string_view>           // for string_view
+#include <tl/expected.hpp>       // for expected
+#include <vector>                // for vector
+
 
 namespace Hack
 {

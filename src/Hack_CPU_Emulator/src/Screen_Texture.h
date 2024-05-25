@@ -5,11 +5,10 @@
 #ifndef HACK_2024_05_8_SCREEN_TEXTURE_H
 #define HACK_2024_05_8_SCREEN_TEXTURE_H
 
-#include <Hack/Computer.h>
+#include <Hack/Computer.h>       // for Computer
 
-class SDL_Window;
-class SDL_Renderer;
-class SDL_Texture;
+class SDL_Renderer;              
+class SDL_Texture;              
 
 namespace Hack
 {

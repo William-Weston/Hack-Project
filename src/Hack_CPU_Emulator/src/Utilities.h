@@ -11,14 +11,12 @@
 #ifndef HACK_EMULATOR_PROJECT_2024_05_14_HACK_CPU_EMULATOR_UTILITIES_H
 #define HACK_EMULATOR_PROJECT_2024_05_14_HACK_CPU_EMULATOR_UTILITIES_H
 
-#include "Hack/Utilities/exceptions.hpp"
+#include "Hack/Utilities/exceptions.hpp"     // for Exception
 
-#include <cstdint>         // uint16_t
-#include <cstddef>         // size_t
+#include <cstdint>                           // for uint16_t
+#include <string>                            // for string
+#include <vector>                            // for vector
 
-#include <string> 
-
-#include <vector>  
 
 
 namespace Hack::EMULATOR::Utils

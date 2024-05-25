@@ -10,10 +10,9 @@
  */
 #include "Computer.h"
 
-#include <algorithm>       // copy
-#include <iostream>
-#include <stdexcept>       // runtime_error
-#include <string>
+#include <algorithm>    // for __copy_fn, copy
+#include <stdexcept>    // for runtime_error
+#include <string>       // for operator+, to_string
 
 auto 
 Hack::Computer::load_rom( std::span<word_t const> instructions ) -> void

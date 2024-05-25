@@ -10,25 +10,25 @@
  */
 #include "Assembler.h"
 
-#include "Code_Generator.h"
-#include "Code_Line.h" 
-#include "Hack/Utilities/exceptions.hpp"           // parse_error
-#include "Hack/Utilities/utilities.hpp"            // to_uint_t, is_alpha, to_binary16_string
+#include "Code_Generator.h"               // for Code_Generator
+#include "Code_Line.h"                    // for Code_Line
 
-#include <tl/expected.hpp>
+#include "Hack/Utilities/exceptions.hpp"  // for parse_error
+#include "Hack/Utilities/utilities.hpp"   // for is_alpha, to_binary16_string
 
-#include <algorithm>                               // sort
-#include <cassert>                                 // assert
-#include <cctype>
-#include <ios>                                     // ios_base
-#include <istream>
-#include <optional>
-#include <span>
-#include <string>
-#include <string_view>
-#include <utility>                                 // move
-#include <vector>
-#include <tuple>
+#include <tl/expected.hpp>                // for expected, unexpected
+
+#include <algorithm>                      // for sort
+#include <cassert>                        // for assert
+#include <istream>                        // for basic_istream, basic_ios::c...
+#include <optional>                       // for optional, nullopt
+#include <span>                           // for span
+#include <string>                         // for char_traits, allocator, ope...
+#include <string_view>                    // for basic_string_view, string_view
+#include <tuple>                          // for tuple
+#include <utility>                        // for move
+#include <vector>                         // for vector
+
 
 // ------------------------------------------------------------------------------------------------
 namespace   // helper function declarations -------------------------------------------------------
