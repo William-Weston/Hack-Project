@@ -15,7 +15,7 @@
 #include <string>
 
 
-TEST_CASE( "signed_to_unsigned_16" )
+TEST_CASE( "Utilites: signed_to_unsigned_16" )
 {
    using namespace Hack::Utils;
 
@@ -60,7 +60,7 @@ TEST_CASE( "signed_to_unsigned_16" )
 }
 
 
-TEST_CASE( "unsigned_to_signed_16" )
+TEST_CASE( "Utilites: unsigned_to_signed_16" )
 {
    using namespace Hack::Utils;
 
@@ -106,7 +106,7 @@ TEST_CASE( "unsigned_to_signed_16" )
 }
 
 
-TEST_CASE( "binary_to_uint16" )
+TEST_CASE( "Utilites: binary_to_uint16" )
 {
    using namespace Hack::Utils;
 
@@ -183,7 +183,7 @@ TEST_CASE( "binary_to_uint16" )
 }
 
 
-TEST_CASE( "binary_to_int16" )
+TEST_CASE( "Utilites: binary_to_int16" )
 {
    using namespace Hack::Utils;
 
@@ -282,7 +282,7 @@ TEST_CASE( "binary_to_int16" )
 }
 
 
-TEST_CASE( "to_uint16_t( std::string_view )" )
+TEST_CASE( "Utilites: to_uint16_t( std::string_view )" )
 {
    using namespace Hack::Utils;
 
@@ -369,7 +369,7 @@ TEST_CASE( "to_uint16_t( std::string_view )" )
 }
 
 
-TEST_CASE( "to_int16_t( std::string_view )" )
+TEST_CASE( "Utilites: to_int16_t( std::string_view )" )
 {
    using namespace Hack::Utils;
 
@@ -477,7 +477,111 @@ TEST_CASE( "to_int16_t( std::string_view )" )
 }
 
 
-TEST_CASE( "to_binary16_string( std::uint16_t )" )
+TEST_CASE( "Utilites: to_binary16_string( std::string_view base10 )" )
+{
+   using namespace Hack::Utils;
+
+   SECTION( "zero" )
+   {
+      auto const result   = to_binary16_string( "0" );
+      auto const expected = "0000000000000000";
+
+      REQUIRE( result );
+      REQUIRE( expected == result.value() );
+
+   }
+
+   SECTION( "one" )
+   {
+      auto const result   = to_binary16_string( "1" );
+      auto const expected = "0000000000000001";
+
+      REQUIRE( result );
+      REQUIRE( expected == result.value() );
+   }
+
+   SECTION( "uint16_t max" )
+   {
+      auto const result   = to_binary16_string( "65535" );
+      auto const expected = "1111111111111111";
+
+      REQUIRE( result );
+      REQUIRE( expected == result.value() );
+   }
+
+   SECTION( "leading zeros" )
+   {
+      auto const result   = to_binary16_string( "0000" );
+      auto const expected = "0000000000000000";
+
+      REQUIRE( result );
+      REQUIRE( expected == result.value() );
+
+   }
+
+   SECTION( "Expect Failure" )
+   {
+      SECTION( "negative: -1" )
+      {
+         auto const result = to_binary16_string( "-1" );
+
+         REQUIRE( !result );
+      }
+
+      SECTION( "value greater than uint16_t max" )
+      {
+         auto const result = to_binary16_string( "65536" );
+
+         REQUIRE( !result );
+      }
+
+      SECTION( "empty string" )
+      {
+         auto const result = to_binary16_string( "" );
+
+         REQUIRE( !result );
+      }
+
+      SECTION( "trailing spaces" )
+      {
+         REQUIRE( !to_binary16_string( "112 " ) );
+         REQUIRE( !to_binary16_string( "123  " ) );
+         REQUIRE( !to_binary16_string( "123   " ) );
+      }
+
+      SECTION( "leading spaces" )
+      {
+         REQUIRE( !to_binary16_string( " 112" ) );
+         REQUIRE( !to_binary16_string( "  123" ) );
+         REQUIRE( !to_binary16_string( "    123" ) );
+      }
+
+      SECTION( "interposed spaces" )
+      {
+         REQUIRE( !to_binary16_string( "1 12" ) );
+         REQUIRE( !to_binary16_string( "12 3" ) );
+         REQUIRE( !to_binary16_string( "1 2 3" ) );
+      }
+
+      SECTION( "non-numeric strings" )
+      {
+         REQUIRE( !to_binary16_string( "z112" ) );
+         REQUIRE( !to_binary16_string( "12y3" ) );
+         REQUIRE( !to_binary16_string( "123o" ) );
+      }
+
+      SECTION( "non-base10 strings" )
+      {
+         REQUIRE( !to_binary16_string( "A9" ) );
+         REQUIRE( !to_binary16_string( "FF" ) );
+         REQUIRE( !to_binary16_string( "ff" ) );
+         REQUIRE( !to_binary16_string( "ABC" ) );
+      }
+   }
+}
+
+
+TEST_CASE( "Utilites: to_binary16_string( std::uint16_t )" )
 {
    using namespace Hack::Utils;
 
@@ -513,7 +617,7 @@ TEST_CASE( "to_binary16_string( std::uint16_t )" )
 }
 
 
-TEST_CASE( "to_binary16_string( std::int16_t )" )
+TEST_CASE( "Utilites: to_binary16_string( std::int16_t )" )
 {
    using namespace Hack::Utils;
 
@@ -569,7 +673,7 @@ TEST_CASE( "to_binary16_string( std::int16_t )" )
 }
 
 
-TEST_CASE( "to_hex4_string( std::uint16_t )" )
+TEST_CASE( "Utilites: to_hex4_string( std::uint16_t )" )
 {
    using namespace Hack::Utils;
 
@@ -605,7 +709,7 @@ TEST_CASE( "to_hex4_string( std::uint16_t )" )
 }
 
 
-TEST_CASE( "to_hex4_string( std::int16_t )" )
+TEST_CASE( "Utilites: to_hex4_string( std::int16_t )" )
 {
    using namespace Hack::Utils;
 
@@ -661,7 +765,7 @@ TEST_CASE( "to_hex4_string( std::int16_t )" )
 }
 
 
-TEST_CASE( "is_a_instruction" )
+TEST_CASE( "Utilites: is_a_instruction" )
 {
    using namespace Hack::Utils;
 
@@ -683,7 +787,7 @@ TEST_CASE( "is_a_instruction" )
 }
 
 
-TEST_CASE( "is_binary16_string" )
+TEST_CASE( "Utilites: is_binary16_string" )
 {
    using namespace Hack::Utils;
 

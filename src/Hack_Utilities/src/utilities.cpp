@@ -5,6 +5,7 @@
 #include <charconv>        // from_chars, to_chars
 #include <cstdint>
 #include <fstream>         // ifstream
+#include <optional>        // nullopt, optional
 #include <string>
 
 // ------------------------------------------------------------------------------------------------
@@ -15,6 +16,27 @@ namespace   // helper function declarations ------------------------------------
 
 
 // Conversion Utilities ---------------------------------------------------------------------------
+
+auto 
+Hack::Utils::to_binary16_string( std::string_view positive_base10 ) -> std::optional<std::string>
+{
+   auto const number = to_uint16_t( positive_base10 );
+
+   if ( ! number )
+   {
+      return std::nullopt;
+   }
+
+   auto result = to_binary16_string( *number );
+
+   if ( result.empty() )
+   {
+      return std::nullopt;
+   }
+
+   return { std::move( result ) };        // move result into the optional
+   
+}
 
 auto 
 Hack::Utils::to_binary16_string( std::uint16_t value ) -> std::string
@@ -31,7 +53,7 @@ Hack::Utils::to_binary16_string( std::uint16_t value ) -> std::string
       return str;
    }
 
-   return std::string();
+   return {};
 }
 
 auto 

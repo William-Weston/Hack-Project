@@ -50,6 +50,9 @@ constexpr auto binary_to_int16( std::string_view binary16 )   -> std::optional<s
 constexpr auto to_uint16_t( std::string_view value )          -> std::optional<std::uint16_t>;
 constexpr auto to_int16_t( std::string_view value )           -> std::optional<std::int16_t>;
 
+// convert string respresenting a positive base10 number into binary 16 string
+auto to_binary16_string( std::string_view positive_base10 )   -> std::optional<std::string>;
+
 // return std::string() on error
 auto to_binary16_string( std::uint16_t value ) -> std::string;
 auto to_binary16_string( std::int16_t value )  -> std::string;
