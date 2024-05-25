@@ -38,6 +38,25 @@ EnableCoverage( Hack_Disassembler )
 
 
 # =====================================
+# 	OPTIONS
+# =====================================
+
+option( HACK_DISASSEMBLER_ENABLE_CLANGTIDY "Enable clang-tidy"        OFF )
+option( HACK_DISASSEMBLER_ENABLE_CPPCHECK  "Enable cppcheck"          OFF )
+option( HACK_DISASSEMBLER_ENABLE_IWYU      "Enable iwyu"              ON  )
+option( HACK_DISASSEMBLER_ENABLE_LWYU      "Enable link whay you use" ON  )
+
+include( StaticAnalyzers )
+
+EnableSanitizers( Hack_Disassembler 
+   HACK_DISASSEMBLER_ENABLE_CLANGTIDY
+   HACK_DISASSEMBLER_ENABLE_CPPCHECK
+   HACK_DISASSEMBLER_ENABLE_IWYU
+   HACK_DISASSEMBLER_ENABLE_LWYU
+)
+
+
+# =====================================
 # 	TEST SUITE
 # =====================================
 

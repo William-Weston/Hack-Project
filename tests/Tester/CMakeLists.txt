@@ -17,6 +17,16 @@ target_link_libraries( main
       Hack::project_warnings
 )
 
+option( HACK_TESTER_ENABLE_CLANGTIDY "Enable clang-tidy" OFF )
+option( HACK_TESTER_ENABLE_CPPCHECK "Enable cppcheck" OFF )
+option( HACK_TESTER_ENABLE_IWYU "Enable iwyu" ON )
+option( HACK_TESTER_ENABLE_LWYU "Enable link whay you use" ON )
+
 include( StaticAnalyzers )
-AddIWYU( main )
-AddLWYU( main )
+
+EnableSanitizers( main 
+   HACK_TESTER_ENABLE_CLANGTIDY
+   HACK_TESTER_ENABLE_CPPCHECK
+   HACK_TESTER_ENABLE_IWYU
+   HACK_TESTER_ENABLE_LWYU
+)

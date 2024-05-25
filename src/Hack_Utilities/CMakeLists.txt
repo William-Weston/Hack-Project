@@ -43,6 +43,26 @@ EnableCoverage( Hack_Utilities )
 
 
 # =====================================
+# 	OPTIONS
+# =====================================
+
+option( HACK_UTILITIES_ENABLE_CLANGTIDY "Enable clang-tidy"        OFF )
+option( HACK_UTILITIES_ENABLE_CPPCHECK  "Enable cppcheck"          OFF )
+option( HACK_UTILITIES_ENABLE_IWYU      "Enable iwyu"              ON  )
+option( HACK_UTILITIES_ENABLE_LWYU      "Enable link whay you use" ON  )
+
+include( StaticAnalyzers )
+
+EnableSanitizers( Hack_Utilities 
+   HACK_UTILITIES_ENABLE_CLANGTIDY
+   HACK_UTILITIES_ENABLE_CPPCHECK
+   HACK_UTILITIES_ENABLE_IWYU
+   HACK_UTILITIES_ENABLE_LWYU
+)
+
+
+
+# =====================================
 # 	TEST SUITE
 # =====================================
 

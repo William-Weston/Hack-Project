@@ -51,5 +51,24 @@ target_link_libraries( Hack_CPU_Emulator_GUI
 
 
 # =====================================
+# 	OPTIONS
+# =====================================
+
+option( HACK_CPU_EMULATOR_GUI_ENABLE_CLANGTIDY "Enable clang-tidy"        OFF )
+option( HACK_CPU_EMULATOR_GUI_ENABLE_CPPCHECK  "Enable cppcheck"          OFF )
+option( HACK_CPU_EMULATOR_GUI_ENABLE_IWYU      "Enable iwyu"              ON  )
+option( HACK_CPU_EMULATOR_GUI_ENABLE_LWYU      "Enable link whay you use" ON  )
+
+include( StaticAnalyzers )
+
+EnableSanitizers( Hack_CPU_Emulator_GUI 
+   HACK_CPU_EMULATOR_GUI_ENABLE_CLANGTIDY
+   HACK_CPU_EMULATOR_GUI_ENABLE_CPPCHECK
+   HACK_CPU_EMULATOR_GUI_ENABLE_IWYU
+   HACK_CPU_EMULATOR_GUI_ENABLE_LWYU
+)
+
+
+# =====================================
 # 	TEST SUITE
 # =====================================

@@ -47,13 +47,29 @@ target_link_libraries( Hack_Assembler
       Hack::Utilities
 )
 
+
 include( Coverage )
 CleanCoverage( Hack_Assembler )
 EnableCoverage( Hack_Assembler )
 
+# =====================================
+# 	OPTIONS
+# =====================================
+
+option( HACK_ASSEMBLER_ENABLE_CLANGTIDY "Enable clang-tidy"        OFF )
+option( HACK_ASSEMBLER_ENABLE_CPPCHECK  "Enable cppcheck"          OFF )
+option( HACK_ASSEMBLER_ENABLE_IWYU      "Enable iwyu"              ON  )
+option( HACK_ASSEMBLER_ENABLE_LWYU      "Enable link whay you use" ON  )
+
 include( StaticAnalyzers )
-AddCppCheck( Hack_Assembler )
-AddClangTidy( Hack_Assembler )
+
+EnableSanitizers( Hack_Assembler 
+   HACK_ASSEMBLER_ENABLE_CLANGTIDY
+   HACK_ASSEMBLER_ENABLE_CPPCHECK
+   HACK_ASSEMBLER_ENABLE_IWYU
+   HACK_ASSEMBLER_ENABLE_LWYU
+)
+
 
 
 # =====================================
