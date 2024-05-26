@@ -2,8 +2,8 @@ macro( configure_linker target )
 
    include( CheckCXXCompilerFlag )
 
-   set( USER_LINKER_OPTION "lld" CACHE STRING "Linker to be used" )
-   set( USER_LINKER_OPTION_VALUES "lld" "gold" "bfd" "mold" )
+   set( USER_LINKER_OPTION "mold" CACHE STRING "Linker to be used" )
+   set( USER_LINKER_OPTION_VALUES "mold" "gold" "bfd" "lld" )
    set_property( CACHE USER_LINKER_OPTION PROPERTY STRINGS ${USER_LINKER_OPTION_VALUES} )
 
    list(
