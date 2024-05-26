@@ -1,0 +1,35 @@
+/**
+ * @file    buildinfo.h.in
+ * @author  William Weston (wjtWeston@protonmail.com)
+ * @brief   Build info for the Hack Computer Project 
+ * @version 0.1
+ * @date    2024-05-26
+ * 
+ * @copyright Copyright (c) 2024
+ * 
+ */
+#ifndef HACK_PROJECT_2024_05_26_BUILDINFOR_H
+#define HACK_PROJECT_2024_05_26_BUILDINFOR_H
+
+#include <string_view>
+
+namespace Hack
+{
+
+struct BuildInfo final 
+{
+   static constexpr auto project_name          = std::string_view( "@PROJECT_NAME@" );
+   static constexpr auto project_version       = std::string_view( "@PROJECT_VERSION@" );
+   static constexpr auto project_description   = std::string_view( "@PROJECT_DESCRIPTION@" );
+   static constexpr auto commit_sha            = std::string_view( "@COMMIT_SHA@" );
+   static constexpr auto timestamp             = std::string_view( "@TIMESTAMP@" );
+   static constexpr auto project_version_major = @PROJECT_VERSION_MAJOR@;
+   static constexpr auto project_version_minor = @PROJECT_VERSION_MINOR@;
+   static constexpr auto project_version_patch = @PROJECT_VERSION_PATCH@;
+   static constexpr auto project_version_tweak = @PROJECT_VERSION_TWEAK@;
+};
+
+}
+
+
+#endif         // HACK_PROJECT_2024_05_26_BUILDINFOR_H

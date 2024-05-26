@@ -13,8 +13,8 @@ target_link_libraries( main
       imgui::imgui
       ImGuiFileDialog::ImGuiFileDialog
       ImGuiSugar::ImGuiSugar
-      Hack::hack_config
       Hack::project_warnings
+      Hack::BuildInfo
 )
 
 option( HACK_TESTER_ENABLE_CLANGTIDY "Enable clang-tidy" OFF )

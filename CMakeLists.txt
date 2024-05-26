@@ -30,14 +30,9 @@ set( THREADS_PREFER_PTHREAD_FLAG TRUE )
 # Generate compile_commands.json, enhance error reporting & compiler messages, and set default build
 include( StandardProjectSettings )
 
-# link to Hack::hack_config to add configure file to target, then add #include "Hack/hack_config.hpp"
-configure_file( Hack_config.hpp.in "${CMAKE_CURRENT_BINARY_DIR}/include/Hack/hack_config.hpp" @ONLY )
-add_library( hack_config INTERFACE )
-add_library( Hack::hack_config ALIAS hack_config )
-target_include_directories( hack_config
-   INTERFACE
-      ${CMAKE_CURRENT_BINARY_DIR}/include
-)
+# link to Hack::BuildInfo to add build info to target, then add #include "Hack/BuildInfo.h"
+include( BuildInfo )
+add_library( Hack::BuildInfo ALIAS BuildInfo )
 
 include( ProjectOptions )
 project_options()

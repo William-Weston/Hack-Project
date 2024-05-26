@@ -7,17 +7,18 @@
 #include <ImGuiSugar/imgui_sugar.hpp>
 #include <SDL.h>
 
-#include <Hack/hack_config.hpp>
+#include <Hack/buildinfo.h>
 
 #include <iostream>
 
 auto main() -> int
 {
-   using namespace Hack::cmake;
+   using namespace Hack;
 
-   std::cout << "Project Name:        " << project_name << '\n';
-   std::cout << "Project Version:     " << project_version << '\n';
-   std::cout << "Project Description: " << project_description << '\n';
-   
+   std::cout << "Project Name:        " << BuildInfo::project_name << '\n';
+   std::cout << "Project Version:     " << BuildInfo::project_version << '\n';
+   std::cout << "Project Description: " << BuildInfo::project_description << '\n';
+   std::cout << "Timestamp:           " << BuildInfo::timestamp << '\n';
+   std::cout << "Commit SHA:          " << BuildInfo::commit_sha << '\n';             
    return EXIT_SUCCESS;
 }
