@@ -16,7 +16,7 @@ FetchContent_MakeAvailable( doxygen-awesome-css )
 function( Enable_Doxygen )
    
    set( NAME                           "doxygen-${target}" )
-   set( DOXYGEN_HTML_OUTPUT            ${PROJECT_BINARY_DIR} )
+   set( DOXYGEN_EXCLUDE_PATTERNS       "${PROJECT_SOURCE_DIR}/external" "${PROJECT_SOURCE_DIR}/build" )
    set( DOXYGEN_GENERATE_HTML          YES )
    set( DOXYGEN_GENERATE_TREEVIEW      YES )
    set( DOXYGEN_HAVE_DOT               YES )
