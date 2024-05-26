@@ -44,6 +44,7 @@ target_link_libraries( Hack_Assembler
       tl::expected
    PRIVATE
       Hack::project_warnings
+      Hack::project_options
       Hack::Utilities
 )
 
@@ -89,6 +90,7 @@ target_link_libraries( Hack_Assembler_Tests
       Catch2::Catch2 
       Catch2::Catch2WithMain
       Hack::project_warnings
+      Hack::project_options
       Hack::Assembler
       Hack::Utilities
 )

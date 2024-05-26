@@ -38,6 +38,7 @@ target_include_directories( Hack_CPU_Emulator_GUI
 target_link_libraries( Hack_CPU_Emulator_GUI
    PRIVATE 
         Hack::project_warnings
+        Hack::project_options
         Hack::Assembler
         Hack::Computer
         Hack::Disassembler

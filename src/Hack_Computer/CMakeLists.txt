@@ -89,6 +89,7 @@ target_link_libraries( Hack_Computer_Tests
       Catch2::Catch2 
       Catch2::Catch2WithMain
       Hack::project_warnings
+      Hack::project_options
       Hack::Computer
       Hack::Utilities
 )

@@ -29,6 +29,7 @@ target_include_directories( Hack_Disassembler
 target_link_libraries( Hack_Disassembler 
    PRIVATE
       Hack::project_warnings
+      Hack::project_options
       Hack::Utilities
 )
 
@@ -74,6 +75,7 @@ target_link_libraries( Hack_Disassembler_Tests
       Catch2::Catch2 
       Catch2::Catch2WithMain
       Hack::project_warnings
+      Hack::project_options
       Hack::Disassembler
 )
 

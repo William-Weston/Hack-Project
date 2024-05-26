@@ -39,15 +39,11 @@ target_include_directories( hack_config
       ${CMAKE_CURRENT_BINARY_DIR}/include
 )
 
-include( Cache )
-include( IPO )
-enable_ipo()
+include( ProjectOptions )
+project_setup()
 
-# link against the Hack::project_warnings target to enable warnings
-add_library( project_warnings INTERFACE )
 add_library( Hack::project_warnings ALIAS project_warnings )
-include( CompilerWarnings )
-set_project_warnings( project_warnings )
+add_library( Hack::project_options ALIAS project_options )
 
 
 if( PROJECT_IS_TOP_LEVEL )

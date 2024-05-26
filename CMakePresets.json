@@ -58,7 +58,6 @@
       {
          "name": "conf-gcc-base",
          "hidden": true,
-         "inherits": "conf-mold-base",
          "cacheVariables": {
             "CMAKE_C_COMPILER":     "gcc",
             "CMAKE_CXX_COMPILER":   "g++"
@@ -68,7 +67,6 @@
       {
          "name": "conf-gcc13-base",
          "hidden": true,
-         "inherits": "conf-mold-base",
          "cacheVariables": {
             "CMAKE_C_COMPILER":     "gcc-13",
             "CMAKE_CXX_COMPILER":   "g++-13"

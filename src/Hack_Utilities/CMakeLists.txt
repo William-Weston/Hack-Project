@@ -35,6 +35,7 @@ target_include_directories( Hack_Utilities
 target_link_libraries( Hack_Utilities
    PRIVATE 
       Hack::project_warnings
+      Hack::project_options
 )
 
 include( Coverage )
@@ -80,6 +81,7 @@ target_link_libraries( Hack_Utilities_Tests
       Catch2::Catch2 
       Catch2::Catch2WithMain
       Hack::project_warnings
+      Hack::project_options
       Hack::Utilities
 )
 
