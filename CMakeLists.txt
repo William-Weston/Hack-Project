@@ -40,6 +40,8 @@ project_options()
 add_library( Hack::project_warnings ALIAS project_warnings )
 add_library( Hack::project_options ALIAS project_options )
 
+include( Doxygen )
+Enable_Doxygen()
 
 if( PROJECT_IS_TOP_LEVEL )
    include( CTest )
@@ -66,6 +68,4 @@ if( PROJECT_IS_TOP_LEVEL )
 	add_subdirectory( tests )
 #	add_subdirectory( packaging )
 endif() 
-
-
 
