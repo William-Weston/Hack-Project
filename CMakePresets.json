@@ -149,5 +149,19 @@
             "CMAKE_TOOLCHAIN_FILE":       "$env{VCPKG_ROOT}/scripts/buildsystems/vcpkg.cmake"
          }
       }
+   ],
+
+   "buildPresets": [
+      {
+         "name": "ci-gcc13-coverage",
+         "configurePreset": "conf-gcc13-debug-vcpkg",
+         "targets":[
+            "coverage-Hack_Assembler_Tests",
+            "coverage-Hack_Computer_Tests",
+            "coverage-Hack_Disassembler_Tests",
+            "coverage-Hack_Utilities_Tests"
+         ]
+      }
    ]
+
 }

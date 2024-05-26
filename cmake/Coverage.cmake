@@ -35,12 +35,12 @@ function( AddCoverage target )
       COMMENT "Running coverage for ${target}..."
       COMMAND ${LCOV_PATH} -d . --zerocounters
       COMMAND $<TARGET_FILE:${target}>
-      COMMAND ${LCOV_PATH} -d . --capture -o coverage.info 
-      COMMAND ${LCOV_PATH} -r coverage.info '/usr/include/*' --ignore-errors unused
-                           -o filtered.info
+      COMMAND ${LCOV_PATH} -d . --capture -o coverage-${target}.info 
+      COMMAND ${LCOV_PATH} -r coverage-${target}.info '/usr/include/*' --ignore-errors unused
+                           -o filtered-${target}.info
       COMMAND ${GENHTML_PATH} -o coverage-${target} 
-                              filtered.info --legend
-      COMMAND rm -rf coverage.info filtered.info
+                              filtered-${target}.info --legend
+      COMMAND rm -rf coverage-${target}.info filtered-${target}.info
       WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
    )
 
