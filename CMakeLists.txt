@@ -40,7 +40,7 @@ target_include_directories( hack_config
 )
 
 include( ProjectOptions )
-project_setup()
+project_options()
 
 add_library( Hack::project_warnings ALIAS project_warnings )
 add_library( Hack::project_options ALIAS project_options )

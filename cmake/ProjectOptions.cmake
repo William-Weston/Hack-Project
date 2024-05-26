@@ -1,5 +1,5 @@
 
-macro( project_setup )
+macro( project_options )
 
    option( HACK_ENABLE_USER_LINKER "Enable custom linker" ON )
 
