@@ -21,7 +21,7 @@
 #include <catch2/catch_all.hpp>
 
 
-TEST_CASE( "Basic: assemble istream" )
+TEST_CASE( "Assembler: Basic assemble istream" )
 {
    auto const data = std::string
    ( 
@@ -88,7 +88,7 @@ TEST_CASE( "Basic: assemble istream" )
 }
 
 
-TEST_CASE( "assemble( istream& ): label parsing tests" )
+TEST_CASE( "Assembler: assemble( istream& ) - label parsing tests" )
 {
    SECTION( "expect zero" )
    {
@@ -141,7 +141,7 @@ TEST_CASE( "assemble( istream& ): label parsing tests" )
 }
 
 
-TEST_CASE( "assemble( istream& ): variable parsing tests" )
+TEST_CASE( "Assembler: assemble( istream& ) - variable parsing tests" )
 {
    SECTION( "single variable" )
    {
@@ -226,7 +226,7 @@ TEST_CASE( "assemble( istream& ): variable parsing tests" )
 }
 
 
-TEST_CASE( "assemble( istream& ): failure cases" )
+TEST_CASE( "Assembler: assemble( istream& ) - failure cases" )
 {
    SECTION( "exceptions" )
    {
@@ -331,7 +331,8 @@ TEST_CASE( "assemble( istream& ): failure cases" )
    }
 }
 
-TEST_CASE( "Basic: assemble span" )
+
+TEST_CASE( "Assembler: Basic - assemble span" )
 {
    auto const data = std::vector<std::string>
    { 
@@ -370,7 +371,7 @@ TEST_CASE( "Basic: assemble span" )
 }
 
 
-TEST_CASE( "assemble( span<std::string const> ): failure cases" )
+TEST_CASE( "Assembler: assemble( span<std::string const> ) - failure cases" )
 {
    SECTION( "exceptions" )
    {
@@ -412,7 +413,7 @@ TEST_CASE( "assemble( span<std::string const> ): failure cases" )
 }
 
 
-TEST_CASE( "Basic: assemble_expected istream" )
+TEST_CASE( "Assembler: Basic: - assemble_expected istream" )
 {
    auto const data = std::string
    ( 
@@ -488,7 +489,7 @@ TEST_CASE( "Basic: assemble_expected istream" )
 }
 
 
-TEST_CASE( "assemble_expected( istream ): expect failure" )
+TEST_CASE( "Assembler: assemble_expected( istream ) - expect failure" )
 {
    auto const data = std::string
    ( 
@@ -539,7 +540,7 @@ TEST_CASE( "assemble_expected( istream ): expect failure" )
 }
 
 
-TEST_CASE( "assemble( string_view )" )
+TEST_CASE( "Assembler:  assemble( string_view )" )
 {
    auto assembler = Hack::Assembler();
 
@@ -956,7 +957,7 @@ TEST_CASE( "assemble( string_view )" )
 }
 
 
-TEST_CASE( "assemble( string_view ): Expect Failure" )
+TEST_CASE( "Assembler: assemble( string_view ) - Expect Failure" )
 {
    auto assembler = Hack::Assembler();
 
