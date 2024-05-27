@@ -13,7 +13,7 @@
 #include <catch2/catch_all.hpp>
 
 
-TEST_CASE( "disassemble( string_view )" )
+TEST_CASE( "Disassembler: disassemble( string_view )" )
 {
    auto const disasm = Hack::Disassembler();
 

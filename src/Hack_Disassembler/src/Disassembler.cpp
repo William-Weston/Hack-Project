@@ -25,7 +25,9 @@
 auto 
 Hack::Disassembler::disassemble( std::string_view binary ) const -> std::optional<std::string>
 {
-   if ( binary.size() != 16 )
+   static constexpr auto instruction_size = 16;
+
+   if ( binary.size() != instruction_size )
    {
       return std::nullopt;
    }
@@ -56,12 +58,12 @@ Hack::Disassembler::a_instruction( std::string_view binary ) const -> std::optio
    binary.remove_prefix( 1 );      // remove opt-code
 
    auto const* const end = binary.data() + binary.size();
-   std::int16_t value;
+   auto value            = std::int16_t{} ;
 
    if ( auto const [ptr, ec] = std::from_chars( binary.data(), end, value, 2 );
         ec == std::errc() && ptr == end )
    {
-      return std::optional<std::string>( "@" + std::to_string( value ) );
+      return std::make_optional<std::string>( "@" + std::to_string( value ) );
    }
 
    return std::nullopt;
@@ -92,18 +94,17 @@ Hack::Disassembler::c_instruction( std::string_view binary ) const -> std::optio
 
    auto result = std::string();
 
-
-   if ( auto const dest = dest_iter->second; dest != "" )
+   if ( auto const dest = dest_iter->second; !dest.empty() )
    {
       result += dest + "=";
    }
 
    result += comp_iter->second;
 
-   if ( auto const jump = jump_iter-> second; jump != "" )
+   if ( auto const jump = jump_iter-> second; !jump.empty() )
    {
       result += ";" + jump;
    }
 
-   return std::optional<std::string>( std::move( result ) );
+   return std::make_optional<std::string>( std::move( result ) );
 }
