@@ -25,6 +25,7 @@ TEST_CASE( "Computer: Load ROM" )
    SECTION( "span overload" )
    {
       using namespace Hack;
+      namespace rng = std::ranges;
 
       auto computer     = Computer();
       auto instructions = std::vector<std::uint16_t>( computer.rom_size() );
@@ -40,6 +41,7 @@ TEST_CASE( "Computer: Load ROM" )
    SECTION( "iterator overload" )
    {
       using namespace Hack;
+      namespace rng = std::ranges;
 
       auto computer     = Computer();
       auto instructions = std::vector<std::uint16_t>( computer.rom_size() );
