@@ -142,10 +142,13 @@ Hack::Utils::unsigned_to_signed_16( std::uint16_t value ) -> std::int16_t
 constexpr auto 
 Hack::Utils::binary_to_uint16( std::string_view binary16 )  -> std::optional<std::uint16_t>
 {
-   if ( binary16.size() != 16 )   return std::nullopt;
+   if ( binary16.size() != 16 )   
+   {
+      return std::nullopt;
+   }
 
-   auto result = std::uint16_t{};
-   auto const* const end =  binary16.data() + binary16.size();
+   auto result           = std::uint16_t{};
+   auto const* const end = binary16.data() + binary16.size();
 
    auto [ptr, ec] = std::from_chars( binary16.data(), end, result, 2 );
 
@@ -162,8 +165,11 @@ Hack::Utils::binary_to_int16( std::string_view binary16 )   -> std::optional<std
 {
    auto const result = binary_to_uint16( binary16 );
 
-   if ( !result ) return std::nullopt;
-
+   if ( !result ) 
+   {
+      return std::nullopt;
+   }
+   
    return unsigned_to_signed_16( *result );
 }
 
