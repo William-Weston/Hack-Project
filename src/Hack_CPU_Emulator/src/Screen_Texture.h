@@ -36,9 +36,8 @@ public:
 private:
    using iterator = Computer::Screen_const_iterator;
 
-   iterator const start_; 
-   iterator const finish_;
-
+   iterator const start_{}; 
+   iterator const finish_{};
    SDL_Texture*   texture_{}; 
 };
 
