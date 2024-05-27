@@ -70,9 +70,9 @@ public:
    constexpr auto clear_keyboard()       noexcept -> void;
 
 private:
-   std::array<std::uint16_t, 16'384> RAM16K;
-   std::array<std::uint16_t, 8'192>  Screen;
-   std::uint16_t                     Keyboard;
+   std::array<std::uint16_t, 16'384> RAM16K{};
+   std::array<std::uint16_t, 8'192>  Screen{};
+   std::uint16_t                     Keyboard{};
 };
 
 }  // namespace Hack
