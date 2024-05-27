@@ -57,6 +57,8 @@ public:
 private:
    Symbol_Table symbol_table_{};
 
+   static constexpr int instruction_size = 16;
+   
    // performs first two passes
    auto prepare( std::istream& file )           -> std::vector<Code_Line>;
    auto first_pass( std::istream& file )        -> void;
