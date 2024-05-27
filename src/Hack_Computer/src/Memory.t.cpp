@@ -14,7 +14,7 @@
 
 #include <stdexcept>          // out_of_range
 
-TEST_CASE( "operator[]" )
+TEST_CASE( "Computer: operator[]" )
 {
    using namespace Hack;
 
