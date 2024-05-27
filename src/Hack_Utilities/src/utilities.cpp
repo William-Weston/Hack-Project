@@ -51,7 +51,9 @@ Hack::Utils::to_binary16_string( std::string_view positive_base10 ) -> std::opti
 auto 
 Hack::Utils::to_binary16_string( std::uint16_t value ) -> std::string
 {
-   auto buffer = std::array<char, 16>{};
+   static constexpr auto bits16 = 16;
+
+   auto buffer = std::array<char, bits16>{};
 
    if ( auto [ptr,ec] = std::to_chars( buffer.data(), buffer.data() + buffer.size(), value, 2 );
       ec == std::errc() )
@@ -78,9 +80,11 @@ Hack::Utils::to_binary16_string( std::int16_t value )   -> std::string
 auto 
 Hack::Utils::to_hex4_string( std::uint16_t value ) -> std::string
 {
+   static constexpr auto hex = 16;
+
    auto buffer = std::array<char, 4>{};
 
-   if ( auto [ptr,ec] = std::to_chars( buffer.data(), buffer.data() + buffer.size(), value, 16 );
+   if ( auto [ptr,ec] = std::to_chars( buffer.data(), buffer.data() + buffer.size(), value, hex );
       ec == std::errc() )
    {
       auto const size = ptr - buffer.data();
@@ -89,7 +93,7 @@ Hack::Utils::to_hex4_string( std::uint16_t value ) -> std::string
       str.insert( str.cend(), buffer.data(), ptr );
       return str;
    }
-   return std::string();
+   return {};
 }
 
 auto 
