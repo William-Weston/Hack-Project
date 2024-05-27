@@ -20,7 +20,7 @@
 #include <sstream>      // string_stream
 #include <vector>
 
-TEST_CASE( "Load ROM" )
+TEST_CASE( "Computer: Load ROM" )
 {
    SECTION( "span overload" )
    {
