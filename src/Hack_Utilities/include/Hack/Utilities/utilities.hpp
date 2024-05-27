@@ -1,5 +1,5 @@
 /**
- * @file    utilities.h
+ * @file    utilities.hpp
  * @author  William Weston
  * @brief   Utility functions for Hack Emulator
  * @version 0.1

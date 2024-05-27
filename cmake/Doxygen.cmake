@@ -15,7 +15,7 @@ FetchContent_MakeAvailable( doxygen-awesome-css )
 # Generate Project-Wide Docs
 function( Enable_Doxygen )
    
-   set( NAME                           "doxygen-${target}" )
+   set( DOXYGEN_QUIET                  YES )
    set( DOXYGEN_EXCLUDE_PATTERNS       "${PROJECT_SOURCE_DIR}/external" "${PROJECT_SOURCE_DIR}/build" )
    set( DOXYGEN_GENERATE_HTML          YES )
    set( DOXYGEN_GENERATE_TREEVIEW      YES )
