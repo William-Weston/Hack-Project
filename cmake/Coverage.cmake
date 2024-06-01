@@ -32,11 +32,11 @@ function( AddCoverage target )
    find_program( GENHTML_PATH genhtml REQUIRED )
 
    add_custom_target( coverage-${target}
-      COMMENT "Running coverage for ${target}..."
-      COMMAND ${LCOV_PATH} -d . --zerocounters
+      COMMENT "Running coverage for ${target}... Entry file ${CMAKE_BINARY_DIR}/coverage-${target}/index.html"
+      COMMAND ${LCOV_PATH} -d . --zerocounters 
       COMMAND $<TARGET_FILE:${target}>
       COMMAND ${LCOV_PATH} -d . --capture -o coverage-${target}.info 
-      COMMAND ${LCOV_PATH} -r coverage-${target}.info '/usr/include/*' --ignore-errors unused
+      COMMAND ${LCOV_PATH} -r coverage-${target}.info '/usr/include/*' --ignore-errors unused --ignore-errors gcov
                            -o filtered-${target}.info
       COMMAND ${GENHTML_PATH} -o coverage-${target} 
                               filtered-${target}.info --legend

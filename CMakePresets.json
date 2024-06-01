@@ -145,12 +145,22 @@
    "buildPresets": [
       {
          "name": "ci-gcc13-coverage",
+         "displayName": "Build Coverage Reports",
          "configurePreset": "conf-gcc13-debug-vcpkg",
          "targets":[
             "coverage-Hack_Assembler_Tests",
             "coverage-Hack_Computer_Tests",
             "coverage-Hack_Disassembler_Tests",
             "coverage-Hack_Utilities_Tests"
+         ]
+      },
+
+      {
+         "name": "ci-doxygen",
+         "displayName": "Build Doxygen Docs",
+         "configurePreset": "conf-gcc13-debug-vcpkg",
+         "targets":[
+            "doxygen-docs"
          ]
       }
    ]
