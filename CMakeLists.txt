@@ -5,10 +5,10 @@
 cmake_minimum_required( VERSION 3.29 )
 
 project( Hack_Computer_Project 
-		VERSION 			0.0.1.0
-		DESCRIPTION		"Hack Computer Project"
-		HOMEPAGE_URL 	"www.MyProj.com"
-		LANGUAGES		CXX
+         VERSION         0.0.1.0
+         DESCRIPTION     "Hack Computer Project"
+         HOMEPAGE_URL    "https://github.com/William-Weston/Hack-Project"
+         LANGUAGES       CXX
 )
 
 list( APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake" )
@@ -35,10 +35,10 @@ include( BuildInfo )
 add_library( Hack::BuildInfo ALIAS BuildInfo )
 
 include( ProjectOptions )
-project_options()
+project_setup()
 
 add_library( Hack::project_warnings ALIAS project_warnings )
-add_library( Hack::project_options ALIAS project_options )
+add_library( Hack::project_options  ALIAS project_options  )
 
 include( Doxygen )
 Enable_Doxygen()

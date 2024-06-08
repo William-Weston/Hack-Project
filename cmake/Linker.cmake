@@ -18,8 +18,8 @@ macro( configure_linker target )
          "Using custom linker: '${USER_LINKER_OPTION}', explicitly supported entries are ${USER_LINKER_OPTION_VALUES}" 
       )
    endif()
-
-   if( NOT HACK_ENABLE_USER_LINKER )
+   
+   if( NOT HACK_PROJECT_ENABLE_USER_LINKER )
       return()
    endif()
 
