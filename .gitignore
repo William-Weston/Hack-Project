@@ -58,3 +58,6 @@ CMakeUserPresets.json
 
 # Backup files
 *.backup
+
+# Test Files
+Test-Files/
