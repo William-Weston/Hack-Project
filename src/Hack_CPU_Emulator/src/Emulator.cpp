@@ -56,9 +56,7 @@ namespace
 
 Hack::Emulator::Emulator( std::string_view title, int x_pos, int y_pos, int width, int height, bool fullscreen )
    :  core_( title, x_pos, y_pos, width, height, fullscreen ),
-      screen_texture_( computer_.screen_cbegin(), computer_.screen_cend(), core_.renderer() ),
-      window_{ core_.window() },
-      renderer_{ core_.renderer() }
+      screen_texture_( computer_.screen_cbegin(), computer_.screen_cend(), core_.renderer() )
 {
 }
 
@@ -154,7 +152,7 @@ Hack::Emulator::handle_events() -> void
 
       if ( event.type            == SDL_WINDOWEVENT               && 
            event.window.event    == SDL_WINDOWEVENT_CLOSE         && 
-           event.window.windowID == SDL_GetWindowID( window_ ) )
+           event.window.windowID == SDL_GetWindowID( core_.window() ) )
       { 
          running_ = false;
       }
@@ -923,7 +921,7 @@ Hack::Emulator::update_GUI_interface() -> void
    static int window_width;
    static int window_height;
 
-   SDL_GetWindowSize( window_, &window_width, &window_height );
+   SDL_GetWindowSize( core_.window(), &window_width, &window_height );
    ImGui::SetNextWindowSize( ImVec2{ static_cast<float>( window_width ),static_cast<float>( window_height )}, ImGuiCond_Always );
 
    with_Window( "Main", nullptr, window_flags )

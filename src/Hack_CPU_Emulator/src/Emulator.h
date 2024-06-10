@@ -52,8 +52,6 @@ private:
    Screen_Texture   screen_texture_;
    Assembler        assembler_{};
    Disassembler     disasmblr_{};
-   SDL_Window*      window_{};
-   SDL_Renderer*    renderer_{};
    Keyboard_Handler keyboard_handler_{};
    std::string      current_file_{};
    UserError_t      user_error_{};
