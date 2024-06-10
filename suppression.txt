@@ -1,0 +1,5 @@
+# Usage:
+#    LSAN_OPTIONS=suppressions=suppression.txt ./<program>
+
+# suppress SDL "leaks"
+leak:SDL*
