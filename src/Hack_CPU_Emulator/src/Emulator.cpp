@@ -936,8 +936,6 @@ Hack::Emulator::update_GUI_interface() -> void
             open_new_file_ = false;
             open_file( current_file_ );
          }
-     
-      
    }
 }
 
