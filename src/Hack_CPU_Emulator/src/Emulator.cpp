@@ -33,6 +33,7 @@
 #include <imgui_stdlib.h>                     // for InputText
 #include <SDL_scancode.h>                     // for SDL_SCANCODE_0, SDL_SCA...
 
+#include <algorithm>                          // for max
 #include <cstdint>                            // for uint16_t
 #include <exception>                          // for exception
 #include <iostream>                           // for basic_ostream, operator<<
@@ -46,10 +47,9 @@
 
 namespace
 {
-   auto file_error_popup( std::string_view error_msg  )     -> bool;
-   auto parse_error_popup( std::string_view error_msg )     -> bool;
-   auto unsupported_filetype_popup( std::string_view path ) -> bool;
-   auto memory_access_error_popup( std::string_view msg )   -> bool;
+   auto CentreTextUnformatted( std::string_view text, float alignment = 0.5f )  -> void;
+   auto CentreButton( std::string_view text, float alignment = 0.5f )           -> bool;
+   auto error_popup( std::string_view description, std::string_view msg  )      -> bool;
 }
 
 // -------------------------------------------- API -----------------------------------------------
@@ -71,6 +71,7 @@ Hack::Emulator::run() -> void
       try
       {
          auto const frame = GUI_Frame( core_.renderer() );
+
          handle_events();
          update();
          render();
@@ -85,21 +86,21 @@ Hack::Emulator::run() -> void
                           "Line no:  " + std::to_string( error.data().line_no ) + "\n" +
                           "Text:     " + error.data().text;
 
-         user_error_ = UserError{ std::move( error_msg ), Error_t::PARSE_ERROR, true };
+         user_error_ = UserError{ "Parse Error", std::move( error_msg ), true };
       }
       catch( Hack::EMULATOR::Utils::file_error const& error )
       {
          std::cerr << error.what()  << '\n';
          std::cerr << error.where() << '\n';
          
-         user_error_ = UserError{ error.data().filename, Error_t::FILE_ERROR, true };
+         user_error_ = UserError{ "File Error", error.data().filename, true };
       }
       catch( Hack::EMULATOR::Utils::unsupported_filetype_error const& error )
       {
          std::cerr << error.what()  << '\n';
          std::cerr << error.where() << '\n';
          
-         user_error_ = UserError{ std::move( current_file_ ), Error_t::UNSUPPORTED_FILETYPE, true };
+         user_error_ = UserError{ "Unsupported File Type", std::move( current_file_ ), true };
       }
       catch( std::out_of_range const& error )
       {
@@ -122,7 +123,7 @@ Hack::Emulator::run() -> void
             error_msg = "Out of bounds";
          }
 
-         user_error_ = UserError{ std::move( error_msg ), Error_t::MEMORY_ACCESS_ERROR, true };
+         user_error_ = UserError{ "Out of Range Error", std::move( error_msg ), true };
 
          play_ = false;
          step_ = false;
@@ -927,15 +928,14 @@ Hack::Emulator::update_GUI_interface() -> void
 
    with_Window( "Main", nullptr, window_flags )
    {
-     
-         main_window();
-         displays_errors();
-         
-         if ( open_new_file_ )
-         {
-            open_new_file_ = false;
-            open_file( current_file_ );
-         }
+      main_window();
+      displays_errors();
+      
+      if ( open_new_file_ )
+      {
+         open_new_file_ = false;
+         open_file( current_file_ );
+      }
    }
 }
 
@@ -946,7 +946,7 @@ Hack::Emulator::main_window()  -> void
    menu_bar();
 
    // Main Command Window ---------------------------------------------------------------------------
-   auto  const options = command_GUI();
+   auto const options = command_GUI();
 
    // ImGui::PushStyleVar( ImGuiStyleVar_ChildRounding, 15.0f );
    set_StyleVar( ImGuiStyleVar_ChildRounding, 15.0f );
@@ -1056,7 +1056,7 @@ Hack::Emulator::command_GUI() -> main_options
             ImGuiFileDialog::Instance()->OpenDialog( "ChooseFileDlgKey", "Open File", ".hack,.asm,.*", config );
       }
       
-      if ( ImGuiFileDialog::Instance()->Display( "ChooseFileDlgKey", ImGuiWindowFlags_NoCollapse, ImVec2{ 512, 256 } ) )
+      if ( ImGuiFileDialog::Instance()->Display( "ChooseFileDlgKey", ImGuiWindowFlags_NoCollapse, ImVec2{ 720, 480 } ) )
       {
          if ( ImGuiFileDialog::Instance()->IsOk() )
          { 
@@ -1078,7 +1078,7 @@ Hack::Emulator::command_GUI() -> main_options
       ImGui::SameLine();
       if ( ImGui::Button( "Play" ) )
       {
-            play_ = true;
+         play_ = true;
       }
 
       ImGui::SameLine();
@@ -1196,7 +1196,9 @@ Hack::Emulator::ROM_GUI( bool highlight_pc ) -> void
                else if ( highlight_pc && idx == pc )
                {
                   ImGui::SetScrollHereY( 0.25 );
+
                }
+               
             }
          }
       } 
@@ -1609,54 +1611,23 @@ Hack::Emulator::Screen_GUI() -> void
 auto
 Hack::Emulator::displays_errors() -> void
 {  
-   // only replace the user_error with nullopt once one of the error popups has been closed by
-   // the user
-   if ( 
-      file_error_popup( user_error_ ? user_error_->msg : "" )             ||
-      parse_error_popup( user_error_ ? user_error_->msg : "" )            ||
-      unsupported_filetype_popup( user_error_ ? user_error_->msg : "" )   ||
-      memory_access_error_popup( user_error_ ? user_error_->msg : "" )
-     )
+   // only replace the user_error with nullopt once one of the error popups
+   // has been closed by the user
+   if ( user_error_ )
    {
-      user_error_ = std::nullopt;
-   }
-
-   if ( !user_error_ || !user_error_->activate )
-   {
-      return;
-   }
-
-
-   switch ( user_error_->type )
-   {
-      case Error_t::PARSE_ERROR:
+      if ( error_popup( user_error_->description, user_error_->msg  ) )
       {
-         ImGui::OpenPopup( "File Parse Error" );
-         break;
-      }
-
-      case Error_t::FILE_ERROR:
-      {
-         ImGui::OpenPopup( "File Loading Error" );
-         break;
-      }
-
-      case Error_t::UNSUPPORTED_FILETYPE:
-      {
-         ImGui::OpenPopup( "Unsupported File Error" );
-         break;
-      }
-
-      case Error_t::MEMORY_ACCESS_ERROR:
-      {
-         ImGui::OpenPopup( "Memory Access Error" );
-         break;
+         user_error_ = std::nullopt;
       }
    }
 
-   // only called the openpop once
-   user_error_->activate = false;
-
+   if ( user_error_ && user_error_->activate )
+   {
+      ImGui::OpenPopup( "Error" );
+       
+      // only call  OpenPopup once
+      user_error_->activate = false;
+   }
 }
 
 // for testing
@@ -1680,109 +1651,63 @@ namespace   // -----------------------------------------------------------------
 
 
 auto 
-file_error_popup( std::string_view error_msg ) -> bool
+error_popup( std::string_view description, std::string_view msg ) -> bool
 {
-   auto closed = false;
+   auto done       = false;
+   auto const width = std::max( ImGui::CalcTextSize( description.data() ).x, ImGui::CalcTextSize( msg.data() ).x ) + 15.0f;
+   ImGui::SetNextWindowSize( ImVec2{ width, 0.0 } );
 
    with_StyleVar( ImGuiStyleVar_PopupRounding, 10.0 )
    with_StyleVar( ImGuiStyleVar_WindowTitleAlign, ImVec2{ 0.5, 0.5 } )
    {
       auto popup_open = true;
-      with_PopupModal( "File Loading Error", &popup_open )
+      with_PopupModal( "Error", &popup_open )
       {
-         ImGui::TextUnformatted( "Error - Failed to load file:" );
-         ImGui::TextUnformatted( error_msg.data() );
-
+         CentreTextUnformatted( description.data() );
          ImGui::Spacing();
-         
-         if ( ImGui::Button( "Okay" ) )
-         {
-            ImGui::CloseCurrentPopup();
-            closed = true;
-         }
-      }
-   }
-   return closed;
-}
-
-
-auto 
-parse_error_popup( std::string_view error_msg  ) -> bool
-{
-   auto closed = false;
-
-   with_StyleVar( ImGuiStyleVar_PopupRounding, 10.0 )
-   with_StyleVar( ImGuiStyleVar_WindowTitleAlign, ImVec2{ 0.5, 0.5 } )
-   {
-      auto popup_open = true;
-      with_PopupModal( "File Parse Error", &popup_open )
-      {  
-         ImGui::Spacing();
-         ImGui::TextUnformatted( error_msg.data() );
-         ImGui::Spacing();
-         
-         if ( ImGui::Button( "Okay" ) )
-         {
-            ImGui::CloseCurrentPopup();
-            closed = true;
-         }
-      }
-   }
-
-   return closed;
-}
-
-
-auto 
-unsupported_filetype_popup( std::string_view path ) -> bool
-{
-   auto closed = false;
-
-   with_StyleVar( ImGuiStyleVar_PopupRounding, 10.0 )
-   with_StyleVar( ImGuiStyleVar_WindowTitleAlign, ImVec2{ 0.5, 0.5 } )
-   {
-      auto popup_open = true;
-      with_PopupModal( "Unsupported File Error", &popup_open )
-      {
-         ImGui::Text( "Could not open file: %s", path.data() );
-         ImGui::TextUnformatted( "Unsupported File Format" );
-         
-         ImGui::Spacing();
-         
-         if ( ImGui::Button( "Okay" ) )
-         {
-            ImGui::CloseCurrentPopup();
-            closed = true;
-         }
-      }
-   }
-   return closed;
-}
-
-
-auto 
-memory_access_error_popup( std::string_view msg ) -> bool
-{
-   auto closed = false;
-
-   with_StyleVar( ImGuiStyleVar_PopupRounding, 10.0 )
-   with_StyleVar( ImGuiStyleVar_WindowTitleAlign, ImVec2{ 0.5, 0.5 } )
-   {
-      auto popup_open = true;
-      with_PopupModal( "Memory Access Error", &popup_open )
-      { 
          ImGui::TextUnformatted( msg.data() );
-         
+
+         ImGui::Spacing();
          ImGui::Spacing();
          
-         if ( ImGui::Button( "Okay" ) )
+         if ( CentreButton( " Done " ) )
          {
             ImGui::CloseCurrentPopup();
-            closed = true;
+            done = true;
          }
       }
    }
-   return closed;
+   return done;
+}
+
+
+auto CentreTextUnformatted( std::string_view text, float alignment ) -> void
+{
+   auto size   = ImGui::CalcTextSize( text.data() ).x;
+   auto avail  = ImGui::GetContentRegionAvail().x;
+   auto offset = ( avail - size ) * alignment;
+
+   if ( offset > 0.0 )
+   {
+      ImGui::SetCursorPosX( ImGui::GetCursorPosX() + offset );
+   }
+
+   ImGui::TextUnformatted( text.data() );
+}
+
+auto CentreButton( std::string_view text, float alignment ) -> bool
+{
+   auto& style  = ImGui::GetStyle();
+   auto  size   = ImGui::CalcTextSize( text.data() ).x + style.FramePadding.x * 2.0f;
+   auto  avail  = ImGui::GetContentRegionAvail().x;
+   auto  offset = ( avail - size ) * alignment;
+
+   if ( offset > 0.0 )
+   {
+      ImGui::SetCursorPosX( ImGui::GetCursorPosX() + offset );
+   }
+
+   return ImGui::Button( text.data() );
 }
 
 
