@@ -50,6 +50,8 @@ namespace
    auto CentreTextUnformatted( std::string_view text, float alignment = 0.5f )  -> void;
    auto CentreButton( std::string_view text, float alignment = 0.5f )           -> bool;
    auto error_popup( std::string_view description, std::string_view msg  )      -> bool;
+
+   auto button_with_popup( std::string_view button_name, std::string_view popup_name, std::string_view text, auto action ) -> void;
 }
 
 // -------------------------------------------- API -----------------------------------------------
@@ -1101,9 +1103,8 @@ Hack::Emulator::command_GUI() -> main_options
       ImGui::PushItemWidth( 200 );
       ImGui::SliderFloat( "##Speed", &speed_, 0.3F, 5'000'000.0F, "%.1f", ImGuiSliderFlags_Logarithmic );
       ImGui::PopItemWidth();
-
    }
-
+ 
    return { track_pc, RAMFormat::DECIMAL };
 }
 
@@ -1129,38 +1130,10 @@ Hack::Emulator::ROM_GUI( bool highlight_pc ) -> void
    track_item = ( track_item > rom_size ) ? rom_size - 1 : track_item ;
 
    ImGui::SameLine();
-   if( ImGui::Button( "Clear" ) )
+   button_with_popup( "Clear", "Clear ROM?", "This action cannot be undone", [&]
    {
-      ImGui::OpenPopup( "Clear ROM?" );
-   }
-   
-   // "Clear ROM?" --------------------------------------------------------------------------------
-   with_StyleVar( ImGuiStyleVar_WindowTitleAlign, ImVec2{ 0.5, 0.5 } )
-   with_StyleVar( ImGuiStyleVar_PopupRounding, 10.0 )
-   {
-      auto clear_ROM_popup_open = true;
-
-      with_PopupModal( "Clear ROM?", &clear_ROM_popup_open ) 
-      {
-         ImGui::TextUnformatted( "This action cannot be undone" );
-         ImGui::Spacing();
-         ImGui::Indent( 30.0 );
-         if ( ImGui::Button( "Confirm" ) )
-         {
-            computer_.clear_rom();
-            ImGui::CloseCurrentPopup();
-         }
-      
-         ImGui::SameLine( 120.0 ); 
-         
-         if ( ImGui::Button( "Cancel" ) )
-         {
-            ImGui::CloseCurrentPopup();
-         }
-      }
-   }
-
-   // ---------------------------------------------------------------------------------------------
+      computer_.clear_rom();
+   } );
 
    ImGui::SameLine();
    ImGui::SetNextItemWidth( 50.0 );
@@ -1196,7 +1169,6 @@ Hack::Emulator::ROM_GUI( bool highlight_pc ) -> void
                   ImGui::SetScrollHereY( 0.25 );
 
                }
-               
             }
          }
       } 
@@ -1380,36 +1352,11 @@ Hack::Emulator::RAM_GUI( ) -> void
    track_item = ( track_item > ram_size ) ? ram_size - 1 : track_item ;
 
    ImGui::SameLine();
-   if( ImGui::Button( "Clear" ) )
+   button_with_popup( "Clear", "Clear RAM?", "This action cannot be undone", [&] 
    {
-      ImGui::OpenPopup( "Clear RAM?" );
-   }
+      computer_.clear_ram();
+   } );
 
-   // "Clear RAM?"" -------------------------------------------------------------------------------
-   with_StyleVar( ImGuiStyleVar_PopupRounding, 10.0 )
-   with_StyleVar( ImGuiStyleVar_WindowTitleAlign, ImVec2{ 0.5, 0.5 } )
-   {
-      auto clear_RAM_popup_open = true;
-      with_PopupModal( "Clear RAM?", &clear_RAM_popup_open )
-      {
-         ImGui::TextUnformatted( "This action cannot be undone" );
-         ImGui::Spacing();
-         ImGui::Indent( 30.0 );
-         if ( ImGui::Button( "Confirm" ) )
-         {
-            computer_.clear_ram();
-            ImGui::CloseCurrentPopup();
-         }
-      
-         ImGui::SameLine( 120.0 ); 
-         
-         if ( ImGui::Button( "Cancel" ) )
-         {
-            ImGui::CloseCurrentPopup();
-         }
-      }
-   }
-   // ---------------------------------------------------------------------------------------------
 
    ImGui::SameLine();
    ImGui::SetNextItemWidth( 50.0 );
@@ -1538,37 +1485,10 @@ Hack::Emulator::Screen_GUI() -> void
       track_item = screen_start;
 
    ImGui::SameLine();
-   if( ImGui::Button( "Clear" ) )
+   button_with_popup( "Clear", "Clear Screen RAM?", "This action cannot be undone", [&] 
    {
-      ImGui::OpenPopup( "Clear Screen RAM?" );
-   }
-   
-   // "Clear Screen RAM?" -------------------------------------------------------------------------
-   with_StyleVar( ImGuiStyleVar_PopupRounding, 10.0 )
-   with_StyleVar( ImGuiStyleVar_WindowTitleAlign, ImVec2{ 0.5, 0.5 } )
-   {
-      auto clear_screen_RAM_popup_open = true;
-      with_PopupModal( "Clear Screen RAM?", &clear_screen_RAM_popup_open )
-      {
-         ImGui::TextUnformatted( "This action cannot be undone" );
-         ImGui::Spacing();
-         ImGui::Indent( 30.0 );
-         if ( ImGui::Button( "Confirm" ) )
-         {
-            computer_.clear_screen();
-            ImGui::CloseCurrentPopup();
-         }
-      
-         ImGui::SameLine( 120.0 ); 
-         
-         if ( ImGui::Button( "Cancel" ) )
-         {
-            ImGui::CloseCurrentPopup();
-         }
-      }
-   }
-
-   // ---------------------------------------------------------------------------------------------
+      computer_.clear_screen();
+   } );
 
    ImGui::SameLine();
    ImGui::SetNextItemWidth( 50.0 );
@@ -1708,5 +1628,39 @@ auto CentreButton( std::string_view text, float alignment ) -> bool
    return ImGui::Button( text.data() );
 }
 
+auto 
+button_with_popup( std::string_view button_name, std::string_view popup_name, std::string_view text, auto action ) -> void
+{
+   if( ImGui::Button(  button_name.data() ) )
+   {
+      ImGui::OpenPopup( popup_name.data() );
+   }
+
+   // "Clear RAM?"" -------------------------------------------------------------------------------
+   with_StyleVar( ImGuiStyleVar_PopupRounding, 10.0 )
+   with_StyleVar( ImGuiStyleVar_WindowTitleAlign, ImVec2{ 0.5, 0.5 } )
+   {
+      auto popup_open = true;
+      with_PopupModal( popup_name.data(), &popup_open )
+      {
+         ImGui::TextUnformatted( text.data() );
+         ImGui::Spacing();
+         ImGui::Indent( 30.0 );
+         if ( ImGui::Button( "Confirm" ) )
+         {
+            action();
+            ImGui::CloseCurrentPopup();
+         }
+      
+         ImGui::SameLine( 120.0 ); 
+         
+         if ( ImGui::Button( "Cancel" ) )
+         {
+            ImGui::CloseCurrentPopup();
+         }
+      }
+   }
+   // ---------------------------------------------------------------------------------------------
+}
 
 }  // namespace -----------------------------------------------------------------------------------
