@@ -1321,13 +1321,6 @@ Hack::Emulator::ROM_Display( ROMFormat const fmt, int const idx ) -> void
       }
       return;
    }
-
-   default:
-   {
-      std::cerr << "Unkown Format in ROM Display\n";
-      break;
-   }
-
    }  // switch( fmt )
 }
 
@@ -1451,11 +1444,6 @@ Hack::Emulator::RAM_Display( RAMFormat fmt, int idx ) -> void
       }
       return;
    }
-   
-   default:
-      std::cerr << "Unknown Format in RAM Display\n";
-      break;
-   
    }  // switch( fmt )
 }
 
