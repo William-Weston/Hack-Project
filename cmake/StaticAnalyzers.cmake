@@ -154,7 +154,7 @@ function( AddLWYU target )
 endfunction()
 
 
-function( EnableSanitizers 
+function( add_static_analyzers
    target 
    ENABLE_CLANGTIDY
    ENABLE_CPPCHECK

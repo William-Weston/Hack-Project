@@ -61,7 +61,7 @@ option( HACK_COMPUTER_ENABLE_LWYU      "Enable link whay you use" ON  )
 
 include( StaticAnalyzers )
 
-EnableSanitizers( Hack_Computer 
+add_static_analyzers( Hack_Computer 
    HACK_COMPUTER_ENABLE_CLANGTIDY
    HACK_COMPUTER_ENABLE_CPPCHECK
    HACK_COMPUTER_ENABLE_IWYU

@@ -22,7 +22,7 @@ option( HACK_TESTER_ENABLE_LWYU      "Enable link whay you use" ON  )
 
 include( StaticAnalyzers )
 
-EnableSanitizers( main 
+add_static_analyzers( main 
    HACK_TESTER_ENABLE_CLANGTIDY
    HACK_TESTER_ENABLE_CPPCHECK
    HACK_TESTER_ENABLE_IWYU

@@ -64,7 +64,7 @@ option( HACK_ASSEMBLER_ENABLE_LWYU      "Enable link whay you use" ON  )
 
 include( StaticAnalyzers )
 
-EnableSanitizers( Hack_Assembler 
+add_static_analyzers( Hack_Assembler 
    HACK_ASSEMBLER_ENABLE_CLANGTIDY
    HACK_ASSEMBLER_ENABLE_CPPCHECK
    HACK_ASSEMBLER_ENABLE_IWYU

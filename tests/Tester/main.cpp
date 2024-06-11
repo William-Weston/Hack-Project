@@ -5,7 +5,6 @@
 #include <iostream>                    // for char_traits, basic_ostream, operator<<
 #include <string_view>                 // for operator<<
 
-
 auto main() -> int
 {
    using namespace Hack;

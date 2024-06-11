@@ -61,8 +61,8 @@ option( HACK_CPU_EMULATOR_GUI_ENABLE_IWYU      "Enable iwyu"              ON  )
 option( HACK_CPU_EMULATOR_GUI_ENABLE_LWYU      "Enable link whay you use" ON  )
 
 include( StaticAnalyzers )
-
-EnableSanitizers( Hack_CPU_Emulator_GUI 
+AddLWYU( Hack_CPU_Emulator_GUI )
+add_static_analyzers( Hack_CPU_Emulator_GUI 
    HACK_CPU_EMULATOR_GUI_ENABLE_CLANGTIDY
    HACK_CPU_EMULATOR_GUI_ENABLE_CPPCHECK
    HACK_CPU_EMULATOR_GUI_ENABLE_IWYU

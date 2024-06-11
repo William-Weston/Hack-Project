@@ -37,7 +37,6 @@
 #include <cstdint>                            // for uint16_t
 #include <exception>                          // for exception
 #include <iostream>                           // for basic_ostream, operator<<
-#include <span>                               // for span
 #include <stdexcept>                          // for out_of_range
 #include <string>                             // for allocator, operator+
 #include <string_view>                        // for string_view
@@ -59,8 +58,7 @@ namespace
 Hack::Emulator::Emulator( std::string_view title, int x_pos, int y_pos, int width, int height, bool fullscreen )
    :  core_( title, x_pos, y_pos, width, height, fullscreen ),
       screen_texture_( computer_.screen_cbegin(), computer_.screen_cend(), core_.renderer() )
-{
-}
+{}
 
 
 auto
