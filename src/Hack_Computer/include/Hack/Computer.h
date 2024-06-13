@@ -58,11 +58,11 @@ public:
 
    constexpr auto A_Register()     const noexcept -> word_t;
    constexpr auto D_Register()     const noexcept -> word_t;
-   constexpr auto M_Register()     const noexcept -> word_t;
+   constexpr auto M_Register()     const          -> word_t;
 
    constexpr auto A_Register()           noexcept -> word_t&;
    constexpr auto D_Register()           noexcept -> word_t&;
-   constexpr auto M_Register()           noexcept -> word_t&;
+   constexpr auto M_Register()                    -> word_t&;
 
    constexpr auto screen_begin()         noexcept -> Screen_iterator;
    constexpr auto screen_begin()   const noexcept -> Screen_const_iterator;
@@ -153,7 +153,7 @@ Hack::Computer::D_Register() const noexcept -> word_t
 }
 
 constexpr auto 
-Hack::Computer::M_Register() const noexcept -> word_t
+Hack::Computer::M_Register() const -> word_t
 {
    return cpu_.M_Register();
 }
@@ -171,7 +171,7 @@ Hack::Computer::D_Register()       noexcept -> word_t&
 }
 
 constexpr auto 
-Hack::Computer::M_Register()       noexcept -> word_t&
+Hack::Computer::M_Register() -> word_t&
 {
    return cpu_.M_Register();
 }
