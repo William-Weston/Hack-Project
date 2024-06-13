@@ -129,6 +129,7 @@ Hack::Emulator::run() -> void
       }
       catch( std::exception const& error )
       {
+         std::cerr << "here\n";
          std::cerr << error.what() << '\n';
       }
    }
@@ -997,7 +998,57 @@ Hack::Emulator::main_window()  -> void
    // Status Bar -------------------------------------------------------------------------------
    with_Child( "##Status Bar", ImVec2( ImGui::GetContentRegionAvail().x , ImGui::GetContentRegionAvail().y  ), ImGuiChildFlags_Border )
    {
-      ImGui::SeparatorText( "Status" );
+      ImGui::SeparatorText( "Program Counter & Registers" );
+
+      auto const horizontal_padding = ImGui::GetStyle().FramePadding.x;
+      auto const width              = 225.0f - 55.0f - ( horizontal_padding * 4.0f );
+    //  auto const spacing            = ImGui::GetContentRegionAvail().x - ( width * 4 ) ;
+
+      ImGui::Spacing();
+      ImGui::Spacing();
+      ImGui::Indent( 15.0f );
+
+      ImGui::Columns( 4, "registers", false );
+      ImGui::AlignTextToFramePadding();
+      ImGui::TextUnformatted( "  PC:" );
+      ImGui::SameLine();
+      auto& pc = computer_.pc();
+      ImGui::SetNextItemWidth( width );
+      ImGui::InputScalar( "##program_counter", ImGuiDataType_U16, &pc );
+
+      ImGui::NextColumn();
+      ImGui::AlignTextToFramePadding();
+      ImGui::TextUnformatted( "  A:" );
+      ImGui::SameLine();
+      auto& a_register = computer_.A_Register();
+      ImGui::SetNextItemWidth( width );
+      ImGui::InputScalar( "##a_register", ImGuiDataType_U16, &a_register );
+
+      ImGui::NextColumn();
+
+      ImGui::AlignTextToFramePadding();
+      ImGui::TextUnformatted( "  D:" );
+      ImGui::SameLine();
+      auto& d_register = computer_.D_Register();
+      ImGui::SetNextItemWidth( width );
+      ImGui::InputScalar( "##d_register", ImGuiDataType_U16, &d_register );
+
+      ImGui::NextColumn();
+
+      ImGui::AlignTextToFramePadding();
+      ImGui::Text( "  M = RAM[%d]:", a_register );
+      ImGui::SameLine();
+      if ( a_register < Computer::RAM_SIZE )
+      {
+         auto& m_register = computer_.M_Register();
+         ImGui::SetNextItemWidth( width );
+         ImGui::InputScalar( "##m_register", ImGuiDataType_U16, &m_register ); 
+      }
+      else
+      {
+         ImGui::SetNextItemWidth( width );
+         ImGui::TextUnformatted( "N/A" );
+      }
    }
    
 }
