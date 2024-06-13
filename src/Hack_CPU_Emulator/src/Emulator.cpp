@@ -996,9 +996,9 @@ Hack::Emulator::main_window()  -> void
    }  
 
    // Status Bar -------------------------------------------------------------------------------
-   with_Child( "##Status Bar", ImVec2( ImGui::GetContentRegionAvail().x , ImGui::GetContentRegionAvail().y  ), ImGuiChildFlags_Border )
+   with_Child( "##Computer Internals", ImVec2( ImGui::GetContentRegionAvail().x , ImGui::GetContentRegionAvail().y  ), ImGuiChildFlags_Border )
    {
-      ImGui::SeparatorText( "Program Counter & Registers" );
+      ImGui::SeparatorText( "Internals" );
 
       auto const horizontal_padding = ImGui::GetStyle().FramePadding.x;
       auto const width              = 225.0f - 55.0f - ( horizontal_padding * 4.0f );
@@ -1008,9 +1008,10 @@ Hack::Emulator::main_window()  -> void
       ImGui::Spacing();
       ImGui::Indent( 15.0f );
 
-      ImGui::Columns( 4, "registers", false );
+      ImGui::Columns( 5, "internals_display", false );
+
       ImGui::AlignTextToFramePadding();
-      ImGui::TextUnformatted( "  PC:" );
+      ImGui::TextUnformatted( "PC:" );
       ImGui::SameLine();
       auto& pc = computer_.pc();
       ImGui::SetNextItemWidth( width );
@@ -1018,8 +1019,10 @@ Hack::Emulator::main_window()  -> void
 
       ImGui::NextColumn();
       ImGui::AlignTextToFramePadding();
-      ImGui::TextUnformatted( "  A:" );
+      ImGui::TextUnformatted( "A:" );
       ImGui::SameLine();
+
+      // TODO:: change to ImGuiDataType_S16 representation
       auto& a_register = computer_.A_Register();
       ImGui::SetNextItemWidth( width );
       ImGui::InputScalar( "##a_register", ImGuiDataType_U16, &a_register );
@@ -1027,7 +1030,7 @@ Hack::Emulator::main_window()  -> void
       ImGui::NextColumn();
 
       ImGui::AlignTextToFramePadding();
-      ImGui::TextUnformatted( "  D:" );
+      ImGui::TextUnformatted( "D:" );
       ImGui::SameLine();
       auto& d_register = computer_.D_Register();
       ImGui::SetNextItemWidth( width );
@@ -1036,8 +1039,9 @@ Hack::Emulator::main_window()  -> void
       ImGui::NextColumn();
 
       ImGui::AlignTextToFramePadding();
-      ImGui::Text( "  M = RAM[%d]:", a_register );
+      ImGui::Text( "M = RAM[%d]:", a_register );
       ImGui::SameLine();
+
       if ( a_register < Computer::RAM_SIZE )
       {
          auto& m_register = computer_.M_Register();
@@ -1049,6 +1053,16 @@ Hack::Emulator::main_window()  -> void
          ImGui::SetNextItemWidth( width );
          ImGui::TextUnformatted( "N/A" );
       }
+
+      ImGui::NextColumn();
+
+      ImGui::AlignTextToFramePadding();
+      ImGui::TextUnformatted( "Keyboard:" );
+      ImGui::SameLine();
+      auto const& keyboard = computer_.keyboard();
+      ImGui::SetNextItemWidth( width );
+      ImGui::Text( "%d", keyboard );
+
    }
    
 }
