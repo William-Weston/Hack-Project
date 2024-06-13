@@ -72,11 +72,11 @@ public:
 
    constexpr auto A_Register() const noexcept -> word_t;
    constexpr auto D_Register() const noexcept -> word_t;
-   constexpr auto M_Register() const noexcept -> word_t;
+   constexpr auto M_Register() const          -> word_t;
 
    constexpr auto A_Register()       noexcept -> word_t&;
    constexpr auto D_Register()       noexcept -> word_t&;
-   constexpr auto M_Register()       noexcept -> word_t&;
+   constexpr auto M_Register()                -> word_t&;
 
    constexpr auto set_A_Register( word_t value ) noexcept -> void;
    constexpr auto set_D_Register( word_t value ) noexcept -> void;
@@ -119,7 +119,7 @@ Hack::CPU::D_Register() const noexcept -> word_t
 }
 
 constexpr auto
-Hack::CPU::M_Register() const noexcept -> word_t
+Hack::CPU::M_Register() const -> word_t
 {
    return RAM_[A_Register_];
 }
@@ -137,7 +137,7 @@ Hack::CPU::D_Register()       noexcept -> word_t&
 }
 
 constexpr auto
-Hack::CPU::M_Register()       noexcept -> word_t&
+Hack::CPU::M_Register() -> word_t&
 {
    return RAM_[A_Register_];
 }
