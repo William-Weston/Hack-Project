@@ -17,12 +17,10 @@
 #include <charconv>           // for from_chars, from_chars_result
 #include <cstddef>            // for size_t
 #include <cstdint>            // for uint16_t, int16_t
-#include <iosfwd>             // for ifstream
 #include <optional>           // for optional, nullopt
 #include <string>             // for string, char_traits
 #include <string_view>        // for string_view, hash
 #include <system_error>       // for errc
-#include <vector>             // for vector
 
 
 // ------------------------------------------------------------------------------------------------
@@ -95,15 +93,6 @@ constexpr auto is_binary16_string( std::string_view str )    -> bool;
 // ------------------------------------------------------------------------------------------------
 // File Utilities ---------------------------------------------------------------------------------
 
-/**
- * @brief Open a hack binary text file from a given input stream
- * 
- * @param in the input stream
- * @return std::vector<std::uint16_t> 
- * @throws Hack::Utils::Parse_Error
- */
-auto open_hack_file( std::ifstream& in ) -> std::vector<std::uint16_t>;
-
 
 // ------------------------------------------------------------------------------------------------
 // Hash Functions ---------------------------------------------------------------------------------
@@ -117,6 +106,13 @@ struct string_hash final
     std::size_t operator()( std::string_view str )   const { return hash_type{}( str ); }
     std::size_t operator()( std::string const& str ) const { return hash_type{}( str ); }
 };
+
+
+// ------------------------------------------------------------------------------------------------
+// Numeric ----------------------------------------------------------------------------------------
+
+auto number_of_digits( std::uint16_t value )   -> int;
+
 
 
 }  // namespace Hack::Utils -----------------------------------------------------------------------
