@@ -196,3 +196,15 @@ Hack::Utils::to_upper( char ch ) -> char
 
 // File Utilities ---------------------------------------------------------------------------------
 
+// Numeric Utilities -------------------------------------------------------------------------------
+
+auto 
+Hack::Utils::number_of_digits( std::uint16_t value )   -> int
+{
+   if ( value < 10 )       return 1;
+   if ( value < 100 )      return 2;
+   if ( value < 1'000 )    return 3;
+   if ( value < 10'000 )   return 4;
+   
+   return 5;
+}
