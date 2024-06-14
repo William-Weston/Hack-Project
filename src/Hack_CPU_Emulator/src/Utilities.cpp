@@ -15,9 +15,18 @@
 
 #include <fstream>                       // for basic_ifstream, basic_istream
 #include <optional>                      // for optional
+#include <utility>                       // for unreachable
 
 
 
+
+/**
+ * @brief Open a hack binary text file from the given path
+ * 
+ * @param path the path to open
+ * @return std::vector<std::uint16_t> 
+ * @throws Hack::EMULATOR::Utils::Parse_Error
+ */
 auto 
 Hack::EMULATOR::Utils::open_hack_file( std::string const& path ) -> std::vector<std::uint16_t>
 {
