@@ -48,6 +48,7 @@ namespace
 {
    auto CentreTextUnformatted( std::string_view text, float alignment = 0.5f )  -> void;
    auto CentreButton( std::string_view text, float alignment = 0.5f )           -> bool;
+
    auto error_popup( std::string_view description, std::string_view msg  )      -> bool;
 
    auto button_with_popup( std::string_view button_name, std::string_view popup_name, std::string_view text, auto action ) -> void;
@@ -951,7 +952,7 @@ Hack::Emulator::main_window()  -> void
    set_StyleVar( ImGuiStyleVar_ChildRounding, 15.0f );
 
    // Memory Displays --------------------------------------------------------------------------
-   auto const child_height = ImGui::GetContentRegionAvail().y - 75;
+   auto const child_height = ImGui::GetContentRegionAvail().y - 85.0f;
 
    with_Child( "##ROM Display", ImVec2( 225 , child_height), ImGuiChildFlags_Border  )
    {
@@ -977,7 +978,7 @@ Hack::Emulator::main_window()  -> void
 
    with_Group
    {
-      with_Child( "##Hack Computer Screen", ImVec2( ImGui::GetContentRegionAvail().x , 300 ), ImGuiChildFlags_Border )
+      with_Child( "##Hack Computer Screen", ImVec2( ImGui::GetContentRegionAvail().x , 300.0f ), ImGuiChildFlags_Border )
       {  
          with_StyleVar( ImGuiStyleVar_SeparatorTextAlign, ImVec2{ 0.5, 0.5 } )
             ImGui::SeparatorText( "Hack Computer Screen" );
@@ -989,7 +990,7 @@ Hack::Emulator::main_window()  -> void
          ImGui::Image( (void*) screen_texture_.texture(), ImVec2( screen_texture_.width, screen_texture_.height ) );
       }
 
-      with_Child( "##CPU", ImVec2( ImGui::GetContentRegionAvail().x , ImGui::GetContentRegionAvail().y - 75), ImGuiChildFlags_Border )
+      with_Child( "##CPU", ImVec2( ImGui::GetContentRegionAvail().x , ImGui::GetContentRegionAvail().y - 85.0f ), ImGuiChildFlags_Border )
       {
          
       }
@@ -1002,44 +1003,48 @@ Hack::Emulator::main_window()  -> void
 
       auto const horizontal_padding = ImGui::GetStyle().FramePadding.x;
       auto const width              = 225.0f - 55.0f - ( horizontal_padding * 4.0f );
-    //  auto const spacing            = ImGui::GetContentRegionAvail().x - ( width * 4 ) ;
-
-      ImGui::Spacing();
-      ImGui::Spacing();
+     
       ImGui::Indent( 15.0f );
 
-      ImGui::Columns( 5, "internals_display", false );
+      ImGui::Columns( 5 );
 
-      ImGui::AlignTextToFramePadding();
-      ImGui::TextUnformatted( "PC:" );
-      ImGui::SameLine();
+      auto const offset = ( ImGui::GetContentRegionAvail().x - width ) * 0.5f;
+
+      CentreTextUnformatted( "--- Program Counter ---" );
       auto& pc = computer_.pc();
       ImGui::SetNextItemWidth( width );
+      ImGui::SetCursorPosX( ImGui::GetCursorPosX() + offset );
       ImGui::InputScalar( "##program_counter", ImGuiDataType_U16, &pc );
 
       ImGui::NextColumn();
-      ImGui::AlignTextToFramePadding();
-      ImGui::TextUnformatted( "A:" );
-      ImGui::SameLine();
+
+      CentreTextUnformatted( "--- A Register ---" );
 
       // TODO:: change to ImGuiDataType_S16 representation
       auto& a_register = computer_.A_Register();
       ImGui::SetNextItemWidth( width );
+      ImGui::SetCursorPosX( ImGui::GetCursorPosX() + offset );
       ImGui::InputScalar( "##a_register", ImGuiDataType_U16, &a_register );
 
       ImGui::NextColumn();
 
-      ImGui::AlignTextToFramePadding();
-      ImGui::TextUnformatted( "D:" );
-      ImGui::SameLine();
+      CentreTextUnformatted( "--- D Register ---" );
+  
       auto& d_register = computer_.D_Register();
       ImGui::SetNextItemWidth( width );
+      ImGui::SetCursorPosX( ImGui::GetCursorPosX() + offset );
       ImGui::InputScalar( "##d_register", ImGuiDataType_U16, &d_register );
 
       ImGui::NextColumn();
 
+      CentreTextUnformatted( "--- M Register ---" );
+
       ImGui::AlignTextToFramePadding();
-      ImGui::Text( "M = RAM[%d]:", a_register );
+      auto const ram_loc  = std::string( "RAM[" ) + std::to_string( a_register ) + std::string( "]:" );
+      auto const offset_m = ( ImGui::GetContentRegionAvail().x - width - ImGui::CalcTextSize( ram_loc.data() ).x - ImGui::GetStyle().IndentSpacing ) * 0.5f;
+      
+       ImGui::SetCursorPosX( ImGui::GetCursorPosX() + offset_m );
+      ImGui::TextUnformatted( ram_loc.data() );
       ImGui::SameLine();
 
       if ( a_register < Computer::RAM_SIZE )
@@ -1053,9 +1058,11 @@ Hack::Emulator::main_window()  -> void
          ImGui::SetNextItemWidth( width );
          ImGui::TextUnformatted( "N/A" );
       }
+      
 
       ImGui::NextColumn();
 
+      ImGui::Spacing(); ImGui::Spacing();
       ImGui::AlignTextToFramePadding();
       ImGui::TextUnformatted( "Keyboard:" );
       ImGui::SameLine();
@@ -1108,7 +1115,7 @@ Hack::Emulator::command_GUI() -> main_options
 {
    auto track_pc = false;
 
-   with_Child( "##Menu Bar", ImVec2( ImGui::GetContentRegionAvail().x , 75.0 ), ImGuiChildFlags_Border ) 
+   with_Child( "##Menu Bar", ImVec2( ImGui::GetContentRegionAvail().x , 65.0f ), ImGuiChildFlags_Border ) 
    {
       // open File Dialog
       if ( ImGui::Button( "Open File" ) )
@@ -1652,9 +1659,9 @@ error_popup( std::string_view description, std::string_view msg ) -> bool
 
 auto CentreTextUnformatted( std::string_view text, float alignment ) -> void
 {
-   auto size   = ImGui::CalcTextSize( text.data() ).x;
-   auto avail  = ImGui::GetContentRegionAvail().x;
-   auto offset = ( avail - size ) * alignment;
+   auto const size   = ImGui::CalcTextSize( text.data() ).x;
+   auto const avail  = ImGui::GetContentRegionAvail().x;
+   auto const offset = ( avail - size ) * alignment;
 
    if ( offset > 0.0 )
    {
@@ -1666,10 +1673,9 @@ auto CentreTextUnformatted( std::string_view text, float alignment ) -> void
 
 auto CentreButton( std::string_view text, float alignment ) -> bool
 {
-   auto& style  = ImGui::GetStyle();
-   auto  size   = ImGui::CalcTextSize( text.data() ).x + style.FramePadding.x * 2.0f;
-   auto  avail  = ImGui::GetContentRegionAvail().x;
-   auto  offset = ( avail - size ) * alignment;
+   auto const size   = ImGui::CalcTextSize( text.data() ).x + ImGui::GetStyle().FramePadding.x * 2.0f;
+   auto const avail  = ImGui::GetContentRegionAvail().x;
+   auto const offset = ( avail - size ) * alignment;
 
    if ( offset > 0.0 )
    {
