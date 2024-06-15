@@ -993,7 +993,7 @@ Hack::Emulator::main_window()  -> void
 
       with_Child( "##CPU", ImVec2( ImGui::GetContentRegionAvail().x , ImGui::GetContentRegionAvail().y - 85.0f ), ImGuiChildFlags_Border )
       {
-         
+         display_cpu();
       }
    }  
 
@@ -1009,7 +1009,7 @@ Hack::Emulator::main_window()  -> void
 
 
 auto
-Hack::Emulator::menu_bar()                   -> void
+Hack::Emulator::menu_bar() -> void
 {
    with_MenuBar
    {
@@ -1573,6 +1573,59 @@ Hack::Emulator::internals() -> void
    ImGui::SetCursorPosX( ImGui::GetCursorPosX() + kb_offset );
    ImGui::TextUnformatted( keyboard.data() );
 }
+
+
+auto
+Hack::Emulator::display_cpu() -> void
+{
+   ImGui::Spacing(); ImGui::Spacing(); ImGui::Spacing();
+
+   with_StyleVar( ImGuiStyleVar_SeparatorTextAlign, ImVec2{ 0.5, 0.5 } )
+      ImGui::SeparatorText( "Hack Computer ALU" );
+
+   ImGui::Spacing(); ImGui::Spacing(); ImGui::Spacing();
+
+   ImGui::Indent( 20.0f );
+   // Binary:     0vvvvvvvvvvvvvvv
+   // Binary:     111accccccdddjjj
+   auto const binary = Hack::Utils::to_binary16_string( computer_.ROM()[computer_.pc()] );
+   ImGui::Text( "Instruction: %s", binary.data() );
+   ImGui::Spacing(); ImGui::Spacing(); ImGui::Spacing();
+
+
+   ImGui::Columns( 3 );
+  
+   {
+      ImGui::Spacing(); ImGui::Spacing(); ImGui::Spacing();
+
+      ImGui::Indent( 20.0f );
+      ImGui::TextUnformatted( "D Input:" );
+      auto d = std::to_string( computer_.D_Register() );
+      ImGui::InputText( "##d input", &d, ImGuiInputTextFlags_ReadOnly );
+
+      ImGui::Spacing(); ImGui::Spacing(); ImGui::Spacing();
+      ImGui::Spacing(); ImGui::Spacing(); ImGui::Spacing();
+      
+      ImGui::TextUnformatted( "M/A Input:" );
+      auto a = std::to_string( computer_.A_Register() );
+      
+      ImGui::InputText( "##m/a input", &a, ImGuiInputTextFlags_ReadOnly );
+
+   }
+
+   ImGui::NextColumn();
+
+   {
+      CentreTextUnformatted( " --- Computation --- " );
+   }
+
+   ImGui::NextColumn();
+
+   {
+
+   }
+}
+
 
 auto
 Hack::Emulator::display_errors() -> void

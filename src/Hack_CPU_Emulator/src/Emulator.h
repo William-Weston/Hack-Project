@@ -85,7 +85,7 @@ private:
    auto RAM_Display( RAMFormat fmt, int idx )    -> void;
    auto Screen_GUI( )                            -> void;
    auto internals()                              -> void;
-   
+   auto display_cpu()                            -> void;
    auto display_errors()                         -> void;
    
    auto blacken_screen() -> void;      // testing function
