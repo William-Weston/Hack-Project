@@ -60,6 +60,7 @@ private:
    bool             step_{ false };             // execute the next instruction
    bool             running_{ true };          // is the emulator running
    bool             open_new_file_{ false };
+   bool             animating_{ false };
 
    auto handle_events() -> void;
    auto update()        -> void;
@@ -83,8 +84,9 @@ private:
    auto RAM_GUI( )                               -> void;
    auto RAM_Display( RAMFormat fmt, int idx )    -> void;
    auto Screen_GUI( )                            -> void;
-
-   auto displays_errors()                        -> void;
+   auto internals()                              -> void;
+   
+   auto display_errors()                         -> void;
    
    auto blacken_screen() -> void;      // testing function
 };

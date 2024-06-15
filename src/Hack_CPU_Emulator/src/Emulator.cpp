@@ -925,11 +925,12 @@ Hack::Emulator::update_GUI_interface() -> void
 
    SDL_GetWindowSize( core_.window(), &window_width, &window_height );
    ImGui::SetNextWindowSize( ImVec2{ static_cast<float>( window_width ),static_cast<float>( window_height )}, ImGuiCond_Always );
-
+   
+   with_Disabled( animating_ )
    with_Window( "Main", nullptr, window_flags )
    {
       main_window();
-      displays_errors();
+      display_errors();
       
       if ( open_new_file_ )
       {
@@ -996,80 +997,12 @@ Hack::Emulator::main_window()  -> void
       }
    }  
 
-   // Status Bar -------------------------------------------------------------------------------
+   // Interals ------------------------------------------------------------------------------------
    with_Child( "##Computer Internals", ImVec2( ImGui::GetContentRegionAvail().x , ImGui::GetContentRegionAvail().y  ), ImGuiChildFlags_Border )
    {
       ImGui::SeparatorText( "Internals" );
 
-      auto const horizontal_padding = ImGui::GetStyle().FramePadding.x;
-      auto const width              = 225.0f - 55.0f - ( horizontal_padding * 4.0f );
-     
-      ImGui::Indent( 15.0f );
-
-      ImGui::Columns( 5 );
-
-      auto const offset = ( ImGui::GetContentRegionAvail().x - width ) * 0.5f;
-
-      CentreTextUnformatted( "--- Program Counter ---" );
-      auto& pc = computer_.pc();
-      ImGui::SetNextItemWidth( width );
-      ImGui::SetCursorPosX( ImGui::GetCursorPosX() + offset );
-      ImGui::InputScalar( "##program_counter", ImGuiDataType_U16, &pc );
-
-      ImGui::NextColumn();
-
-      CentreTextUnformatted( "--- A Register ---" );
-
-      // TODO:: change to ImGuiDataType_S16 representation
-      auto& a_register = computer_.A_Register();
-      ImGui::SetNextItemWidth( width );
-      ImGui::SetCursorPosX( ImGui::GetCursorPosX() + offset );
-      ImGui::InputScalar( "##a_register", ImGuiDataType_U16, &a_register );
-
-      ImGui::NextColumn();
-
-      CentreTextUnformatted( "--- D Register ---" );
-  
-      auto& d_register = computer_.D_Register();
-      ImGui::SetNextItemWidth( width );
-      ImGui::SetCursorPosX( ImGui::GetCursorPosX() + offset );
-      ImGui::InputScalar( "##d_register", ImGuiDataType_U16, &d_register );
-
-      ImGui::NextColumn();
-
-      CentreTextUnformatted( "--- M Register ---" );
-
-      ImGui::AlignTextToFramePadding();
-      auto const ram_loc  = std::string( "RAM[" ) + std::to_string( a_register ) + std::string( "]:" );
-      auto const offset_m = ( ImGui::GetContentRegionAvail().x - width - ImGui::CalcTextSize( ram_loc.data() ).x - ImGui::GetStyle().IndentSpacing ) * 0.5f;
-      
-       ImGui::SetCursorPosX( ImGui::GetCursorPosX() + offset_m );
-      ImGui::TextUnformatted( ram_loc.data() );
-      ImGui::SameLine();
-
-      if ( a_register < Computer::RAM_SIZE )
-      {
-         auto& m_register = computer_.M_Register();
-         ImGui::SetNextItemWidth( width );
-         ImGui::InputScalar( "##m_register", ImGuiDataType_U16, &m_register ); 
-      }
-      else
-      {
-         ImGui::SetNextItemWidth( width );
-         ImGui::TextUnformatted( "N/A" );
-      }
-      
-
-      ImGui::NextColumn();
-
-      ImGui::Spacing(); ImGui::Spacing();
-      ImGui::AlignTextToFramePadding();
-      ImGui::TextUnformatted( "Keyboard:" );
-      ImGui::SameLine();
-      auto const& keyboard = computer_.keyboard();
-      ImGui::SetNextItemWidth( width );
-      ImGui::Text( "%d", keyboard );
-
+      internals();
    }
    
 }
@@ -1323,11 +1256,9 @@ Hack::Emulator::ROM_Display( ROMFormat const fmt, int const idx ) -> void
          ImGui::SameLine( 60 );
          ImGui::InputScalar( "##rom", ImGuiDataType_S16, &value );
       }
-
-      if ( value != instruction )
-      {
-         instruction = Hack::Utils::signed_to_unsigned_16( value );
-      }
+ 
+      instruction = Hack::Utils::signed_to_unsigned_16( value );
+      
       return;
    }
    
@@ -1342,7 +1273,7 @@ Hack::Emulator::ROM_Display( ROMFormat const fmt, int const idx ) -> void
             ImGui::AlignTextToFramePadding();
             ImGui::Text( "%d", idx );
             ImGui::SameLine( 60 );
-            ImGui::InputScalar( "##rom", ImGuiDataType_U16, &value, nullptr, nullptr, "%04X" );
+            ImGui::InputScalar( "##rom", ImGuiDataType_U16, &value, nullptr, nullptr, "%04X", ImGuiInputTextFlags_CharsUppercase );
          }
       }
       else
@@ -1350,13 +1281,11 @@ Hack::Emulator::ROM_Display( ROMFormat const fmt, int const idx ) -> void
          ImGui::AlignTextToFramePadding();
          ImGui::Text( "%d", idx );
          ImGui::SameLine( 60 );
-         ImGui::InputScalar( "##rom", ImGuiDataType_U16, &value, nullptr, nullptr, "%04X" );
+         ImGui::InputScalar( "##rom", ImGuiDataType_U16, &value, nullptr, nullptr, "%04X", ImGuiInputTextFlags_CharsUppercase );
       }
-
-      if ( value != instruction )
-      {
-         instruction = value;
-      }
+    
+      instruction = value;
+    
       return;
    }
 
@@ -1384,10 +1313,7 @@ Hack::Emulator::ROM_Display( ROMFormat const fmt, int const idx ) -> void
 
       if ( auto const value = Hack::Utils::binary_to_uint16( binary ); value )
       {
-         if ( *value != instruction )
-         {
-            instruction = *value;
-         }
+         instruction = *value; 
       }
       return;
    }
@@ -1473,10 +1399,9 @@ Hack::Emulator::RAM_Display( RAMFormat fmt, int idx ) -> void
       ImGui::SameLine( 60 );
       ImGui::InputScalar( "##ram", ImGuiDataType_S16, &value );
 
-      if ( value != data )
-      {
-         data = Hack::Utils::signed_to_unsigned_16( value );
-      }
+
+      data = Hack::Utils::signed_to_unsigned_16( value );
+      
       return;
    }
    
@@ -1486,13 +1411,9 @@ Hack::Emulator::RAM_Display( RAMFormat fmt, int idx ) -> void
       ImGui::AlignTextToFramePadding();
       ImGui::Text( "%d", idx );
       ImGui::SameLine( 60 );
-      ImGui::InputScalar( "##ram", ImGuiDataType_U16, &value, nullptr, nullptr, "%04X" );
+      ImGui::InputScalar( "##ram", ImGuiDataType_U16, &value, nullptr, nullptr, "%04X", ImGuiInputTextFlags_CharsUppercase );
 
-      if ( value != data )
-      {
-         data = value;
-      }
-
+      data = value;
       return;
    }
 
@@ -1507,10 +1428,7 @@ Hack::Emulator::RAM_Display( RAMFormat fmt, int idx ) -> void
 
       if ( auto const value = Hack::Utils::binary_to_uint16( binary ); value )
       {
-         if ( *value != data )
-         {
-            data = *value;
-         }
+         data = *value;
       }
       return;
    }
@@ -1585,7 +1503,79 @@ Hack::Emulator::Screen_GUI() -> void
 
 
 auto
-Hack::Emulator::displays_errors() -> void
+Hack::Emulator::internals() -> void
+{
+   auto const horizontal_padding = ImGui::GetStyle().FramePadding.x;
+   auto const width              = 225.0f - 55.0f - ( horizontal_padding * 4.0f );
+   
+   ImGui::Indent( 15.0f );
+
+   ImGui::Columns( 5 );
+
+   auto const offset = ( ImGui::GetContentRegionAvail().x - width ) * 0.5f;
+
+   CentreTextUnformatted( "--- Program Counter ---" );
+   auto& pc = computer_.pc();
+   ImGui::SetNextItemWidth( width );
+   ImGui::SetCursorPosX( ImGui::GetCursorPosX() + offset );
+   ImGui::InputScalar( "##program_counter", ImGuiDataType_U16, &pc );
+
+   ImGui::NextColumn();
+
+   CentreTextUnformatted( "--- A Register ---" );
+
+   // TODO:: change to ImGuiDataType_S16 representation
+   auto& a_register = computer_.A_Register();
+   ImGui::SetNextItemWidth( width );
+   ImGui::SetCursorPosX( ImGui::GetCursorPosX() + offset );
+   ImGui::InputScalar( "##a_register", ImGuiDataType_U16, &a_register );
+
+   ImGui::NextColumn();
+
+   CentreTextUnformatted( "--- D Register ---" );
+
+   auto& d_register = computer_.D_Register();
+   ImGui::SetNextItemWidth( width );
+   ImGui::SetCursorPosX( ImGui::GetCursorPosX() + offset );
+   ImGui::InputScalar( "##d_register", ImGuiDataType_U16, &d_register );
+
+   ImGui::NextColumn();
+
+   CentreTextUnformatted( "--- M Register ---" );
+
+   ImGui::AlignTextToFramePadding();
+   auto const label    = std::string( "RAM[" ) + std::to_string( a_register ) + std::string( "]:" );
+   auto const offset_m = ( ImGui::GetContentRegionAvail().x - width - ImGui::CalcTextSize( label.data() ).x - ImGui::GetStyle().ItemSpacing.x ) * 0.5f;
+   
+   ImGui::SetCursorPosX( ImGui::GetCursorPosX() + offset_m );
+   ImGui::TextUnformatted( label.data() );
+   ImGui::SameLine();
+
+   if ( a_register < Computer::RAM_SIZE )
+   {
+      auto& m_register = computer_.M_Register();
+      ImGui::SetNextItemWidth( width );
+      ImGui::InputScalar( "##m_register", ImGuiDataType_U16, &m_register ); 
+   }
+   else
+   {
+      ImGui::SetNextItemWidth( width );
+      ImGui::TextUnformatted( "N/A" );
+   }
+   
+
+   ImGui::NextColumn();
+
+   CentreTextUnformatted( "--- Keyboard ---" );
+   ImGui::Spacing();
+   auto const keyboard = std::to_string( computer_.keyboard() );
+   auto const kb_offset = ( ImGui::GetContentRegionAvail().x - ImGui::CalcTextSize( keyboard.data() ).x ) * 0.5f;
+   ImGui::SetCursorPosX( ImGui::GetCursorPosX() + kb_offset );
+   ImGui::TextUnformatted( keyboard.data() );
+}
+
+auto
+Hack::Emulator::display_errors() -> void
 {  
    // only replace the user_error with nullopt once one of the error popups
    // has been closed by the user
