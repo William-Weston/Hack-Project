@@ -14,16 +14,15 @@
 #include "Emulator.h"
 
 #include "Definitions.h"                      // for UserError, Error_t, RAM...
-#include "GUI_Frame.h"                        // for GUI_Frame
+#include "Utilities.h"                        // for FileError, open_asm_file
+
 #include "Hack/Assembler.h"                   // for Assembler
 #include "Hack/Disassembler.h"                // for Disassembler
 #include "Hack/Memory.h"                      // for Memory
-#include "SDL_events.h"                       // for SDL_PollEvent, SDL_KEYDOWN
-#include "Utilities.h"                        // for FileError, open_asm_file
-
-#include <Hack/Computer.h>                    // for Computer
-#include <Hack/Utilities/exceptions.hpp>      // for operator<<, ParseErrorData
-#include <Hack/Utilities/utilities.hpp>       // for binary_to_uint16, signe...
+#include "Hack/Computer.h"                    // for Computer
+#include "Hack/Utilities/exceptions.hpp"      // for operator<<, ParseErrorData
+#include "Hack/Utilities/utilities.hpp"       // for binary_to_uint16, signe...
+#include "GUI_Core/GUI_Frame.h"               // for GUI_Frame
 
 #include <ImGuiFileDialog/ImGuiFileDialog.h>  // for FileDialog, FileDialogC...
 #include <ImGuiSugar/imgui_sugar.hpp>         // for BooleanGuard, with_Styl...
@@ -32,6 +31,7 @@
 #include <imgui_impl_sdl2.h>                  // for ImGui_ImplSDL2_ProcessE...
 #include <imgui_stdlib.h>                     // for InputText
 #include <SDL_scancode.h>                     // for SDL_SCANCODE_0, SDL_SCA...
+#include <SDL_events.h>                       // for SDL_PollEvent, SDL_KEYDOWN
 
 #include <algorithm>                          // for max
 #include <cstdint>                            // for uint16_t
@@ -56,8 +56,8 @@ namespace
 
 // -------------------------------------------- API -----------------------------------------------
 
-Hack::Emulator::Emulator( std::string_view title, int x_pos, int y_pos, int width, int height, bool fullscreen )
-   :  core_( title, x_pos, y_pos, width, height, fullscreen ),
+Hack::Emulator::Emulator( std::string_view title, int width, int height, bool fullscreen )
+   :  core_( title, width, height, fullscreen ),
       screen_texture_( computer_.screen_cbegin(), computer_.screen_cend(), core_.renderer() )
 {}
 

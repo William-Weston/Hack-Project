@@ -13,7 +13,7 @@
 
 
 #include "Definitions.h"        // for UserError, RAMFormat, ROMF...
-#include "GUI_Core.h"           // for GUI_Core
+#include "GUI_Core/GUI_Core.h"  // for GUI_Core
 #include "Keyboard_Handler.h"   // for Keyboard_Handler
 #include "Screen_Texture.h"     // for Screen_Texture
 
@@ -34,7 +34,7 @@ namespace Hack
 class Emulator final
 {
 public:
-   explicit Emulator( std::string_view title, int x_pos, int y_pos, int width, int height, bool fullscreen );
+   explicit Emulator( std::string_view title, int width, int height, bool fullscreen );
    ~Emulator() noexcept = default;
 
    Emulator( Emulator const& )                    = delete;

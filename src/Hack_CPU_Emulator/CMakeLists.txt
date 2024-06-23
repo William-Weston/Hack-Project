@@ -18,14 +18,14 @@ target_sources( Hack_CPU_Emulator_GUI
         src/Definitions.h
         src/Emulator.h
         src/Emulator.cpp
-        src/GUI_Core.h
-        src/GUI_Core.cpp
-        src/GUI_Frame.h
+      #   src/GUI_Core.h
+      #   src/GUI_Core.cpp
+      #   src/GUI_Frame.h
         src/Keyboard_Handler.h
         src/Keyboard_Handler.cpp
         src/Screen_Texture.h
         src/Screen_Texture.cpp
-        src/SDL_InitError.h
+      #   src/SDL_InitError.h
         src/Utilities.h
         src/Utilities.cpp
 )
@@ -43,11 +43,11 @@ target_link_libraries( Hack_CPU_Emulator_GUI
         Hack::Computer
         Hack::Disassembler
         Hack::Utilities
-        imgui::imgui
+        GUI_Core::GUI_Core
         ImGuiFileDialog::ImGuiFileDialog
         ImGuiSugar::ImGuiSugar
-        $<TARGET_NAME_IF_EXISTS:SDL2::SDL2main>
-        $<IF:$<TARGET_EXISTS:SDL2::SDL2>,SDL2::SDL2,SDL2::SDL2-static>
+      #   $<TARGET_NAME_IF_EXISTS:SDL2::SDL2main>
+      #   $<IF:$<TARGET_EXISTS:SDL2::SDL2>,SDL2::SDL2,SDL2::SDL2-static>
 )
 
 

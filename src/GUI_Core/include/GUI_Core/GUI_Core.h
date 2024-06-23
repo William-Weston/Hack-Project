@@ -1,15 +1,16 @@
 /**
  * @file    GUI_Core.h
- * @author  William Weston
+ * @author  William Weston (wjtWeston@protonmail.com)
  * @brief   Handle GUI initialization and teardown
  * @version 0.1
- * @date    2024-03-17
+ * @date    2024-06-15
  * 
  * @copyright Copyright (c) 2024
  * 
  */
-#ifndef HACK_2024_03_16_GUI_CORE_H
-#define HACK_2024_03_16_GUI_CORE_H
+#ifndef INCLUDE_2024_06_15_GUI_CORE_H
+#define INCLUDE_2024_06_15_GUI_CORE_H
+
 
 #include <SDL_render.h>       // for SDL_Renderer, SDL_DestroyRenderer
 #include <SDL_video.h>        // for SDL_Window, SDL_DestroyWindow
@@ -23,7 +24,8 @@ namespace Hack
 class GUI_Core final
 {
 public:
-   explicit GUI_Core( std::string_view title, int x_pos, int y_pos, int width, int height, bool fullscreen );
+
+   [[nodiscard]] explicit GUI_Core( std::string_view title, int width, int height, bool fullscreen );
    ~GUI_Core();
 
    constexpr auto window()   const noexcept -> SDL_Window*;
@@ -47,13 +49,11 @@ private:
    auto init_SDL()      -> void;
    auto init_renderer() -> void;
    auto init_imgui()    -> void;
-   auto init_window( std::string_view title, int x_pos, int y_pos, int width, int height, bool fullscreen ) -> void;
+   auto init_window( std::string_view title, int width, int height, bool fullscreen ) -> void;
    
 };
 
-}     // namespace Hack
-
-
+}  // namespace Hack
 
 // ------------------------------------------ API: constexpr --------------------------------------
 
@@ -81,4 +81,6 @@ Hack::GUI_Core::height()  const noexcept -> int
    return height_;
 }
 
-#endif      // HACK_2024_03_16_GUI_CORE_H
+
+
+#endif   // INCLUDE_2024_06_15_GUI_CORE_H

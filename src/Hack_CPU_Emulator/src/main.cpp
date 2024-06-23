@@ -9,12 +9,12 @@
  * 
  */
 
-#include "Emulator.h"       // for Emulator
-#include "SDL_InitError.h"  // for SDL_InitError
+#include "Emulator.h"                 // for Emulator
+#include "GUI_Core/SDL_InitError.h"   // for SDL_InitError
 
-#include <cstdlib>          // for EXIT_FAILURE, EXIT_SUCCESS
-#include <exception>        // for exception
-#include <iostream>         // for operator<<, basic_ostream, char_traits, cerr
+#include <cstdlib>                    // for EXIT_FAILURE, EXIT_SUCCESS
+#include <exception>                  // for exception
+#include <iostream>                   // for operator<<, basic_ostream, char_traits, cerr
 
 
 
@@ -22,7 +22,7 @@ auto main( int, char*[] ) -> int
 {
     try
     {
-        auto emulator = Hack::Emulator( "Hack Emulator", 50, 50, 1340, 720, false );
+        auto emulator = Hack::Emulator( "Hack Emulator", 1340, 720, false );
 
         emulator.run();
     }
