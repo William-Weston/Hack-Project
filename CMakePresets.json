@@ -36,7 +36,7 @@
          "name": "conf-vcpkg-base",
          "hidden": true,
          "cacheVariables": {
-            "CMAKE_TOOLCHAIN_FILE": "/home/william/vcpkg/scripts/buildsystems/vcpkg.cmake"
+            "CMAKE_TOOLCHAIN_FILE": "$env{VCPKG_ROOT}/scripts/buildsystems/vcpkg.cmake"
          }
       },
       {
