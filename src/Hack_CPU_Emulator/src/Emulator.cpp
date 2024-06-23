@@ -32,7 +32,7 @@
 #include <imgui_stdlib.h>                     // for InputText
 #include <SDL_scancode.h>                     // for SDL_SCANCODE_0, SDL_SCA...
 #include <SDL_events.h>                       // for SDL_PollEvent, SDL_KEYDOWN
-
+#include <SDL_log.h>                          // for SDL_Log
 #include <algorithm>                          // for max
 #include <cstdint>                            // for uint16_t
 #include <exception>                          // for exception
@@ -983,10 +983,11 @@ Hack::Emulator::main_window()  -> void
          with_StyleVar( ImGuiStyleVar_SeparatorTextAlign, ImVec2{ 0.5, 0.5 } )
             ImGui::SeparatorText( "Hack Computer Screen" );
         
-         ImGui::NewLine();
+         ImGui::Spacing();
+
          auto const indent = ( ImGui::GetContentRegionAvail().x - screen_texture_.width ) / 2 + ImGui::GetCursorPosX();
          ImGui::SameLine( indent );
-
+           
          ImGui::Image( (void*) screen_texture_.texture(), ImVec2( screen_texture_.width, screen_texture_.height ) );
       }
 
@@ -1001,7 +1002,9 @@ Hack::Emulator::main_window()  -> void
    {
       ImGui::SeparatorText( "Internals" );
 
-      internals();
+      // Ensure enough space to draw table columns, else imgui will crash
+      if ( ImGui::GetContentRegionAvail().x > 50.0f )
+         internals();
    }
    
 }
@@ -1121,15 +1124,19 @@ Hack::Emulator::ROM_GUI( bool highlight_pc ) -> void
    static auto track_item     = std::uint16_t{ 0 };
    static auto display_format = 0;
 
-   if ( ImGui::Button( "Find" ) )
-   {
-      enable_track = true;
-   } 
+   ImGui::AlignTextToFramePadding();
+   ImGui::TextUnformatted( "Find:" );
 
    ImGui::SameLine();
    ImGui::SetNextItemWidth( 55.0 );
    ImGui::InputScalar( "##address", ImGuiDataType_U16, &track_item );
    track_item = ( track_item > rom_size ) ? rom_size - 1 : track_item ;
+
+   if ( ImGui::IsItemDeactivated() && ImGui::IsKeyPressed(ImGuiKey_Enter, false) )
+   {
+      enable_track = true;
+   }
+
 
    ImGui::SameLine();
    button_with_popup( "Clear", "Clear ROM?", "This action cannot be undone", [&]
@@ -1163,7 +1170,7 @@ Hack::Emulator::ROM_GUI( bool highlight_pc ) -> void
 
                if ( enable_track && idx == track_item )
                {
-                  ImGui::SetScrollHereY( 0 );
+                  ImGui::SetScrollHereY( 0.25 );
                   enable_track = false;
                }
                else if ( highlight_pc && idx == pc )
@@ -1329,15 +1336,18 @@ Hack::Emulator::RAM_GUI( ) -> void
    static auto track_item     = std::uint16_t{ 0 };
    static auto display_format = 0;
 
-   if ( ImGui::Button( "Find" ) )
-   {
-      enable_track = true;
-   } 
+   ImGui::AlignTextToFramePadding();
+   ImGui::TextUnformatted( "Find:" );
 
    ImGui::SameLine();
    ImGui::SetNextItemWidth( 55.0 );
    ImGui::InputScalar( "##address", ImGuiDataType_U16, &track_item );
    track_item = ( track_item > ram_size ) ? ram_size - 1 : track_item ;
+
+   if ( ImGui::IsItemDeactivated() && ImGui::IsKeyPressed(ImGuiKey_Enter, false) )
+   {
+      enable_track = true;
+   }
 
    ImGui::SameLine();
    button_with_popup( "Clear", "Clear RAM?", "This action cannot be undone", [&] 
@@ -1370,13 +1380,12 @@ Hack::Emulator::RAM_GUI( ) -> void
 
                if ( enable_track && idx == track_item )
                {
-                  ImGui::SetScrollHereY( 0 );
+                  ImGui::SetScrollHereY( 0.25 );
                   enable_track = false;
                }
             }
          }
       }
-      
    }
 }
 
@@ -1445,10 +1454,8 @@ Hack::Emulator::Screen_GUI() -> void
    static auto track_item     = std::uint16_t{ screen_start };
    static auto display_format = 0;
 
-   if ( ImGui::Button( "Find" ) )
-   {
-      enable_track = true;
-   } 
+   ImGui::AlignTextToFramePadding();
+   ImGui::TextUnformatted( "Find:" );
 
    ImGui::SameLine();
    ImGui::SetNextItemWidth( 55.0 );
@@ -1458,6 +1465,11 @@ Hack::Emulator::Screen_GUI() -> void
       track_item = screen_finish - 1;
    else if ( track_item < screen_start )
       track_item = screen_start;
+
+   if ( ImGui::IsItemDeactivated() && ImGui::IsKeyPressed(ImGuiKey_Enter, false) )
+   {
+      enable_track = true;
+   }
 
    ImGui::SameLine();
    button_with_popup( "Clear", "Clear Screen RAM?", "This action cannot be undone", [&] 
@@ -1491,7 +1503,7 @@ Hack::Emulator::Screen_GUI() -> void
 
                if ( enable_track && screen_index == track_item )
                {
-                  ImGui::SetScrollHereY( 0 );
+                  ImGui::SetScrollHereY( 0.25 );
                   enable_track = false;
                }
             }
@@ -1591,6 +1603,11 @@ Hack::Emulator::display_cpu() -> void
    ImGui::Text( "Instruction: %s", binary.data() );
    ImGui::Spacing(); ImGui::Spacing(); ImGui::Spacing();
 
+   // ensure sufficient space for columns, else imgui will crash
+   if ( ImGui::GetContentRegionAvail().x < 50.0f )
+   {
+      return;
+   }
 
    ImGui::Columns( 3 );
   
