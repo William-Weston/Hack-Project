@@ -914,19 +914,20 @@ Hack::Emulator::update_Hack_Computer()       -> void
 auto 
 Hack::Emulator::update_GUI_interface() -> void
 {
-   static constexpr auto window_flags = ImGuiWindowFlags_NoCollapse       | ImGuiWindowFlags_NoResize    | ImGuiWindowFlags_MenuBar    |
-                                        ImGuiWindowFlags_NoMove           | ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoTitleBar |
-                                        ImGuiWindowFlags_NoSavedSettings;
+   static constexpr auto window_flags = ImGuiWindowFlags_NoCollapse   | ImGuiWindowFlags_NoResize    | ImGuiWindowFlags_NoMove           |
+                                        ImGuiWindowFlags_NoScrollbar  | ImGuiWindowFlags_NoTitleBar  | ImGuiWindowFlags_NoSavedSettings;
 
-   ImGui::SetNextWindowPos( ImVec2{ 0, 0 }, ImGuiCond_Always );
+   menu_bar();
 
+   auto const frame_height = ImGui::GetFrameHeight();
    static int window_width;
    static int window_height;
 
    SDL_GetWindowSize( core_.window(), &window_width, &window_height );
-   ImGui::SetNextWindowSize( ImVec2{ static_cast<float>( window_width ),static_cast<float>( window_height )}, ImGuiCond_Always );
-   
-   with_Disabled( animating_ )
+
+   ImGui::SetNextWindowSize( ImVec2{ static_cast<float>( window_width ),static_cast<float>( window_height ) - frame_height }, ImGuiCond_Always );
+   ImGui::SetNextWindowPos( ImVec2{ 0, frame_height }, ImGuiCond_Always );
+
    with_Window( "Main", nullptr, window_flags )
    {
       main_window();
@@ -944,8 +945,6 @@ Hack::Emulator::update_GUI_interface() -> void
 auto 
 Hack::Emulator::main_window()  -> void
 {
-   menu_bar();
-
    // Main Command Window ---------------------------------------------------------------------------
    auto const options = command_GUI();
 
@@ -1011,7 +1010,7 @@ Hack::Emulator::main_window()  -> void
 auto
 Hack::Emulator::menu_bar() -> void
 {
-   with_MenuBar
+   with_MainMenuBar
    {
       with_Menu( "File" )
       {  
