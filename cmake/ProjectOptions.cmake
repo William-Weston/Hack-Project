@@ -2,8 +2,8 @@
 macro( project_setup )
       
    option( HACK_PROJECT_ENABLE_USER_LINKER         "Enable custom linker"       ON  )
-   option( HACK_PROJECT_ENABLE_SANITIZER_ADDRESS   "Enable Address Sanitizer"   ON  )
-   option( HACK_PROJECT_ENABLE_SANITIZER_LEAK      "Enable Leak Sanitizer"      ON  )
+   option( HACK_PROJECT_ENABLE_SANITIZER_ADDRESS   "Enable Address Sanitizer"   OFF )
+   option( HACK_PROJECT_ENABLE_SANITIZER_LEAK      "Enable Leak Sanitizer"      OFF )
    option( HACK_PROJECT_ENABLE_SANITIZER_UNDEFINED "Enable Undefined Sanitizer" ON  )
    option( HACK_PROJECT_ENABLE_SANITIZER_THREAD    "Enable Thread Sanitizer"    OFF )
 
