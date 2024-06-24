@@ -70,6 +70,7 @@ public:
    // returns address of next instruction to execute
    auto execute_instruction( word_t instruction ) -> word_t;
 
+   constexpr auto ALU_Output() const noexcept -> word_t;
    constexpr auto A_Register() const noexcept -> word_t;
    constexpr auto D_Register() const noexcept -> word_t;
    constexpr auto M_Register() const          -> word_t;
@@ -86,7 +87,8 @@ public:
 private:
    word_t  A_Register_ = 0;
    word_t  D_Register_ = 0;
-   word_t  PC_         = 0;      
+   word_t  PC_         = 0;   
+   word_t  ALU_output_ = 0;   
    Memory& RAM_;
 
    auto do_a_instruction( word_t instruction ) -> word_t;
@@ -105,6 +107,13 @@ Hack::CPU::CPU( Hack::Memory& memory ) noexcept
 {
 
 }
+
+constexpr auto
+Hack::CPU::ALU_Output() const noexcept -> word_t
+{
+   return ALU_output_;
+}
+
 
 constexpr auto
 Hack::CPU::A_Register() const noexcept -> word_t
