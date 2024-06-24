@@ -21,13 +21,13 @@
 #include <utility>                       // for pair, move
 
 
+// ------------------------------------------------------------------------------------------------
+// --------------------------------------- Interface ----------------------------------------------
 
 auto 
 Hack::Disassembler::disassemble( std::string_view binary ) const -> std::optional<std::string>
 {
-   static constexpr auto instruction_size = 16;
-
-   if ( binary.size() != instruction_size )
+   if ( binary.size() != INSTRUCTION_SIZE )
    {
       return std::nullopt;
    }
@@ -45,6 +45,36 @@ Hack::Disassembler::disassemble( std::uint16_t instruction ) const -> std::optio
 {
    return disassemble( Hack::Utils::to_binary16_string( instruction ) );
 }
+
+
+auto 
+Hack::Disassembler::computation( std::string_view binary )   const -> std::optional<std::string>
+{
+   if ( binary.size() != INSTRUCTION_SIZE || binary.front() == '0' )
+   {
+      return std::nullopt;
+   }
+
+   // Binary:     111 a cccccc ddd jjj
+   auto const c         = std::string_view( binary.begin() + 3,  binary.begin() + 10 );
+   auto const comp_iter = comp_table_.find( c );
+
+   if ( comp_iter == comp_table_.end() )
+   {
+      return std::nullopt;
+   }
+   
+   return { comp_iter->second };
+}
+
+auto 
+Hack::Disassembler::computation( std::uint16_t instruction ) const -> std::optional<std::string>
+{
+   return computation( Hack::Utils::to_binary16_string( instruction ) );
+}
+
+// ------------------------------------------------------------------------------------------------
+// ------------------------------------- Implementation -------------------------------------------
 
 /*
    Symbolic:   @xxx
