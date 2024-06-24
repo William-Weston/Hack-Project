@@ -170,6 +170,7 @@ Hack::CPU::reset()                        noexcept -> void
    A_Register_ = 0;
    D_Register_ = 0;
    PC_         = 0;
+   ALU_output_ = 0;
 }
 
 #endif      // HACK_EMULATOR_2024_03_11_CPU_H
