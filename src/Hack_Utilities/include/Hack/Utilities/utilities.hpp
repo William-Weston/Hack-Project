@@ -84,7 +84,11 @@ auto to_upper( char ch )  -> char;
 // ------------------------------------------------------------------------------------------------
 // Hack Code Utilities ----------------------------------------------------------------------------
 
+// A-instruction - Binary:     0vvvvvvvvvvvvvvv     •  vv ... v = 15-bit value of xxx
 constexpr auto is_a_instruction( std::uint16_t instruction ) -> bool;
+
+// if the 'a' bit is set then the y input to the ALU comes from the M register (RAM_[A]), else from the A register
+constexpr auto is_a_bit_set( std::uint16_t instruction )     -> bool;
 
 // does the string represent a 16-bit binary number
 constexpr auto is_binary16_string( std::string_view str )    -> bool;
@@ -210,6 +214,18 @@ Hack::Utils::is_a_instruction( std::uint16_t instruction ) -> bool
 
   return !( instruction & mask );
 }
+
+constexpr auto 
+Hack::Utils::is_a_bit_set( std::uint16_t instruction )     -> bool
+{
+   // 1111'1100'0000'0000
+   // 5432'1098'7654'3210
+   // 111a'cccc'ccdd'djjj
+   constexpr auto mask = std::uint16_t{ 0b0001'0000'0000'0000 };
+
+   return instruction & mask;
+}
+
 
 constexpr auto 
 Hack::Utils::is_binary16_string( std::string_view str )    -> bool
