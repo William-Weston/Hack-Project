@@ -77,6 +77,8 @@ public:
    constexpr auto pc()             const noexcept -> word_t;
    constexpr auto pc()                   noexcept -> word_t&;
 
+   constexpr auto ALU_output()     const noexcept -> word_t;
+
    constexpr auto reset()                noexcept -> void;     // clears everything but ROM
    constexpr auto clear()                noexcept -> void;     // clears everything
    constexpr auto clear_screen()         noexcept -> void;
@@ -236,6 +238,12 @@ constexpr auto
 Hack::Computer::pc()                   noexcept -> word_t&
 {
    return pc_;
+}
+
+constexpr auto 
+Hack::Computer::ALU_output()     const noexcept -> word_t
+{
+   return cpu_.ALU_Output();
 }
 
 constexpr auto 
