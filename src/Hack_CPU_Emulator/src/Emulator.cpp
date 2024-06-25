@@ -1123,6 +1123,10 @@ Hack::Emulator::ROM_GUI( bool highlight_pc ) -> void
    static auto enable_track   = false;
    static auto track_item     = std::uint16_t{ 0 };
    static auto display_format = 0;
+   static auto previous_pc    = computer_.pc();
+
+   if ( previous_pc != pc )
+      highlight_pc = true;
 
    ImGui::AlignTextToFramePadding();
    ImGui::TextUnformatted( "Find:" );
@@ -1130,7 +1134,7 @@ Hack::Emulator::ROM_GUI( bool highlight_pc ) -> void
    ImGui::SameLine();
    ImGui::SetNextItemWidth( 55.0 );
    ImGui::InputScalar( "##address", ImGuiDataType_U16, &track_item );
-   track_item = ( track_item > rom_size ) ? rom_size - 1 : track_item ;
+   track_item = ( track_item >= rom_size ) ? rom_size - 1 : track_item ;
 
    if ( ImGui::IsItemDeactivated() && ImGui::IsKeyPressed(ImGuiKey_Enter, false) )
    {
@@ -1176,12 +1180,13 @@ Hack::Emulator::ROM_GUI( bool highlight_pc ) -> void
                else if ( highlight_pc && idx == pc )
                {
                   ImGui::SetScrollHereY( 0.25 );
-
                }
             }
          }
       } 
    }
+
+   previous_pc = pc;
 }
 
 
@@ -1342,7 +1347,7 @@ Hack::Emulator::RAM_GUI( ) -> void
    ImGui::SameLine();
    ImGui::SetNextItemWidth( 55.0 );
    ImGui::InputScalar( "##address", ImGuiDataType_U16, &track_item );
-   track_item = ( track_item > ram_size ) ? ram_size - 1 : track_item ;
+   track_item = ( track_item >= ram_size ) ? ram_size - 1 : track_item ;
 
    if ( ImGui::IsItemDeactivated() && ImGui::IsKeyPressed(ImGuiKey_Enter, false) )
    {
@@ -1406,7 +1411,6 @@ Hack::Emulator::RAM_Display( RAMFormat fmt, int idx ) -> void
       ImGui::Text( "%d", idx );
       ImGui::SameLine( 60 );
       ImGui::InputScalar( "##ram", ImGuiDataType_S16, &value );
-
 
       data = Hack::Utils::signed_to_unsigned_16( value );
       
@@ -1545,6 +1549,7 @@ Hack::Emulator::internals() -> void
 
    CentreTextUnformatted( "--- D Register ---" );
 
+   // TODO:: change to ImGuiDataType_S16 representation
    auto& d_register = computer_.D_Register();
    ImGui::SetNextItemWidth( width );
    ImGui::SetCursorPosX( ImGui::GetCursorPosX() + offset );
@@ -1564,6 +1569,7 @@ Hack::Emulator::internals() -> void
 
    if ( a_register < Computer::RAM_SIZE )
    {
+      // TODO:: change to ImGuiDataType_S16 representation
       auto& m_register = computer_.M_Register();
       ImGui::SetNextItemWidth( width );
       ImGui::InputScalar( "##m_register", ImGuiDataType_U16, &m_register ); 
@@ -1597,10 +1603,20 @@ Hack::Emulator::display_cpu() -> void
    ImGui::Spacing(); ImGui::Spacing(); ImGui::Spacing();
 
    ImGui::Indent( 20.0f );
-   // Binary:     0vvvvvvvvvvvvvvv
-   // Binary:     111accccccdddjjj
-   auto const binary = Hack::Utils::to_binary16_string( computer_.ROM()[computer_.pc()] );
-   ImGui::Text( "Instruction: %s", binary.data() );
+
+   // A-instruction
+   //    • Binary:     0vvvvvvvvvvvvvvv
+   // C-instruction
+   //    • Binary:     111accccccdddjjj
+   auto const instruction = computer_.ROM()[computer_.pc()];
+   auto const binary      = Hack::Utils::to_binary16_string( instruction );
+
+   if ( binary.front() == '0' )
+      ImGui::Text( "Instruction: %s", " --- " );
+   else
+      ImGui::Text( "Instruction: %s", binary.data() );
+
+   
    ImGui::Spacing(); ImGui::Spacing(); ImGui::Spacing();
 
    // ensure sufficient space for columns, else imgui will crash
@@ -1616,15 +1632,19 @@ Hack::Emulator::display_cpu() -> void
 
       ImGui::Indent( 20.0f );
       ImGui::TextUnformatted( "D Input:" );
+      // TODO:: change to ImGuiDataType_S16 representation
       auto d = std::to_string( computer_.D_Register() );
       ImGui::InputText( "##d input", &d, ImGuiInputTextFlags_ReadOnly );
 
       ImGui::Spacing(); ImGui::Spacing(); ImGui::Spacing();
       ImGui::Spacing(); ImGui::Spacing(); ImGui::Spacing();
       
-      ImGui::TextUnformatted( "M/A Input:" );
-      auto a = std::to_string( computer_.A_Register() );
+      auto const from_m_register = Hack::Utils::is_a_bit_set( instruction );
+      auto const reg             = ( from_m_register ) ? computer_.M_Register() : computer_.A_Register();
+      auto a                     = std::to_string( reg );
       
+      ImGui::TextUnformatted( "M/A Input:" );
+      // TODO:: change to ImGuiDataType_S16 representation
       ImGui::InputText( "##m/a input", &a, ImGuiInputTextFlags_ReadOnly );
 
    }
@@ -1633,11 +1653,32 @@ Hack::Emulator::display_cpu() -> void
 
    {
       CentreTextUnformatted( " --- Computation --- " );
+      auto const avail  = ImGui::GetContentRegionAvail().y;
+      auto const height = ImGui::GetFrameHeight();
+      auto const offset = ( avail - height ) * 0.5f;
+
+      if ( offset > 0.0 )
+         ImGui::SetCursorPosY( ImGui::GetCursorPosY() + offset );
+
+      auto const comp_opt = disasmblr_.computation( binary );
+
+      if ( comp_opt )
+         CentreTextUnformatted( comp_opt->data() );
+      else
+         CentreTextUnformatted( "---" );
    }
 
    ImGui::NextColumn();
 
    {
+      ImGui::Spacing(); ImGui::Spacing(); ImGui::Spacing();
+
+      auto alu_output = std::to_string( computer_.ALU_output() );
+
+      ImGui::Indent( 20.0f );
+      ImGui::TextUnformatted( "ALU Output:" );
+      // TODO:: change to ImGuiDataType_S16 representation
+      ImGui::InputText( "##alu_ouput", &alu_output, ImGuiInputTextFlags_ReadOnly );
 
    }
 }
@@ -1730,6 +1771,7 @@ auto CentreTextUnformatted( std::string_view text, float alignment ) -> void
    ImGui::TextUnformatted( text.data() );
 }
 
+
 auto CentreButton( std::string_view text, float alignment ) -> bool
 {
    auto const size   = ImGui::CalcTextSize( text.data() ).x + ImGui::GetStyle().FramePadding.x * 2.0f;
@@ -1743,6 +1785,7 @@ auto CentreButton( std::string_view text, float alignment ) -> bool
 
    return ImGui::Button( text.data() );
 }
+
 
 auto 
 button_with_popup( std::string_view button_name, std::string_view popup_name, std::string_view text, auto action ) -> void
