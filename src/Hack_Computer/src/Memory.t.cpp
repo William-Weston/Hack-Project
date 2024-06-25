@@ -14,7 +14,7 @@
 
 #include <stdexcept>          // out_of_range
 
-TEST_CASE( "Computer: operator[]" )
+TEST_CASE( "Computer: Memory::operator[]" )
 {
    using namespace Hack;
 
@@ -45,6 +45,42 @@ TEST_CASE( "Computer: operator[]" )
    {
       auto mem = Memory();
       mem[Memory::keyboard_address] = 1;
+
+      REQUIRE( mem.keyboard() == 1 );
+   }
+}
+
+TEST_CASE( "Computer: Memory::at( size_type )" )
+{
+   using namespace Hack;
+
+   SECTION( "expect exception when accessing out of range" )
+   {
+      auto mem = Memory();
+
+      REQUIRE_THROWS_AS( mem.at( Memory::address_space ), std::out_of_range );
+   }
+
+   SECTION( "ram access" )
+   {
+      auto mem = Memory();
+      mem.at( 0 ) = 1;
+
+      REQUIRE( *mem.ram_begin() == 1 );
+   }
+
+   SECTION( "screen access" )
+   {
+      auto mem = Memory();
+      mem.at( Memory::screen_start_address ) = 1;
+
+      REQUIRE( *mem.screen_begin() == 1 );
+   }
+
+   SECTION( "keyboard access" )
+   {
+      auto mem = Memory();
+      mem.at( Memory::keyboard_address ) = 1;
 
       REQUIRE( mem.keyboard() == 1 );
    }

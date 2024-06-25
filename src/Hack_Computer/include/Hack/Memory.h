@@ -46,6 +46,8 @@ public:
 
    auto operator[]( size_type index )       -> reference;
    auto operator[]( size_type index ) const -> const_reference;
+   auto at( size_type index )               -> reference;
+   auto at( size_type index )         const -> const_reference;
 
    constexpr auto ram_begin()            noexcept -> RAM_iterator;
    constexpr auto ram_begin()      const noexcept -> RAM_const_iterator;
@@ -104,6 +106,18 @@ Hack::Memory::operator[] ( size_type index ) const -> const_reference
    {
       throw std::out_of_range( "RAM: Memory access out of bounds: " + std::to_string( index ) );
    }
+}
+
+inline auto 
+Hack::Memory::at( size_type index ) -> reference
+{
+   return operator[]( index );
+}
+
+inline auto 
+Hack::Memory::at( size_type index ) const -> const_reference
+{
+   return operator[]( index );
 }
 
 constexpr auto 
