@@ -26,6 +26,7 @@ public:
    auto disassemble( std::string_view binary )   const -> std::optional<std::string>;
    auto disassemble( std::uint16_t instruction ) const -> std::optional<std::string>;
 
+   // return the computation performed by the ALU given an instruction
    auto computation( std::string_view binary )   const -> std::optional<std::string>;
    auto computation( std::uint16_t instruction ) const -> std::optional<std::string>;
 
