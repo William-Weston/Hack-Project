@@ -377,7 +377,7 @@ TEST_CASE( "Utilites: to_int16_t( std::string_view )" )
    {
       constexpr auto value    = "0";
       constexpr auto expected = std::int16_t{ 0 };
-      constexpr auto result   = to_int16_t( value );
+      auto const     result   = to_int16_t( value );
 
       REQUIRE( result );
       REQUIRE( expected == *result );
@@ -387,7 +387,7 @@ TEST_CASE( "Utilites: to_int16_t( std::string_view )" )
    {
       constexpr auto value    = "1";
       constexpr auto expected = std::int16_t{ 1 };
-      constexpr auto result   = to_int16_t( value );
+      auto const      result   = to_int16_t( value );
 
       REQUIRE( result );
       REQUIRE( expected == *result );
@@ -397,7 +397,7 @@ TEST_CASE( "Utilites: to_int16_t( std::string_view )" )
    {
       constexpr auto value    = "-1";
       constexpr auto expected = std::int16_t{ -1 };
-      constexpr auto result   = to_int16_t( value );
+      auto const     result   = to_int16_t( value );
 
       REQUIRE( result );
       REQUIRE( expected == *result );
@@ -408,7 +408,7 @@ TEST_CASE( "Utilites: to_int16_t( std::string_view )" )
    {
       constexpr auto value    = "32767";
       constexpr auto expected = std::int16_t{ 32'767 };
-      constexpr auto result   = to_int16_t( value );
+      auto const     result   = to_int16_t( value );
 
       REQUIRE( result );
       REQUIRE( expected == *result );
@@ -418,7 +418,7 @@ TEST_CASE( "Utilites: to_int16_t( std::string_view )" )
    {
       constexpr auto value    = "-32768";
       constexpr auto expected = std::int16_t{ -32'768 };
-      constexpr auto result   = to_int16_t( value );
+      auto const     result   = to_int16_t( value );
 
       REQUIRE( result );
       REQUIRE( expected == *result );
@@ -429,7 +429,7 @@ TEST_CASE( "Utilites: to_int16_t( std::string_view )" )
       SECTION( "greater than int16_t max" )
       {
          constexpr auto value  = "32768";
-         constexpr auto result = to_int16_t( value );
+         auto const     result = to_int16_t( value );
 
          REQUIRE( !result );
       }
@@ -437,7 +437,7 @@ TEST_CASE( "Utilites: to_int16_t( std::string_view )" )
       SECTION( "less than int16_t min" )
       {
          constexpr auto value  = "-32769";
-         constexpr auto result = to_int16_t( value );
+         auto const     result = to_int16_t( value );
 
          REQUIRE( !result );
       }
@@ -445,7 +445,7 @@ TEST_CASE( "Utilites: to_int16_t( std::string_view )" )
       SECTION( "non-numeric character at beginning" )
       {
          constexpr auto value  = "a11";
-         constexpr auto result = to_int16_t( value );
+         auto const     result = to_int16_t( value );
 
          REQUIRE( !result );
       }
@@ -453,7 +453,7 @@ TEST_CASE( "Utilites: to_int16_t( std::string_view )" )
       SECTION( "non-numeric character in middle" )
       {
          constexpr auto value  = "12a3";
-         constexpr auto result = to_int16_t( value );
+         auto const     result = to_int16_t( value );
 
          REQUIRE( !result );
       }
@@ -461,7 +461,7 @@ TEST_CASE( "Utilites: to_int16_t( std::string_view )" )
       SECTION( "non-numeric character at end" )
       {
          constexpr auto value  = "123a";
-         constexpr auto result = to_int16_t( value );
+         auto const     result = to_int16_t( value );
 
          REQUIRE( !result );
       }
@@ -469,7 +469,7 @@ TEST_CASE( "Utilites: to_int16_t( std::string_view )" )
       SECTION( "leading plus sign" )
       {
          constexpr auto value  = "+23";
-         constexpr auto result = to_int16_t( value );
+         auto const     result = to_int16_t( value );
 
          REQUIRE( !result );
       }
@@ -765,6 +765,96 @@ TEST_CASE( "Utilites: to_hex4_string( std::int16_t )" )
 }
 
 
+TEST_CASE( "Utilites: to_hex4_string( std::string_view )" )
+{
+   using namespace Hack::Utils;
+
+   SECTION( "zero" )
+   {
+      constexpr auto value    = "0";
+      constexpr auto expected = "0000";
+
+      auto const result = to_hex4_string( value );
+
+      REQUIRE( expected == result );
+   }
+
+   SECTION( "one" )
+   {
+      constexpr auto value    = "1";
+      constexpr auto expected = "0001";
+
+      auto const result = to_hex4_string( value );
+
+      REQUIRE( expected == result );
+   }
+
+   SECTION( "negative one" )
+   {
+      constexpr auto value    = "-1";
+      constexpr auto expected = "ffff";
+
+      auto const result = to_hex4_string( value );
+
+      REQUIRE( expected == result );
+   }
+
+   SECTION( "int16_t max: 32'767" )
+   {
+      constexpr auto value    = "32767";
+      constexpr auto expected = "7fff";
+
+      auto const result = to_hex4_string( value );
+
+      REQUIRE( expected == result );
+   }
+
+   SECTION( "int16_t min: -32'768" )
+   {
+      constexpr auto value    = "-32768";
+      constexpr auto expected = "8000";
+
+      auto const result = to_hex4_string( value );
+
+      REQUIRE( expected == result );
+   }
+   
+   SECTION( "Out of Range" )
+   {
+      SECTION( "Greater than int16_t max" )
+      {
+         constexpr auto value    = "32768";
+         constexpr auto expected = "";
+
+         auto const result = to_hex4_string( value );
+
+         REQUIRE( expected == result );
+      }
+
+      SECTION( "Less than int16_t min" )
+      {
+         constexpr auto value    = "-32769";
+         constexpr auto expected = "";
+
+         auto const result = to_hex4_string( value );
+
+         REQUIRE( expected == result );
+      }
+   }
+
+   SECTION( "Bad input" )
+   {
+
+      constexpr auto value    = "abcdefg";
+      constexpr auto expected = "";
+
+      auto const result = to_hex4_string( value );
+
+      REQUIRE( expected == result );
+   }
+}
+
+
 TEST_CASE( "Utilites: is_a_instruction" )
 {
    using namespace Hack::Utils;
@@ -860,7 +950,97 @@ TEST_CASE( "Utilites: is_binary16_string" )
             REQUIRE( false == is_binary16_string( "0101\t10101010101" ) );
             REQUIRE( false == is_binary16_string( "0101 10101010101" ) );
          }
-         
       }
+   }
+}
+
+TEST_CASE( "Utilities: to_upper( std::string_view )" )
+{
+   using namespace Hack::Utils;
+
+   SECTION( "empty string" )
+   {
+      auto const str = std::string();
+
+      REQUIRE( "" == to_upper( str ) );
+   }
+
+   SECTION( "one character" )
+   {
+      auto const str = std::string( "a" );
+
+      REQUIRE( "A" == to_upper( str ) );
+   }
+
+   SECTION( "many characters" )
+   {
+      auto const str = std::string( "abcdefg" );
+
+      REQUIRE( "ABCDEFG" == to_upper( str ) );
+   }
+
+   SECTION( "mixed alpha/non-alpha characters" )
+   {
+      auto const str = std::string( "a1b2c.!$-xyz" );
+
+      REQUIRE( "A1B2C.!$-XYZ" == to_upper( str ) );
+   }
+
+   SECTION( "all non-alpha characters" )
+   {
+      auto const str = std::string( "1234.5%)*()" );
+
+      REQUIRE( "1234.5%)*()" == to_upper( str ) );
+   }
+}
+
+
+TEST_CASE( "Utilities: to_upper( std::string_view, std::in_place_t )" )
+{
+   using namespace Hack::Utils;
+
+   SECTION( "empty string" )
+   {
+      auto  str = std::string();
+
+      to_upper( str, std::in_place_t{} );
+
+      REQUIRE( "" == str );
+   }
+
+   SECTION( "one character" )
+   {
+      auto str = std::string( "a" );
+
+      to_upper( str, std::in_place_t{} );
+
+      REQUIRE( "A" == str );
+   }
+
+   SECTION( "many characters" )
+   {
+      auto str = std::string( "abcdefg" );
+
+      to_upper( str, std::in_place_t{} );
+
+      REQUIRE( "ABCDEFG" == str );
+   }
+
+   SECTION( "mixed alpha/non-alpha characters" )
+   {
+      auto str = std::string( "a1b2c.!$-xyz" );
+
+      to_upper( str, std::in_place_t{} );
+
+      REQUIRE( "A1B2C.!$-XYZ" == str );
+   }
+
+   SECTION( "all non-alpha characters" )
+   {
+      auto str = std::string( "1234.5%)*()" );
+
+      to_upper( str, std::in_place_t{} );
+
+      REQUIRE( "1234.5%)*()" == str );
    }
 }

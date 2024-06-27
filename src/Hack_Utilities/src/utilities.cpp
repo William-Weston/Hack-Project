@@ -104,6 +104,17 @@ Hack::Utils::to_hex4_string( std::int16_t value )  -> std::string
    return to_hex4_string( u_value );
 }
 
+auto 
+Hack::Utils::to_hex4_string( std::string_view value )  -> std::string
+{
+   auto const opt = to_int16_t( value );
+
+   if ( !opt ) 
+      return std::string();
+
+   return to_hex4_string( opt.value() );
+}
+
 
 // cctype Wrapper Utilities ----------------------------------------------------------------------
 
@@ -190,6 +201,33 @@ Hack::Utils::to_upper( char ch ) -> char
 {
    return static_cast<char>( std::toupper( static_cast<unsigned char>( ch ) ) );
 }
+
+
+// ------------------------------------------------------------------------------------------------
+// String Utils
+
+auto 
+Hack::Utils::to_upper( std::string_view str ) -> std::string
+{
+   auto result = std::string( str );
+
+   for ( auto& ch : result )
+   {
+      ch = to_upper( ch );
+   }
+
+   return result;
+}
+
+auto 
+Hack::Utils::to_upper( std::string& str, std::in_place_t ) -> void
+{
+   for ( auto& ch : str )
+   {
+      ch = to_upper( ch );
+   }
+}
+
 
 // Hack Code Utilities ----------------------------------------------------------------------------
 

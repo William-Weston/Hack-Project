@@ -21,6 +21,7 @@
 #include <string>             // for string, char_traits
 #include <string_view>        // for string_view, hash
 #include <system_error>       // for errc
+#include <utility>            // for in_place_t
 
 
 // ------------------------------------------------------------------------------------------------
@@ -55,10 +56,13 @@ auto to_binary16_string( std::uint16_t value ) -> std::string;
 auto to_binary16_string( std::int16_t value )  -> std::string;
 
 // returns a four character hex string or string() on error
-auto to_hex4_string( std::uint16_t value ) -> std::string;
+auto to_hex4_string( std::uint16_t value )     -> std::string;
 
 // return hex value of the 2's complement binary representation of the int16_t
-auto to_hex4_string( std::int16_t value )  -> std::string;
+auto to_hex4_string( std::int16_t value )      -> std::string;
+
+// return the hex string representation of the base 10 value represented by the string_view
+auto to_hex4_string( std::string_view value )  -> std::string;
 
 
 // ------------------------------------------------------------------------------------------------
@@ -80,6 +84,12 @@ auto is_punct( char ch )  -> bool;
 auto to_lower( char ch )  -> char;
 auto to_upper( char ch )  -> char;
 
+
+// ------------------------------------------------------------------------------------------------
+// String Utils
+
+auto to_upper( std::string_view str )              -> std::string;
+auto to_upper( std::string& str, std::in_place_t ) -> void;
 
 // ------------------------------------------------------------------------------------------------
 // Hack Code Utilities ----------------------------------------------------------------------------
@@ -120,10 +130,12 @@ auto number_of_digits( std::uint16_t value )   -> int;
 
 
 }  // namespace Hack::Utils -----------------------------------------------------------------------
+// ------------------------------------------------------------------------------------------------
 
 
 // ------------------------------------------------------------------------------------------------
-// ---------------------------------------- Implementation ----------------------------------------
+// -------------------------------------- Implementation ------------------------------------------
+// ------------------------------------------------------------------------------------------------
 
 
 constexpr auto 
@@ -190,7 +202,7 @@ Hack::Utils::to_uint16_t( std::string_view value )          -> std::optional<std
 }
 
 constexpr auto 
-Hack::Utils::to_int16_t( std::string_view value )           -> std::optional<std::int16_t>
+Hack::Utils::to_int16_t( std::string_view value )  -> std::optional<std::int16_t>
 {
    auto result = std::int16_t{};
    auto const* const end = value.data() + value.size();
