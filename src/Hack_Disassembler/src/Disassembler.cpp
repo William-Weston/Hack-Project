@@ -25,7 +25,7 @@
 // --------------------------------------- Interface ----------------------------------------------
 
 auto 
-Hack::Disassembler::disassemble( std::string_view binary ) const -> std::optional<std::string>
+Hack::Disassembler::disassemble( std::string_view binary )  -> std::optional<std::string>
 {
    if ( binary.size() != INSTRUCTION_SIZE )
    {
@@ -41,14 +41,14 @@ Hack::Disassembler::disassemble( std::string_view binary ) const -> std::optiona
 }
 
 auto 
-Hack::Disassembler::disassemble( std::uint16_t instruction ) const -> std::optional<std::string>
+Hack::Disassembler::disassemble( std::uint16_t instruction ) -> std::optional<std::string>
 {
    return disassemble( Hack::Utils::to_binary16_string( instruction ) );
 }
 
 
 auto 
-Hack::Disassembler::computation( std::string_view binary )   const -> std::optional<std::string>
+Hack::Disassembler::computation( std::string_view binary )  -> std::optional<std::string>
 {
    if ( binary.size() != INSTRUCTION_SIZE || binary.front() == '0' )
    {
@@ -68,7 +68,7 @@ Hack::Disassembler::computation( std::string_view binary )   const -> std::optio
 }
 
 auto 
-Hack::Disassembler::computation( std::uint16_t instruction ) const -> std::optional<std::string>
+Hack::Disassembler::computation( std::uint16_t instruction ) -> std::optional<std::string>
 {
    return computation( Hack::Utils::to_binary16_string( instruction ) );
 }
@@ -81,9 +81,9 @@ Hack::Disassembler::computation( std::uint16_t instruction ) const -> std::optio
    Binary:     0vvvvvvvvvvvvvvv
 */
 auto 
-Hack::Disassembler::a_instruction( std::string_view binary ) const -> std::optional<std::string>
+Hack::Disassembler::a_instruction( std::string_view binary ) -> std::optional<std::string>
 {
-   assert( binary.size() == 16 );
+   assert( binary.size() == INSTRUCTION_SIZE );
 
    binary.remove_prefix( 1 );      // remove opt-code
 
@@ -104,9 +104,9 @@ Hack::Disassembler::a_instruction( std::string_view binary ) const -> std::optio
    Binary:     111accccccdddjjj
 */
 auto 
-Hack::Disassembler::c_instruction( std::string_view binary ) const -> std::optional<std::string>
+Hack::Disassembler::c_instruction( std::string_view binary ) -> std::optional<std::string>
 {
-   assert( binary.size() == 16 );
+   assert( binary.size() == INSTRUCTION_SIZE );
 
    // 111 acccccc ddd jjj
    auto const c = std::string_view( binary.begin() + 3,  binary.begin() + 10 );

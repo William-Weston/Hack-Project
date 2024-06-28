@@ -23,12 +23,12 @@ namespace Hack
 class Disassembler final 
 {
 public:
-   auto disassemble( std::string_view binary )   const -> std::optional<std::string>;
-   auto disassemble( std::uint16_t instruction ) const -> std::optional<std::string>;
+   static auto disassemble( std::string_view binary )   -> std::optional<std::string>;
+   static auto disassemble( std::uint16_t instruction ) -> std::optional<std::string>;
 
    // return the computation performed by the ALU given an instruction
-   auto computation( std::string_view binary )   const -> std::optional<std::string>;
-   auto computation( std::uint16_t instruction ) const -> std::optional<std::string>;
+   static auto computation( std::string_view binary )   -> std::optional<std::string>;
+   static auto computation( std::uint16_t instruction ) -> std::optional<std::string>;
 
 private:
    static constexpr auto INSTRUCTION_SIZE = 16zu;
@@ -67,8 +67,8 @@ private:
       { "100", "JLT" },   { "101", "JNE" },   { "110", "JLE" },   { "111", "JMP" }
    };
 
-   auto a_instruction( std::string_view binary ) const -> std::optional<std::string>;
-   auto c_instruction( std::string_view binary ) const -> std::optional<std::string>;
+   static auto a_instruction( std::string_view binary ) -> std::optional<std::string>;
+   static auto c_instruction( std::string_view binary ) -> std::optional<std::string>;
 
 
 };
