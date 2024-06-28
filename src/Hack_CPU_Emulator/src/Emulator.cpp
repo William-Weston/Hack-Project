@@ -1595,6 +1595,27 @@ Hack::Emulator::internals() -> void
 auto
 Hack::Emulator::display_cpu() -> void
 {
+   static auto am_register = Hack::Computer::word_t{};
+   static auto d_register  = Hack::Computer::word_t{};
+   static auto out         = Hack::Computer::word_t{};
+   static auto instruction = Hack::Computer::word_t{};
+   static bool update_alu  = false;
+
+   if ( update_alu )
+   {
+      out        = computer_.ALU_output();
+      update_alu = false;
+   }
+   if ( step_ )
+   {
+      auto const from_m_register = Hack::Utils::is_a_bit_set( instruction );
+
+      am_register = ( from_m_register ) ? computer_.M_Register() : computer_.A_Register();
+      d_register  = computer_.D_Register();
+      instruction = computer_.ROM()[computer_.pc()];
+      update_alu  = true;
+   }
+
    ImGui::Spacing(); ImGui::Spacing(); ImGui::Spacing();
 
    with_StyleVar( ImGuiStyleVar_SeparatorTextAlign, ImVec2{ 0.5, 0.5 } )
@@ -1608,8 +1629,8 @@ Hack::Emulator::display_cpu() -> void
    //    • Binary:     0vvvvvvvvvvvvvvv
    // C-instruction
    //    • Binary:     111accccccdddjjj
-   auto const instruction = computer_.ROM()[computer_.pc()];
-   auto const binary      = Hack::Utils::to_binary16_string( instruction );
+   
+   auto const binary = Hack::Utils::to_binary16_string( instruction );
 
    if ( binary.front() == '0' )
       ImGui::Text( "Instruction: %s", " --- " );
@@ -1633,15 +1654,14 @@ Hack::Emulator::display_cpu() -> void
       ImGui::Indent( 20.0f );
       ImGui::TextUnformatted( "D Input:" );
       // TODO:: change to ImGuiDataType_S16 representation
-      auto d = std::to_string( computer_.D_Register() );
+      auto d = std::to_string( d_register );
       ImGui::InputText( "##d input", &d, ImGuiInputTextFlags_ReadOnly );
 
       ImGui::Spacing(); ImGui::Spacing(); ImGui::Spacing();
       ImGui::Spacing(); ImGui::Spacing(); ImGui::Spacing();
       
-      auto const from_m_register = Hack::Utils::is_a_bit_set( instruction );
-      auto const reg             = ( from_m_register ) ? computer_.M_Register() : computer_.A_Register();
-      auto a                     = std::to_string( reg );
+      
+      auto a = std::to_string( am_register );
       
       ImGui::TextUnformatted( "M/A Input:" );
       // TODO:: change to ImGuiDataType_S16 representation
@@ -1673,7 +1693,7 @@ Hack::Emulator::display_cpu() -> void
    {
       ImGui::Spacing(); ImGui::Spacing(); ImGui::Spacing();
 
-      auto alu_output = std::to_string( computer_.ALU_output() );
+      auto alu_output = std::to_string( out );
 
       ImGui::Indent( 20.0f );
       ImGui::TextUnformatted( "ALU Output:" );

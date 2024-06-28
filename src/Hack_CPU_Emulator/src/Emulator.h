@@ -47,20 +47,20 @@ public:
 private:
    using UserError_t = std::optional<UserError>;
 
-   GUI_Core         core_;
-   Computer         computer_{};             // must be initialized before screen_
-   Screen_Texture   screen_texture_;
-   Assembler        assembler_{};
-   Disassembler     disasmblr_{};
-   Keyboard_Handler keyboard_handler_{};
-   std::string      current_file_{};
-   UserError_t      user_error_{};
-   float            speed_{ 0.33F };            // instructions per second to execute on Hack Computer
-   bool             play_{ false };             // run the program in the Hack computer ROM
-   bool             step_{ false };             // execute the next instruction
-   bool             running_{ true };          // is the emulator running
-   bool             open_new_file_{ false };
-   bool             animating_{ false };
+   GUI_Core           core_;
+   Computer           computer_{};              // must be initialized before screen_
+   Screen_Texture     screen_texture_;
+   Assembler const    assembler_{};
+   Disassembler const disasmblr_{};
+   Keyboard_Handler   keyboard_handler_{};
+   std::string        current_file_{};
+   UserError_t        user_error_{};
+   float              speed_{ 0.33F };            // instructions per second to execute on Hack Computer
+   bool               play_{ false };             // run the program in the Hack computer ROM
+   bool               step_{ false };             // execute the next instruction
+   bool               running_{ true };           // is the emulator running
+   bool               open_new_file_{ false };
+   bool               animating_{ false };
 
    auto handle_events() -> void;
    auto update()        -> void;
