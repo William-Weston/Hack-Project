@@ -1,15 +1,16 @@
 /**
  * @file    SDL_InitError.h
- * @author  William Weston
+ * @author  William Weston (wjtWeston@protonmail.com)
  * @brief   SDL Initialization Exception
  * @version 0.1
- * @date    2024-03-15
+ * @date    2024-06-15
  * 
  * @copyright Copyright (c) 2024
  * 
  */
-#ifndef HACK_2024_03_15_SDL_INITERROR_H_INCLUDED
-#define HACK_2024_03_15_SDL_INITERROR_H_INCLUDED
+#ifndef INCLUDE_2024_06_15_SDL_INITERROR_H
+#define INCLUDE_2024_06_15_SDL_INITERROR_H
+
 
 #include <exception>
 #include <string>
@@ -22,10 +23,10 @@ public:
    SDL_InitError();
    explicit SDL_InitError( std::string msg );
 
-   virtual const char* what() const noexcept override;
+   virtual auto what() const noexcept -> const char* override;
 
 private:
-   std::string msg_ = {};
+   std::string msg_{};
 };
 
 
@@ -45,10 +46,12 @@ SDL_InitError::SDL_InitError( std::string msg )
    msg_ = msg_ + ": " + SDL_GetError();
 }
 
+
 inline auto 
 SDL_InitError::what() const noexcept -> const char*
 {
    return msg_.c_str();
 }
 
-#endif // HACK_2024_03_15_SDL_INITERROR_H_INCLUDED
+
+#endif   // INCLUDE_2024_06_15_SDL_INITERROR_H

@@ -49,7 +49,7 @@ option( HACK_DISASSEMBLER_ENABLE_LWYU      "Enable link whay you use" ON  )
 
 include( StaticAnalyzers )
 
-EnableSanitizers( Hack_Disassembler 
+add_static_analyzers( Hack_Disassembler 
    HACK_DISASSEMBLER_ENABLE_CLANGTIDY
    HACK_DISASSEMBLER_ENABLE_CPPCHECK
    HACK_DISASSEMBLER_ENABLE_IWYU

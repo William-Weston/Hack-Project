@@ -1,7 +1,6 @@
 {
    "version": 6,
    "configurePresets": [
-
       {
          "name": "conf-base",
          "hidden": true,
@@ -9,145 +8,217 @@
          "binaryDir": "${sourceDir}/build/${presetName}",
          "installDir": "${sourceDir}/install/${presetName}"
       },
-
-      {
-         "name": "conf-mold-base",
-         "hidden": true,
-         "cacheVariables": {
-            "CMAKE_LINKER":               "/usr/bin/mold",
-            "CMAKE_EXE_LINKER_FLAGS":     "-fuse-ld=mold",
-            "CMAKE_SHARED_LINKER_FLAGS":  "-fuse-ld=mold"
-         }
-      },
-
       {
          "name": "conf-debug-base",
          "hidden": true,
          "inherits": "conf-base",
-         "cacheVariables": { 
+         "cacheVariables": {
             "CMAKE_BUILD_TYPE": "Debug"
          }
       },
-
       {
          "name": "conf-release-base",
          "hidden": true,
          "inherits": "conf-base",
-         "cacheVariables": { 
+         "cacheVariables": {
             "CMAKE_BUILD_TYPE": "Release"
          }
       },
-      
       {
          "name": "conf-reldebug-base",
          "hidden": true,
          "inherits": "conf-base",
-         "cacheVariables": { 
+         "cacheVariables": {
             "CMAKE_BUILD_TYPE": "RelWithDebInfo"
          }
       },
-
       {
          "name": "conf-vcpkg-base",
          "hidden": true,
          "cacheVariables": {
-            "CMAKE_TOOLCHAIN_FILE": "/home/william/vcpkg/scripts/buildsystems/vcpkg.cmake"
+            "CMAKE_TOOLCHAIN_FILE": "$env{VCPKG_ROOT}/scripts/buildsystems/vcpkg.cmake"
          }
       },
-
       {
          "name": "conf-gcc-base",
          "hidden": true,
          "cacheVariables": {
-            "CMAKE_C_COMPILER":     "gcc",
-            "CMAKE_CXX_COMPILER":   "g++"
+            "CMAKE_C_COMPILER": "gcc",
+            "CMAKE_CXX_COMPILER": "g++"
          }
       },
-
       {
          "name": "conf-gcc13-base",
          "hidden": true,
          "cacheVariables": {
-            "CMAKE_C_COMPILER":     "gcc-13",
-            "CMAKE_CXX_COMPILER":   "g++-13"
+            "CMAKE_C_COMPILER": "gcc-13",
+            "CMAKE_CXX_COMPILER": "g++-13"
          }
       },
-
+      {
+         "name": "conf-gcc14-base",
+         "hidden": true,
+         "cacheVariables": {
+            "CMAKE_C_COMPILER": "gcc-14",
+            "CMAKE_CXX_COMPILER": "g++-14"
+         }
+      },
       {
          "name": "conf-clang-base",
          "hidden": true,
-         "cacheVariables":  {
-            "CMAKE_C_COMPILER":     "clang",
-            "CMAKE_CXX_COMPILER":   "clang++"
+         "cacheVariables": {
+            "CMAKE_C_COMPILER": "clang",
+            "CMAKE_CXX_COMPILER": "clang++"
          }
       },
-
       {
          "name": "conf-clang17-base",
          "hidden": true,
-         "cacheVariables":  {
-            "CMAKE_C_COMPILER":     "clang-17",
-            "CMAKE_CXX_COMPILER":   "clang++-17"
+         "cacheVariables": {
+            "CMAKE_C_COMPILER": "clang-17",
+            "CMAKE_CXX_COMPILER": "clang++-17"
          }
       },
-
       {
          "name": "conf-clang18-base",
          "hidden": true,
-         "cacheVariables":  {
-            "CMAKE_C_COMPILER":     "clang-18",
-            "CMAKE_CXX_COMPILER":   "clang++-18"
+         "cacheVariables": {
+            "CMAKE_C_COMPILER": "clang-18",
+            "CMAKE_CXX_COMPILER": "clang++-18"
          }
       },
-
-
       {
          "name": "conf-gcc13-debug-vcpkg",
          "displayName": "GCC-13 Debug (VCPKG)",
          "description": "Unix-like gcc-13 debug with vcpkg toolchain",
-         "inherits": ["conf-debug-base", "conf-gcc13-base", "conf-vcpkg-base"]
+         "inherits": [
+            "conf-debug-base",
+            "conf-gcc13-base",
+            "conf-vcpkg-base"
+         ]
       },
-
-
+      {
+         "name": "conf-gcc14-debug-vcpkg",
+         "displayName": "GCC-14 Debug (VCPKG)",
+         "description": "Unix-like gcc-14 debug with vcpkg toolchain",
+         "inherits": [
+            "conf-debug-base",
+            "conf-gcc14-base",
+            "conf-vcpkg-base"
+         ]
+      },
       {
          "name": "conf-clang17-debug-vcpkg",
          "displayName": "Clang-17 Debug (VCPKG)",
          "description": "Unix-like clang-17 debug with vcpkg toolchain",
-         "inherits": ["conf-debug-base", "conf-clang17-base", "conf-vcpkg-base"]
+         "inherits": [
+            "conf-debug-base",
+            "conf-clang17-base",
+            "conf-vcpkg-base"
+         ]
       },
-      
       {
          "name": "conf-clang18-debug-vcpkg",
          "displayName": "Clang-18 Debug (VCPKG)",
          "description": "Unix-like clang-18 debug with vcpkg toolchain",
-         "inherits": ["conf-debug-base", "conf-clang18-base", "conf-vcpkg-base"]
+         "inherits": [
+            "conf-debug-base",
+            "conf-clang18-base",
+            "conf-vcpkg-base"
+         ]
       },
-
-
       {
          "name": "conf-gcc13-release-vcpkg",
          "displayName": "GCC-13 Release (VCPKG)",
          "description": "Unix-like gcc-13 Release with vcpkg toolchain",
-         "inherits": ["conf-release-base", "conf-gcc13-base", "conf-vcpkg-base"]
+         "inherits": [
+            "conf-release-base",
+            "conf-gcc13-base",
+            "conf-vcpkg-base"
+         ]
       },
-
+      {
+         "name": "conf-gcc14-release-vcpkg",
+         "displayName": "GCC-14 Release (VCPKG)",
+         "description": "Unix-like gcc-14 Release with vcpkg toolchain",
+         "inherits": [
+            "conf-release-base",
+            "conf-gcc14-base",
+            "conf-vcpkg-base"
+         ]
+      },
       {
          "name": "conf-clang18-release-vcpkg",
          "displayName": "Clang-18 Release (VCPKG)",
          "description": "Unix-like clang-18 Release with vcpkg toolchain",
-         "inherits": ["conf-release-base", "conf-clang18-base", "conf-vcpkg-base"]
+         "inherits": [
+            "conf-release-base",
+            "conf-clang18-base",
+            "conf-vcpkg-base"
+         ]
       },
-
       {
-         "name":           "gcc-debug-vcpkg",
-         "displayName":    "GCC Debug VCPKG",
-         "generator":      "Ninja",
-         "binaryDir":      "${sourceDir}/build/gcc-debug-vcpkg",
+         "name": "gcc-debug-vcpkg",
+         "displayName": "GCC Debug VCPKG",
+         "generator": "Ninja",
+         "binaryDir": "${sourceDir}/build/gcc-debug-vcpkg",
          "cacheVariables": {
-            "CMAKE_BUILD_TYPE":           "Debug",
-            "CMAKE_CXX_COMPILER":         "g++",
-            "CMAKE_TOOLCHAIN_FILE":       "$env{VCPKG_ROOT}/scripts/buildsystems/vcpkg.cmake"
+            "CMAKE_BUILD_TYPE": "Debug",
+            "CMAKE_CXX_COMPILER": "g++",
+            "CMAKE_TOOLCHAIN_FILE": "$env{VCPKG_ROOT}/scripts/buildsystems/vcpkg.cmake"
          }
       }
+   ],
+   "buildPresets": [
+      {
+         "name": "ci-gcc13-coverage",
+         "displayName": "Build Coverage Reports",
+         "configurePreset": "conf-gcc13-debug-vcpkg",
+         "targets": [
+            "coverage-Hack_Assembler_Tests",
+            "coverage-Hack_Computer_Tests",
+            "coverage-Hack_Disassembler_Tests",
+            "coverage-Hack_Utilities_Tests"
+         ]
+      },
+      {
+         "name": "ci-gcc13-doxygen",
+         "displayName": "Build Doxygen Docs - GCC 13",
+         "configurePreset": "conf-gcc13-debug-vcpkg",
+         "targets": [
+            "doxygen-docs"
+         ]
+      },
+      {
+         "name": "ci-gcc14-coverage",
+         "displayName": "Build Coverage Reports - GCC 14",
+         "configurePreset": "conf-gcc14-debug-vcpkg",
+         "targets": [
+            "coverage-Hack_Assembler_Tests",
+            "coverage-Hack_Computer_Tests",
+            "coverage-Hack_Disassembler_Tests",
+            "coverage-Hack_Utilities_Tests"
+         ]
+      },
+      {
+         "name": "ci-gcc14-doxygen",
+         "displayName": "Build Doxygen Docs - GCC 14",
+         "configurePreset": "conf-gcc14-debug-vcpkg",
+         "targets": [
+            "doxygen-docs"
+         ]
+      },
+      {
+         "name": "ci-gcc14-tests",
+         "displayName": "Build All Tests - GCC 14",
+         "configurePreset": "conf-gcc14-debug-vcpkg",
+         "targets": [
+            "Hack_Assembler_Tests",
+            "Hack_Computer_Tests",
+            "Hack_Disassembler_Tests",
+            "Hack_Utilities_Tests"
+         ]
+      }
    ]
+   
 }

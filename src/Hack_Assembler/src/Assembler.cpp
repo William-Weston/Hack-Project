@@ -233,10 +233,12 @@ Hack::Assembler::first_pass( std::istream& file ) -> void
 auto 
 Hack::Assembler::second_pass( std::istream& file ) -> std::vector<Code_Line>
 {
+   static constexpr auto variable_start_address = 16;
+
    auto code            = std::vector<Code_Line>();
    auto line            = std::string();
    auto current_line_no = 1;
-   auto variable_no     = 16;
+   auto variable_no     = variable_start_address;
 
    while ( std::getline( file, line ) )                  // cppcheck-suppress[accessMoved]
    {
@@ -280,7 +282,7 @@ Hack::Assembler::second_pass( std::istream& file ) -> std::vector<Code_Line>
 auto 
 Hack::Assembler::process_a_instruction( std::string_view instruction ) const -> std::optional<std::string>
 {
-   instruction.remove_prefix( 1 );        // remove '@'
+   instruction.remove_prefix( 1 );              // remove '@'
 
    auto result = Hack::Utils::to_binary16_string( instruction );
 
@@ -289,7 +291,7 @@ Hack::Assembler::process_a_instruction( std::string_view instruction ) const -> 
       return std::nullopt;
    }
 
-   return result;
+   return std::optional<std::string>{ std::move( result ) };
 }
 
 
@@ -315,12 +317,12 @@ Hack::Assembler::process_c_instruction( std::string_view instruction ) const -> 
 
    auto binary_instruction = c_op_code + *comp_code + *dest_code + *jump_code;
 
-   if ( binary_instruction.size() != 16 )
+   if ( binary_instruction.size() != instruction_size )
    {
       return std::nullopt;
    }
 
-   return binary_instruction;
+   return std::optional<std::string>{ std::move( binary_instruction ) };
 }
 
 
@@ -369,7 +371,9 @@ parse_c_instruction( std::string_view instruction ) -> std::tuple<std::string, s
    current_pos = dest_end;
 
    if ( has_equal )
+   {
       ++current_pos; // advance past equal sign
+   }
 
    // parse comp
    auto const semicolon_pos = instruction.find( ';', current_pos );

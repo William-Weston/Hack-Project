@@ -70,13 +70,14 @@ public:
    // returns address of next instruction to execute
    auto execute_instruction( word_t instruction ) -> word_t;
 
+   constexpr auto ALU_Output() const noexcept -> word_t;
    constexpr auto A_Register() const noexcept -> word_t;
    constexpr auto D_Register() const noexcept -> word_t;
-   constexpr auto M_Register() const noexcept -> word_t;
+   constexpr auto M_Register() const          -> word_t;
 
    constexpr auto A_Register()       noexcept -> word_t&;
    constexpr auto D_Register()       noexcept -> word_t&;
-   constexpr auto M_Register()       noexcept -> word_t&;
+   constexpr auto M_Register()                -> word_t&;
 
    constexpr auto set_A_Register( word_t value ) noexcept -> void;
    constexpr auto set_D_Register( word_t value ) noexcept -> void;
@@ -86,7 +87,8 @@ public:
 private:
    word_t  A_Register_ = 0;
    word_t  D_Register_ = 0;
-   word_t  PC_         = 0;      
+   word_t  PC_         = 0;   
+   word_t  ALU_output_ = 0;   
    Memory& RAM_;
 
    auto do_a_instruction( word_t instruction ) -> word_t;
@@ -107,6 +109,13 @@ Hack::CPU::CPU( Hack::Memory& memory ) noexcept
 }
 
 constexpr auto
+Hack::CPU::ALU_Output() const noexcept -> word_t
+{
+   return ALU_output_;
+}
+
+
+constexpr auto
 Hack::CPU::A_Register() const noexcept -> word_t
 {
    return A_Register_;
@@ -119,7 +128,7 @@ Hack::CPU::D_Register() const noexcept -> word_t
 }
 
 constexpr auto
-Hack::CPU::M_Register() const noexcept -> word_t
+Hack::CPU::M_Register() const -> word_t
 {
    return RAM_[A_Register_];
 }
@@ -137,7 +146,7 @@ Hack::CPU::D_Register()       noexcept -> word_t&
 }
 
 constexpr auto
-Hack::CPU::M_Register()       noexcept -> word_t&
+Hack::CPU::M_Register() -> word_t&
 {
    return RAM_[A_Register_];
 }
@@ -161,6 +170,7 @@ Hack::CPU::reset()                        noexcept -> void
    A_Register_ = 0;
    D_Register_ = 0;
    PC_         = 0;
+   ALU_output_ = 0;
 }
 
 #endif      // HACK_EMULATOR_2024_03_11_CPU_H

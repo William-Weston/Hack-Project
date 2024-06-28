@@ -1,5 +1,6 @@
 {
    "version-semver" : "0.0.1",
+   "builtin-baseline": "f7423ee180c4b7f40d43402c2feb3859161ef625",
    "dependencies" :
    [
       {
@@ -11,7 +12,8 @@
          "features": [
             "sdl2-binding",
             "sdl2-renderer-binding"
-         ]
+         ],
+         "version>=": "1.90.2"
       },
 
       {

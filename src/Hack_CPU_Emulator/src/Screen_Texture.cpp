@@ -17,10 +17,11 @@
 #include <SDL_stdinc.h>     // for Uint32
 #include <array>            // for array
 #include <bitset>           // for bitset
+#include <cstddef>          // for size_t
 
 
 
-Hack::Screen_Texture::Screen_Texture( Computer::Screen_const_iterator start, 
+Hack::Screen_Texture::Screen_Texture( Computer::Screen_const_iterator start,        // NOLINT(bugprone-easily-swappable-parameters)
                                       Computer::Screen_const_iterator finish, 
                                       SDL_Renderer* renderer )
    :  start_{ start },
@@ -38,18 +39,23 @@ Hack::Screen_Texture::~Screen_Texture()
 auto 
 Hack::Screen_Texture::update()  -> void
 {
-   auto pixels     = std::array<Uint32, width * height>{};
+   static constexpr auto pixel_size = static_cast<std::size_t>( width ) * static_cast<std::size_t>( height );
+   static constexpr auto word_size  = 16;
+   static constexpr auto black      = Uint32{ 0x00000000 };
+   static constexpr auto white      = Uint32{ 0xFFFFFFFF };
+
+   auto pixels     = std::array<Uint32, pixel_size>{};
    auto word_count = 0u;
 
    // each row is 32 16-bit words
    for ( auto begin = start_; begin != finish_ ; ++begin, ++word_count )
    {
       auto const word = *begin;
-      auto const bits = std::bitset<16>{ word };
+      auto const bits = std::bitset<word_size>{ word };
 
-      for ( auto idx = 0u; idx < 16; ++idx )
+      for ( auto idx = 0u; idx < word_size; ++idx )
       {
-         pixels[word_count * 16 + idx] = ( bits[idx] ) ? 0x00000000 : 0xFFFFFFFF;
+         pixels.at( word_count * word_size + idx) = ( bits[idx] ) ? black : white;
       }
    }
 

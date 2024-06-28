@@ -13,7 +13,7 @@
 
 #include <catch2/catch_all.hpp>
 
-TEST_CASE( "ALU Tests" )
+TEST_CASE( "Computer: ALU Tests" )
 {
    using namespace Hack;
    using namespace Hack::Utils;

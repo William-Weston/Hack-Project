@@ -21,11 +21,13 @@
 #include <utility>                       // for pair, move
 
 
+// ------------------------------------------------------------------------------------------------
+// --------------------------------------- Interface ----------------------------------------------
 
 auto 
 Hack::Disassembler::disassemble( std::string_view binary ) const -> std::optional<std::string>
 {
-   if ( binary.size() != 16 )
+   if ( binary.size() != INSTRUCTION_SIZE )
    {
       return std::nullopt;
    }
@@ -44,6 +46,36 @@ Hack::Disassembler::disassemble( std::uint16_t instruction ) const -> std::optio
    return disassemble( Hack::Utils::to_binary16_string( instruction ) );
 }
 
+
+auto 
+Hack::Disassembler::computation( std::string_view binary )   const -> std::optional<std::string>
+{
+   if ( binary.size() != INSTRUCTION_SIZE || binary.front() == '0' )
+   {
+      return std::nullopt;
+   }
+
+   // Binary:     111 a cccccc ddd jjj
+   auto const c         = std::string_view( binary.begin() + 3,  binary.begin() + 10 );
+   auto const comp_iter = comp_table_.find( c );
+
+   if ( comp_iter == comp_table_.end() )
+   {
+      return std::nullopt;
+   }
+   
+   return { comp_iter->second };
+}
+
+auto 
+Hack::Disassembler::computation( std::uint16_t instruction ) const -> std::optional<std::string>
+{
+   return computation( Hack::Utils::to_binary16_string( instruction ) );
+}
+
+// ------------------------------------------------------------------------------------------------
+// ------------------------------------- Implementation -------------------------------------------
+
 /*
    Symbolic:   @xxx
    Binary:     0vvvvvvvvvvvvvvv
@@ -56,12 +88,12 @@ Hack::Disassembler::a_instruction( std::string_view binary ) const -> std::optio
    binary.remove_prefix( 1 );      // remove opt-code
 
    auto const* const end = binary.data() + binary.size();
-   std::int16_t value;
+   auto value            = std::int16_t{} ;
 
    if ( auto const [ptr, ec] = std::from_chars( binary.data(), end, value, 2 );
         ec == std::errc() && ptr == end )
    {
-      return std::optional<std::string>( "@" + std::to_string( value ) );
+      return std::make_optional<std::string>( "@" + std::to_string( value ) );
    }
 
    return std::nullopt;
@@ -92,18 +124,17 @@ Hack::Disassembler::c_instruction( std::string_view binary ) const -> std::optio
 
    auto result = std::string();
 
-
-   if ( auto const dest = dest_iter->second; dest != "" )
+   if ( auto const dest = dest_iter->second; !dest.empty() )
    {
       result += dest + "=";
    }
 
    result += comp_iter->second;
 
-   if ( auto const jump = jump_iter-> second; jump != "" )
+   if ( auto const jump = jump_iter-> second; !jump.empty() )
    {
       result += ";" + jump;
    }
 
-   return std::optional<std::string>( std::move( result ) );
+   return std::make_optional<std::string>( std::move( result ) );
 }

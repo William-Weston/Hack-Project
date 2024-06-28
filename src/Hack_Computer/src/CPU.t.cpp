@@ -16,7 +16,7 @@
 #include <cstdint>
 
 
-TEST_CASE( "Register Accessors" )
+TEST_CASE( "Computer: Register Accessors" )
 {
    using namespace Hack;
    auto ram = Memory();
@@ -58,7 +58,7 @@ TEST_CASE( "Register Accessors" )
 }
 
 
-TEST_CASE( "Simple Register Tests: put 1 or -1 into each register" )
+TEST_CASE( "Computer: Simple Register Tests: put 1 or -1 into each register" )
 {
    using namespace Hack;
    auto ram = Memory();
@@ -120,7 +120,7 @@ TEST_CASE( "Simple Register Tests: put 1 or -1 into each register" )
 }
 
 
-TEST_CASE( "Set registers to zero" )
+TEST_CASE( "Computer: Set registers to zero" )
 {
    using namespace Hack;
    auto ram = Memory();
@@ -192,7 +192,7 @@ TEST_CASE( "Set registers to zero" )
 }
 
 
-TEST_CASE( "Compute the binary negation of the value in each register" )
+TEST_CASE( "Computer: Compute the binary negation of the value in each register" )
 {
    using namespace Hack;
    auto ram = Memory();
@@ -296,7 +296,7 @@ TEST_CASE( "Compute the binary negation of the value in each register" )
 }
 
 
-TEST_CASE( "Arithmatic operations" )
+TEST_CASE( "Computer: Arithmatic operations" )
 {
    using namespace Hack;
    auto ram = Memory();
@@ -329,7 +329,7 @@ TEST_CASE( "Arithmatic operations" )
 }
 
 
-TEST_CASE( "Jump Operations" )
+TEST_CASE( "Computer: Jump Operations" )
 {
    using namespace Hack;
    auto ram = Memory();

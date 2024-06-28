@@ -83,11 +83,13 @@ Hack::CPU::do_c_instruction( word_t instruction ) -> word_t
    // ALU: x = D Register, y = A or M Register
    //    in          x, y, zx, nx, zy, ny, f, no
    auto const [comp, zr, ng] = ALU( ALU_in{ x, y, zx, nx, zy, ny, f, no } );
-
+   
    auto const store_A = bits.test( 5 );
    auto const store_D = bits.test( 4 );
    auto const store_M = bits.test( 3 );
    auto const address = A_Register_;      // save current A_Register value to access M Regisiter
+
+   ALU_output_ = comp;   // store the output of the ALU
 
    if ( store_A ) { A_Register_   = comp; }
    if ( store_D ) { D_Register_   = comp; }

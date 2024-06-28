@@ -16,20 +16,10 @@
 namespace Hack
 {
 
-
-enum class Error_t
-{
-   PARSE_ERROR,
-   FILE_ERROR,
-   UNSUPPORTED_FILETYPE,
-   MEMORY_ACCESS_ERROR,
-};
-
-
 struct UserError
 {
+   std::string description;
    std::string msg;
-   Error_t     type;
    bool        activate;
 };
 

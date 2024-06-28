@@ -51,7 +51,9 @@ Hack::Utils::to_binary16_string( std::string_view positive_base10 ) -> std::opti
 auto 
 Hack::Utils::to_binary16_string( std::uint16_t value ) -> std::string
 {
-   auto buffer = std::array<char, 16>{};
+   static constexpr auto bits16 = 16;
+
+   auto buffer = std::array<char, bits16>{};
 
    if ( auto [ptr,ec] = std::to_chars( buffer.data(), buffer.data() + buffer.size(), value, 2 );
       ec == std::errc() )
@@ -78,9 +80,11 @@ Hack::Utils::to_binary16_string( std::int16_t value )   -> std::string
 auto 
 Hack::Utils::to_hex4_string( std::uint16_t value ) -> std::string
 {
+   static constexpr auto hex = 16;
+
    auto buffer = std::array<char, 4>{};
 
-   if ( auto [ptr,ec] = std::to_chars( buffer.data(), buffer.data() + buffer.size(), value, 16 );
+   if ( auto [ptr,ec] = std::to_chars( buffer.data(), buffer.data() + buffer.size(), value, hex );
       ec == std::errc() )
    {
       auto const size = ptr - buffer.data();
@@ -89,7 +93,7 @@ Hack::Utils::to_hex4_string( std::uint16_t value ) -> std::string
       str.insert( str.cend(), buffer.data(), ptr );
       return str;
    }
-   return std::string();
+   return {};
 }
 
 auto 
@@ -98,6 +102,17 @@ Hack::Utils::to_hex4_string( std::int16_t value )  -> std::string
    auto const u_value = signed_to_unsigned_16( value );
 
    return to_hex4_string( u_value );
+}
+
+auto 
+Hack::Utils::to_hex4_string( std::string_view value )  -> std::string
+{
+   auto const opt = to_int16_t( value );
+
+   if ( !opt ) 
+      return std::string();
+
+   return to_hex4_string( opt.value() );
 }
 
 
@@ -187,8 +202,47 @@ Hack::Utils::to_upper( char ch ) -> char
    return static_cast<char>( std::toupper( static_cast<unsigned char>( ch ) ) );
 }
 
+
+// ------------------------------------------------------------------------------------------------
+// String Utils
+
+auto 
+Hack::Utils::to_upper( std::string_view str ) -> std::string
+{
+   auto result = std::string( str );
+
+   for ( auto& ch : result )
+   {
+      ch = to_upper( ch );
+   }
+
+   return result;
+}
+
+auto 
+Hack::Utils::to_upper( std::string& str, std::in_place_t ) -> void
+{
+   for ( auto& ch : str )
+   {
+      ch = to_upper( ch );
+   }
+}
+
+
 // Hack Code Utilities ----------------------------------------------------------------------------
 
 
 // File Utilities ---------------------------------------------------------------------------------
 
+// Numeric Utilities -------------------------------------------------------------------------------
+
+auto 
+Hack::Utils::number_of_digits( std::uint16_t value )   -> int
+{
+   if ( value < 10 )       return 1;
+   if ( value < 100 )      return 2;
+   if ( value < 1'000 )    return 3;
+   if ( value < 10'000 )   return 4;
+   
+   return 5;
+}

@@ -1,15 +1,9 @@
-#include <cstdlib>         
+    
 
-
-#include <imgui.h>
-#include <imgui_impl_sdlrenderer2.h>
-#include <ImGuiFileDialog/ImGuiFileDialog.h>
-#include <ImGuiSugar/imgui_sugar.hpp>
-#include <SDL.h>
-
-#include <Hack/buildinfo.h>
-
-#include <iostream>
+#include <Hack/buildinfo.h>            // for BuildInfo
+#include <cstdlib>                     // for EXIT_SUCCESS
+#include <iostream>                    // for char_traits, basic_ostream, operator<<
+#include <string_view>                 // for operator<<
 
 auto main() -> int
 {
@@ -19,6 +13,10 @@ auto main() -> int
    std::cout << "Project Version:     " << BuildInfo::project_version << '\n';
    std::cout << "Project Description: " << BuildInfo::project_description << '\n';
    std::cout << "Timestamp:           " << BuildInfo::timestamp << '\n';
-   std::cout << "Commit SHA:          " << BuildInfo::commit_sha << '\n';             
+   std::cout << "Commit SHA:          " << BuildInfo::commit_sha << '\n';     
+
+   // int x;
+
+   // std::cout << x << '\n';        
    return EXIT_SUCCESS;
 }

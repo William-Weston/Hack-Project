@@ -10,14 +10,23 @@
  */
 #include "Utilities.h"
 
-#include "Hack/Assembler.h"               // for Assembler
-#include "Hack/Utilities/utilities.hpp"   // for binary_to_uint16
+#include "Hack/Assembler.h"              // for Assembler
+#include "Hack/Utilities/utilities.hpp"  // for binary_to_uint16
 
-#include <fstream>                        // for basic_ifstream, basic_istream
-#include <optional>                       // for optional
-#include <utility>                        // for move
+#include <fstream>                       // for basic_ifstream, basic_istream
+#include <optional>                      // for optional
+#include <utility>                       // for unreachable
 
 
+
+
+/**
+ * @brief Open a hack binary text file from the given path
+ * 
+ * @param path the path to open
+ * @return std::vector<std::uint16_t> 
+ * @throws Hack::EMULATOR::Utils::Parse_Error
+ */
 auto 
 Hack::EMULATOR::Utils::open_hack_file( std::string const& path ) -> std::vector<std::uint16_t>
 {
@@ -38,7 +47,7 @@ Hack::EMULATOR::Utils::open_hack_file( std::string const& path ) -> std::vector<
 
       if ( !binary_optional )
       {
-        throw Hack::Utils::parse_error( "Error parsing Hack binary file", Hack::Utils::ParseErrorData{ std::move( line ), line_no } );
+        throw Hack::Utils::parse_error( "Error parsing Hack binary file", Hack::Utils::ParseErrorData{ line, line_no } );
       }
 
       data.push_back( *binary_optional );
