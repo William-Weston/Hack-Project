@@ -15,17 +15,22 @@ add_executable( Hack_CPU_Emulator_GUI )
 target_sources( Hack_CPU_Emulator_GUI
     PRIVATE 
         src/main.cpp
+        src/AnimationHandler.h
+        src/AnimationHandler.cpp
+        src/animation_t.hpp
+        src/DataDisplay.hpp
+        src/DatumDisplay.h
+        src/DatumDisplay.cpp
         src/Definitions.h
+        src/DisplayFormats.hpp
         src/Emulator.h
         src/Emulator.cpp
-      #   src/GUI_Core.h
-      #   src/GUI_Core.cpp
-      #   src/GUI_Frame.h
         src/Keyboard_Handler.h
         src/Keyboard_Handler.cpp
         src/Screen_Texture.h
         src/Screen_Texture.cpp
-      #   src/SDL_InitError.h
+        src/TextAnimation.h
+        src/TextAnimation.cpp
         src/Utilities.h
         src/Utilities.cpp
 )
@@ -46,8 +51,6 @@ target_link_libraries( Hack_CPU_Emulator_GUI
         GUI_Core::GUI_Core
         ImGuiFileDialog::ImGuiFileDialog
         ImGuiSugar::ImGuiSugar
-      #   $<TARGET_NAME_IF_EXISTS:SDL2::SDL2main>
-      #   $<IF:$<TARGET_EXISTS:SDL2::SDL2>,SDL2::SDL2,SDL2::SDL2-static>
 )
 
 

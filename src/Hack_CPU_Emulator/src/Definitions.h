@@ -11,6 +11,8 @@
 #ifndef  HACK_PROJECT_2024_05_17_DEFINITIONS_H
 #define  HACK_PROJECT_2024_05_17_DEFINITIONS_H
 
+#include <imgui.h>        // for ImVec2
+
 #include <string>
 
 namespace Hack
@@ -23,27 +25,31 @@ struct UserError
    bool        activate;
 };
 
-enum class ROMFormat
+
+
+struct DataLocation
 {
-   ASM,
-   DECIMAL,
-   HEX,
-   BINARY,
+   ImVec2      top_left{};
+   ImVec2      bottom_right{};
+   std::string data{};
 };
 
-enum class RAMFormat
+enum class Format
 {
    DECIMAL,
    HEX,
    BINARY,
+   ASM,
+   NONE,
 };
 
 struct main_options
 {
-   bool      track_pc;
-   RAMFormat format;
+   bool   track_pc;
+   Format format;
 };
 
+inline constexpr auto ITEM_WIDTH = 130.0;
 
 }     // namespace Hack 
 

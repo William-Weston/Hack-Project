@@ -874,6 +874,7 @@ Hack::Emulator::update_Hack_Computer()       -> void
 
       if ( play_ )
       {
+         step_ = false;
          auto const FPS = ImGui::GetIO().Framerate;
 
          if ( speed_ < FPS )
@@ -932,12 +933,12 @@ Hack::Emulator::update_GUI_interface() -> void
    {
       main_window();
       display_errors();
-      
-      if ( open_new_file_ )
-      {
-         open_new_file_ = false;
-         open_file( current_file_ );
-      }
+   }
+
+   if ( open_new_file_ )
+   {
+      open_new_file_ = false;
+      open_file( current_file_ );
    }
 }
 
@@ -956,21 +957,53 @@ Hack::Emulator::main_window()  -> void
 
    with_Child( "##ROM Display", ImVec2( 225 , child_height), ImGuiChildFlags_Border  )
    {
-      ROM_GUI( play_ || step_  || options.track_pc );
+      static auto find_idx = Uint8{};
+
+      ImGui::AlignTextToFramePadding();
+      ImGui::TextUnformatted( "Find:" );
+   
+      ImGui::SameLine();
+      ImGui::SetNextItemWidth( 55.0f );
+      with_Disabled( false )
+      ImGui::InputScalar( "##find", ImGuiDataType_U16, &find_idx );
+      find_idx = ( find_idx >= Computer::ROM_SIZE ) ? Computer::ROM_SIZE : find_idx;
+
+      if ( ImGui::IsItemDeactivated() && ImGui::IsKeyPressed(ImGuiKey_Enter, false) )
+      {
+         rom_display.display( find_idx );
+      }
+      ImGui::SetItemTooltip( "Press Enter to find" );
+
+      ImGui::SameLine();
+
+      button_with_popup( "Clear", "Clear ROM?", "This action cannot be undone", [&]
+      {
+         computer_.clear_rom();
+      } );
+
+      ImGui::SameLine();
+
+      static auto display_format = 0;
+      ImGui::SetNextItemWidth( 50.0 );
+      ImGui::Combo( "##Display", &display_format, "DEC\0HEX\0BIN\0ASM\0" );
+
+      ImGui::SeparatorText( "ROM" );
+
+      rom_display.update( static_cast<Format>( display_format ), ImGuiWindowFlags_None );
    }
 
    ImGui::SameLine();
 
    with_Child( "##RAM Display", ImVec2( 225 , child_height), ImGuiChildFlags_Border  )
    {
-      RAM_GUI();
+      
    }
 
    ImGui::SameLine();
 
    with_Child( "##Screen Display", ImVec2( 225 , child_height), ImGuiChildFlags_Border )
    {  
-      Screen_GUI();
+      
    }
 
    // Screen Area & CPU Display ----------------------------------------------------------------
@@ -1110,420 +1143,16 @@ Hack::Emulator::command_GUI() -> main_options
       ImGui::PopItemWidth();
    }
  
-   return { track_pc, RAMFormat::DECIMAL };
+   return { track_pc, Format::DECIMAL };
 }
 
-
-auto
-Hack::Emulator::ROM_GUI( bool highlight_pc ) -> void
-{
-   static constexpr auto rom_size = Hack::Computer::ROM_SIZE;
-
-   static auto const& pc      = computer_.pc();
-   static auto enable_track   = false;
-   static auto track_item     = std::uint16_t{ 0 };
-   static auto display_format = 0;
-   static auto previous_pc    = computer_.pc();
-
-   if ( previous_pc != pc )
-      highlight_pc = true;
-
-   ImGui::AlignTextToFramePadding();
-   ImGui::TextUnformatted( "Find:" );
-
-   ImGui::SameLine();
-   ImGui::SetNextItemWidth( 55.0 );
-   ImGui::InputScalar( "##address", ImGuiDataType_U16, &track_item );
-   track_item = ( track_item >= rom_size ) ? rom_size - 1 : track_item ;
-
-   if ( ImGui::IsItemDeactivated() && ImGui::IsKeyPressed(ImGuiKey_Enter, false) )
-   {
-      enable_track = true;
-   }
-
-
-   ImGui::SameLine();
-   button_with_popup( "Clear", "Clear ROM?", "This action cannot be undone", [&]
-   {
-      computer_.clear_rom();
-   } );
-
-   ImGui::SameLine();
-   ImGui::SetNextItemWidth( 50.0 );
-   ImGui::Combo( "##Display", &display_format, "ASM\0DEC\0HEX\0BIN\0\0" );
-   ImGui::SeparatorText( "ROM" );
-
-   with_StyleVar( ImGuiStyleVar_ChildRounding, 15.0f )
-   with_Child("RomChild", ImVec2( ImGui::GetContentRegionAvail().x , ImGui::GetContentRegionAvail().y ), ImGuiChildFlags_Border ) 
-   {
-      auto clipper = ImGuiListClipper();
-      clipper.Begin( rom_size );
-
-      if ( enable_track )
-         clipper.IncludeItemByIndex( track_item );
-      else
-         clipper.IncludeItemByIndex( pc );
-      
-      while( clipper.Step() )
-      {
-         for ( auto idx = clipper.DisplayStart; idx < clipper.DisplayEnd; ++idx )
-         {
-            with_ID( idx )
-            {
-               ROM_Display( static_cast<ROMFormat>( display_format ), idx );
-
-               if ( enable_track && idx == track_item )
-               {
-                  ImGui::SetScrollHereY( 0.25 );
-                  enable_track = false;
-               }
-               else if ( highlight_pc && idx == pc )
-               {
-                  ImGui::SetScrollHereY( 0.25 );
-               }
-            }
-         }
-      } 
-   }
-
-   previous_pc = pc;
-}
-
-
-auto
-Hack::Emulator::ROM_Display( ROMFormat const fmt, int const idx ) -> void
-{  
-   static auto& rom      = computer_.ROM();
-   static auto const& pc = computer_.pc();
-
-   auto& instruction = rom[static_cast<Hack::Computer::ROM_t::size_type>( idx )];
-
-   switch ( fmt )
-   {
-   case ROMFormat::ASM:
-   {
-      auto asm_opt         = disasmblr_.disassemble( instruction );
-      auto asm_instruction = std::string( "---" );
-
-      if ( asm_opt )
-         asm_instruction = *asm_opt;
-      
-      if ( idx == pc )
-      {
-         with_StyleColor( ImGuiCol_Text, IM_COL32( 230, 255, 0, 255 ) )
-         {
-            ImGui::AlignTextToFramePadding();
-            ImGui::Text( "%d", idx );
-            ImGui::SameLine( 60 );
-            ImGui::InputText( "rom", &asm_instruction );
-         }
-      }
-      else
-      {
-         ImGui::AlignTextToFramePadding();
-         ImGui::Text( "%d", idx );
-         ImGui::SameLine( 60 );
-         ImGui::InputText( "rom", &asm_instruction );
-      }
-
-      if ( asm_instruction ==  "---" )
-         return;
-
-      if ( asm_opt && *asm_opt == asm_instruction )
-         return;
-      
-      auto const binary_opt = assembler_.assemble( asm_instruction );
-      
-      if( !binary_opt )
-         return;
-
-      auto const value_opt = Hack::Utils::binary_to_uint16( *binary_opt );
-      if ( value_opt )
-      {
-         instruction = *value_opt;
-      }  
-      
-      return;
-   }
-   
-   case ROMFormat::DECIMAL:
-   {
-      auto value = Hack::Utils::unsigned_to_signed_16( instruction );
-
-      if ( idx == pc )
-      {
-         with_StyleColor( ImGuiCol_Text, IM_COL32( 230, 255, 0, 255 ) )
-         {
-            ImGui::AlignTextToFramePadding();
-            ImGui::Text( "%d", idx );
-            ImGui::SameLine( 60 );
-            ImGui::InputScalar( "##rom", ImGuiDataType_S16, &value );
-         }        
-      }
-      else
-      {
-         ImGui::AlignTextToFramePadding();
-         ImGui::Text( "%d", idx );
-         ImGui::SameLine( 60 );
-         ImGui::InputScalar( "##rom", ImGuiDataType_S16, &value );
-      }
- 
-      instruction = Hack::Utils::signed_to_unsigned_16( value );
-      
-      return;
-   }
-   
-   case ROMFormat::HEX:
-   {
-      auto value = instruction;
-
-      if ( idx == pc )
-      {
-         with_StyleColor( ImGuiCol_Text, IM_COL32( 230, 255, 0, 255 ) )
-         {
-            ImGui::AlignTextToFramePadding();
-            ImGui::Text( "%d", idx );
-            ImGui::SameLine( 60 );
-            ImGui::InputScalar( "##rom", ImGuiDataType_U16, &value, nullptr, nullptr, "%04X", ImGuiInputTextFlags_CharsUppercase );
-         }
-      }
-      else
-      {
-         ImGui::AlignTextToFramePadding();
-         ImGui::Text( "%d", idx );
-         ImGui::SameLine( 60 );
-         ImGui::InputScalar( "##rom", ImGuiDataType_U16, &value, nullptr, nullptr, "%04X", ImGuiInputTextFlags_CharsUppercase );
-      }
-    
-      instruction = value;
-    
-      return;
-   }
-
-   case ROMFormat::BINARY:
-   {
-      auto binary = Hack::Utils::to_binary16_string( instruction );
-
-      if ( idx == pc )
-      {
-         with_StyleColor( ImGuiCol_Text, IM_COL32( 230, 255, 0, 255 ) )
-         {
-            ImGui::AlignTextToFramePadding();
-            ImGui::Text( "%d", idx );
-            ImGui::SameLine( 60 );
-            ImGui::InputText( "rom", &binary );
-         }
-      }
-      else
-      {
-         ImGui::AlignTextToFramePadding();
-         ImGui::Text( "%d", idx );
-         ImGui::SameLine( 60 );
-         ImGui::InputText( "rom", &binary );
-      }
-
-      if ( auto const value = Hack::Utils::binary_to_uint16( binary ); value )
-      {
-         instruction = *value; 
-      }
-      return;
-   }
-   }  // switch( fmt )
-}
-
-
-auto
-Hack::Emulator::RAM_GUI( ) -> void
-{
-   static constexpr auto ram_size = Hack::Computer::RAM_SIZE;
-
-   static auto enable_track   = false;
-   static auto track_item     = std::uint16_t{ 0 };
-   static auto display_format = 0;
-
-   ImGui::AlignTextToFramePadding();
-   ImGui::TextUnformatted( "Find:" );
-
-   ImGui::SameLine();
-   ImGui::SetNextItemWidth( 55.0 );
-   ImGui::InputScalar( "##address", ImGuiDataType_U16, &track_item );
-   track_item = ( track_item >= ram_size ) ? ram_size - 1 : track_item ;
-
-   if ( ImGui::IsItemDeactivated() && ImGui::IsKeyPressed(ImGuiKey_Enter, false) )
-   {
-      enable_track = true;
-   }
-
-   ImGui::SameLine();
-   button_with_popup( "Clear", "Clear RAM?", "This action cannot be undone", [&] 
-   {
-      computer_.clear_ram();
-   } );
-
-
-   ImGui::SameLine();
-   ImGui::SetNextItemWidth( 50.0 );
-   ImGui::Combo( "##Display", &display_format, "DEC\0HEX\0BIN\0\0" );
-   ImGui::SeparatorText( "RAM" );
-   
-   with_StyleVar( ImGuiStyleVar_ChildRounding, 15.0f )
-   with_Child("RamChild", ImVec2( ImGui::GetContentRegionAvail().x , ImGui::GetContentRegionAvail().y ), ImGuiChildFlags_Border )
-   {
-      auto clipper = ImGuiListClipper();
-      clipper.Begin( ram_size );
-
-      if ( enable_track )
-         clipper.IncludeItemByIndex( track_item );
-      
-      while( clipper.Step() )
-      {
-         for ( auto idx = clipper.DisplayStart; idx < clipper.DisplayEnd; ++idx )
-         {
-            with_ID( idx )
-            {
-               RAM_Display( static_cast<RAMFormat>( display_format ), idx );
-
-               if ( enable_track && idx == track_item )
-               {
-                  ImGui::SetScrollHereY( 0.25 );
-                  enable_track = false;
-               }
-            }
-         }
-      }
-   }
-}
-
-
-auto
-Hack::Emulator::RAM_Display( RAMFormat fmt, int idx ) -> void
-{
-   static auto& ram = computer_.RAM();
-
-   auto& data = ram[static_cast<Memory::size_type>( idx )];
-
-   switch ( fmt )
-   {
-   case RAMFormat::DECIMAL:
-   {
-      auto value = Hack::Utils::unsigned_to_signed_16( data );
-      ImGui::AlignTextToFramePadding();
-      ImGui::Text( "%d", idx );
-      ImGui::SameLine( 60 );
-      ImGui::InputScalar( "##ram", ImGuiDataType_S16, &value );
-
-      data = Hack::Utils::signed_to_unsigned_16( value );
-      
-      return;
-   }
-   
-   case RAMFormat::HEX:
-   {
-      auto value = data;
-      ImGui::AlignTextToFramePadding();
-      ImGui::Text( "%d", idx );
-      ImGui::SameLine( 60 );
-      ImGui::InputScalar( "##ram", ImGuiDataType_U16, &value, nullptr, nullptr, "%04X", ImGuiInputTextFlags_CharsUppercase );
-
-      data = value;
-      return;
-   }
-
-   case RAMFormat::BINARY:
-   {
-      auto binary = Hack::Utils::to_binary16_string( data );
-
-      ImGui::AlignTextToFramePadding();
-      ImGui::Text( "%d", idx );
-      ImGui::SameLine( 60 );
-      ImGui::InputText( "rom", &binary );
-
-      if ( auto const value = Hack::Utils::binary_to_uint16( binary ); value )
-      {
-         data = *value;
-      }
-      return;
-   }
-   }  // switch( fmt )
-}
-
-
-auto
-Hack::Emulator::Screen_GUI() -> void
-{
-   static constexpr auto screen_start  = Computer::screen_start_address;
-   static constexpr auto screen_finish = Computer::screen_end_address; 
-
-   static auto enable_track   = false;
-   static auto track_item     = std::uint16_t{ screen_start };
-   static auto display_format = 0;
-
-   ImGui::AlignTextToFramePadding();
-   ImGui::TextUnformatted( "Find:" );
-
-   ImGui::SameLine();
-   ImGui::SetNextItemWidth( 55.0 );
-   ImGui::InputScalar( "##address", ImGuiDataType_U16, &track_item );
-   
-   if ( track_item >= screen_finish )  
-      track_item = screen_finish - 1;
-   else if ( track_item < screen_start )
-      track_item = screen_start;
-
-   if ( ImGui::IsItemDeactivated() && ImGui::IsKeyPressed(ImGuiKey_Enter, false) )
-   {
-      enable_track = true;
-   }
-
-   ImGui::SameLine();
-   button_with_popup( "Clear", "Clear Screen RAM?", "This action cannot be undone", [&] 
-   {
-      computer_.clear_screen();
-   } );
-
-   ImGui::SameLine();
-   ImGui::SetNextItemWidth( 50.0 );
-   ImGui::Combo( "##Display", &display_format, "DEC\0HEX\0BIN\0\0" );
-   ImGui::SeparatorText( "Screen RAM" );
-   
-   with_StyleVar( ImGuiStyleVar_ChildRounding, 15.0f )
-   with_Child("ScreenRamChild", ImVec2( ImGui::GetContentRegionAvail().x , ImGui::GetContentRegionAvail().y ), ImGuiChildFlags_Border )
-   {
-      auto clipper = ImGuiListClipper();
-      clipper.Begin( screen_finish - screen_start );
-
-      if ( enable_track )
-         clipper.IncludeItemByIndex( static_cast<int>( track_item - screen_start ) );
-      
-      while( clipper.Step() )
-      {
-         for ( auto idx = clipper.DisplayStart; idx < clipper.DisplayEnd; ++idx )
-         {
-            auto const screen_index = idx + static_cast<int>( screen_start );
-
-            with_ID( screen_index )
-            {
-               RAM_Display( static_cast<RAMFormat>( display_format ), screen_index );
-
-               if ( enable_track && screen_index == track_item )
-               {
-                  ImGui::SetScrollHereY( 0.25 );
-                  enable_track = false;
-               }
-            }
-         }
-      } 
-   }
-}
 
 
 auto
 Hack::Emulator::internals() -> void
 {
-   auto const horizontal_padding = ImGui::GetStyle().FramePadding.x;
-   auto const width              = 225.0f - 55.0f - ( horizontal_padding * 4.0f );
    
-   ImGui::Indent( 15.0f );
+   auto const width = 160.0f;
 
    ImGui::Columns( 5 );
 
@@ -1606,13 +1235,13 @@ Hack::Emulator::display_cpu() -> void
       out        = computer_.ALU_output();
       update_alu = false;
    }
-   if ( step_ )
+   if ( step_ || play_ )
    {
       auto const from_m_register = Hack::Utils::is_a_bit_set( instruction );
 
       am_register = ( from_m_register ) ? computer_.M_Register() : computer_.A_Register();
       d_register  = computer_.D_Register();
-      instruction = computer_.ROM()[computer_.pc()];
+      instruction = computer_.ROM().at( computer_.pc() );
       update_alu  = true;
    }
 
@@ -1680,7 +1309,7 @@ Hack::Emulator::display_cpu() -> void
       if ( offset > 0.0 )
          ImGui::SetCursorPosY( ImGui::GetCursorPosY() + offset );
 
-      auto const comp_opt = disasmblr_.computation( binary );
+      auto const comp_opt = Disassembler::computation( binary );
 
       if ( comp_opt )
          CentreTextUnformatted( comp_opt->data() );

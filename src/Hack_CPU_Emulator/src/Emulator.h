@@ -12,7 +12,8 @@
 #define HACK_2024_03_15_EMULATOR_H
 
 
-#include "Definitions.h"        // for UserError, RAMFormat, ROMF...
+#include "Definitions.h"        // for UserError, Format
+#include "DataDisplay.hpp"
 #include "GUI_Core/GUI_Core.h"  // for GUI_Core
 #include "Keyboard_Handler.h"   // for Keyboard_Handler
 #include "Screen_Texture.h"     // for Screen_Texture
@@ -45,13 +46,14 @@ public:
    auto run() -> void;
 
 private:
-   using UserError_t = std::optional<UserError>;
+   using UserError_t  = std::optional<UserError>;
+   using ROMDisplay_t = DataDisplay<Computer::ROM_t>;
 
    GUI_Core           core_;
    Computer           computer_{};              // must be initialized before screen_
    Screen_Texture     screen_texture_;
+   ROMDisplay_t       rom_display{ computer_.ROM(), 0, Computer::ROM_SIZE };
    Assembler const    assembler_{};
-   Disassembler const disasmblr_{};
    Keyboard_Handler   keyboard_handler_{};
    std::string        current_file_{};
    UserError_t        user_error_{};
@@ -79,11 +81,7 @@ private:
    auto main_window()                            -> void;
    auto command_GUI()                            -> main_options;
    auto menu_bar()                               -> void;
-   auto ROM_GUI( bool highlight_pc )             -> void;
-   auto ROM_Display( ROMFormat fmt, int idx )    -> void;
-   auto RAM_GUI( )                               -> void;
-   auto RAM_Display( RAMFormat fmt, int idx )    -> void;
-   auto Screen_GUI( )                            -> void;
+   
    auto internals()                              -> void;
    auto display_cpu()                            -> void;
    auto display_errors()                         -> void;
