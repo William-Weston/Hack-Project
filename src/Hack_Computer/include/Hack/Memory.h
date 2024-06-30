@@ -25,10 +25,10 @@ namespace Hack
 class Memory final
 {
 public:
-   static constexpr auto address_space        = 24'577u;    // number of bytes in RAM 16K RAM + 8K memory mapped io + 1 byte keyboard map
-   static constexpr auto screen_start_address = 16'384u;
-   static constexpr auto screen_end_address   = 24'576u;     // one past the last valid address of the screen 
-   static constexpr auto keyboard_address     = 24'576u;
+   static constexpr auto address_space        = std::uint16_t{ 24'577 };    // number of bytes in RAM 16K RAM + 8K memory mapped io + 1 byte keyboard map
+   static constexpr auto screen_start_address = std::uint16_t{ 16'384 };
+   static constexpr auto screen_end_address   = std::uint16_t{ 24'576 };     // one past the last valid address of the screen 
+   static constexpr auto keyboard_address     = std::uint16_t{ 24'576 };
 
    using value_type            = std::uint16_t;
    using size_type             = std::size_t;

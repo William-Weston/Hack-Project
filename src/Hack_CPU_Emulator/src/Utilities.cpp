@@ -13,6 +13,8 @@
 #include "Hack/Assembler.h"              // for Assembler
 #include "Hack/Utilities/utilities.hpp"  // for binary_to_uint16
 
+#include "ImGuiSugar/imgui_sugar.hpp"    // for with_
+
 #include <fstream>                       // for basic_ifstream, basic_istream
 #include <optional>                      // for optional
 #include <utility>                       // for unreachable
@@ -88,3 +90,66 @@ Hack::EMULATOR::Utils::open_asm_file( std::string const& path )  -> std::vector<
    
    return data;
 }
+
+
+
+auto 
+Hack::GUI::Utils::error_popup( std::string_view description, std::string_view msg ) -> bool
+{
+   auto done       = false;
+   auto const width = std::max( ImGui::CalcTextSize( description.data() ).x, ImGui::CalcTextSize( msg.data() ).x ) + 15.0f;
+   ImGui::SetNextWindowSize( ImVec2{ width, 0.0 } );
+
+   with_StyleVar( ImGuiStyleVar_PopupRounding, 10.0 )
+   with_StyleVar( ImGuiStyleVar_WindowTitleAlign, ImVec2{ 0.5, 0.5 } )
+   {
+      auto popup_open = true;
+      with_PopupModal( "Error", &popup_open )
+      {
+         CentreTextUnformatted( description.data() );
+         ImGui::Spacing();
+         ImGui::TextUnformatted( msg.data() );
+
+         ImGui::Spacing();
+         ImGui::Spacing();
+         
+         if ( CentreButton( " Done " ) )
+         {
+            ImGui::CloseCurrentPopup();
+            done = true;
+         }
+      }
+   }
+   return done;
+}
+
+auto
+Hack::GUI::Utils::CentreTextUnformatted( std::string_view text, float alignment ) -> void
+{
+   auto const size   = ImGui::CalcTextSize( text.data() ).x;
+   auto const avail  = ImGui::GetContentRegionAvail().x;
+   auto const offset = ( avail - size ) * alignment;
+
+   if ( offset > 0.0 )
+   {
+      ImGui::SetCursorPosX( ImGui::GetCursorPosX() + offset );
+   }
+
+   ImGui::TextUnformatted( text.data() );
+}
+
+auto
+Hack::GUI::Utils::CentreButton( std::string_view text, float alignment ) -> bool
+{
+   auto const size   = ImGui::CalcTextSize( text.data() ).x + ImGui::GetStyle().FramePadding.x * 2.0f;
+   auto const avail  = ImGui::GetContentRegionAvail().x;
+   auto const offset = ( avail - size ) * alignment;
+
+   if ( offset > 0.0 )
+   {
+      ImGui::SetCursorPosX( ImGui::GetCursorPosX() + offset );
+   }
+
+   return ImGui::Button( text.data() );
+}
+

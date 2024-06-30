@@ -15,6 +15,7 @@
 #include "Definitions.h"        // for UserError, Format
 #include "DataDisplay.hpp"
 #include "GUI_Core/GUI_Core.h"  // for GUI_Core
+#include "InternalsDisplay.h"
 #include "Keyboard_Handler.h"   // for Keyboard_Handler
 #include "Screen_Texture.h"     // for Screen_Texture
 
@@ -48,11 +49,15 @@ public:
 private:
    using UserError_t  = std::optional<UserError>;
    using ROMDisplay_t = DataDisplay<Computer::ROM_t>;
+   using RAMDisplay_t = DataDisplay<Computer::RAM_t>;
 
    GUI_Core           core_;
    Computer           computer_{};              // must be initialized before screen_
    Screen_Texture     screen_texture_;
-   ROMDisplay_t       rom_display{ computer_.ROM(), 0, Computer::ROM_SIZE };
+   ROMDisplay_t       rom_display_{ computer_.ROM(), 0, Computer::ROM_SIZE };
+   RAMDisplay_t       ram_display_{ computer_.RAM(), 0, Computer::RAM_SIZE };
+   RAMDisplay_t       screen_display_{ computer_.RAM(), Computer::screen_start_address, Computer::screen_end_address };
+   InternalsDisplay   internals_{ computer_ };
    Assembler const    assembler_{};
    Keyboard_Handler   keyboard_handler_{};
    std::string        current_file_{};
@@ -78,14 +83,20 @@ private:
    auto update_Hack_Computer()                   -> void;
    auto update_GUI_interface()                   -> void;
    
+   auto menu_bar()                               -> void;
+
    auto main_window()                            -> void;
    auto command_GUI()                            -> main_options;
-   auto menu_bar()                               -> void;
    
-   auto internals()                              -> void;
+   auto display_ROM()                            -> void;
+   auto display_RAM( Format fmt )                -> void;
+   auto display_screen( Format fmt )             -> void;
+
+   auto internals( Format fmt )                  -> void;
    auto display_cpu()                            -> void;
    auto display_errors()                         -> void;
    
+
    auto blacken_screen() -> void;      // testing function
 };
 

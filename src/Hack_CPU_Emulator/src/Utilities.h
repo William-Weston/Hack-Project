@@ -13,9 +13,13 @@
 
 #include "Hack/Utilities/exceptions.hpp"     // for Exception
 
-#include <imgui.h>
+#include "ImGuiSugar/imgui_sugar.hpp"        // for with_
+
+#include <imgui.h>                           // for ImGuiDataType_
+
 #include <cstdint>                           // for uint16_t
 #include <string>                            // for string
+#include <string_view>                       // for string_view
 #include <type_traits>                       // for is_integral_v, is_signed_v, remove_cvref_t
 #include <vector>                            // for vector
 
@@ -63,7 +67,7 @@ consteval auto get_ImGuiDataType() -> ImGuiDataType_
          }
          else
          {
-            static_assert( false, "Value type not supported" );
+            static_assert( false, "Size of value type not supported" );
          }
       }
       else
@@ -86,8 +90,79 @@ consteval auto get_ImGuiDataType() -> ImGuiDataType_
          }
          else
          {
-            static_assert( false, "Value type not supported" );
+            static_assert( false, "Size of value type not supported" );
          }
+      }
+   }
+   else
+   {
+      static_assert( false, "Must be an integral type" );
+   }
+
+   return ImGuiDataType_COUNT;
+}
+
+
+template <typename T>
+consteval auto get_signed_ImGuiDataType() -> ImGuiDataType_
+{
+   using U = std::remove_cvref_t<T>;
+   if constexpr ( std::is_integral_v<U> )
+   {
+      if constexpr ( sizeof( U ) * 8 == 8 )
+      {
+         return ImGuiDataType_S8;
+      }
+      else if constexpr ( sizeof( U ) * 8 == 16 )
+      {
+         return ImGuiDataType_S16;
+      }
+      else if constexpr ( sizeof( U ) * 8 == 32 )
+      {
+         return ImGuiDataType_S32;
+      }
+      else if constexpr ( sizeof( U ) * 8 == 64 )
+      {
+         return ImGuiDataType_S64;
+      }
+      else
+      {
+         static_assert( false, "Size of value type not supported" );
+      }
+   }
+   else
+   {
+      static_assert( false, "Must be an integral type" );
+   }
+
+   return ImGuiDataType_COUNT;
+}
+
+template <typename T>
+consteval auto get_unsigned_ImGuiDataType() -> ImGuiDataType_
+{
+   using U = std::remove_cvref_t<T>;
+   if constexpr ( std::is_integral_v<U> )
+   {
+      if constexpr ( sizeof( U ) * 8 == 8 )
+      {
+         return ImGuiDataType_U8;
+      }
+      else if constexpr ( sizeof( U ) * 8 == 16 )
+      {
+         return ImGuiDataType_U16;
+      }
+      else if constexpr ( sizeof( U ) * 8 == 32 )
+      {
+         return ImGuiDataType_U32;
+      }
+      else if constexpr ( sizeof( U ) * 8 == 64 )
+      {
+         return ImGuiDataType_U64;
+      }
+      else
+      {
+         static_assert( false, "Size of value type not supported" );
       }
    }
    else
@@ -130,6 +205,54 @@ consteval auto get_hex_format() -> char const *
 }
 
 }        // Hack::Emulator::Utils
+
+
+namespace Hack::GUI::Utils
+{
+auto CentreTextUnformatted( std::string_view text, float alignment = 0.5f )  -> void;
+auto CentreButton( std::string_view text, float alignment = 0.5f )           -> bool;
+auto error_popup( std::string_view description, std::string_view msg  )      -> bool;
+
+auto button_with_popup( std::string_view button_name, 
+                        std::string_view popup_name, 
+                        std::string_view text, 
+                        auto action                      )                   -> void;
+
+} // namespace Hack::GUI::Utils
+
+
+auto 
+Hack::GUI::Utils::button_with_popup( std::string_view button_name, std::string_view popup_name, std::string_view text, auto action ) -> void
+{
+   if( ImGui::Button( button_name.data() ) )
+   {
+      ImGui::OpenPopup( popup_name.data() );
+   }
+
+   with_StyleVar( ImGuiStyleVar_PopupRounding, 10.0 )
+   with_StyleVar( ImGuiStyleVar_WindowTitleAlign, ImVec2{ 0.5, 0.5 } )
+   {
+      auto popup_open = true;
+      with_PopupModal( popup_name.data(), &popup_open )
+      {
+         ImGui::TextUnformatted( text.data() );
+         ImGui::Spacing();
+         ImGui::Indent( 30.0 );
+         if ( ImGui::Button( "Confirm" ) )
+         {
+            action();
+            ImGui::CloseCurrentPopup();
+         }
+      
+         ImGui::SameLine( 120.0 ); 
+         
+         if ( ImGui::Button( "Cancel" ) )
+         {
+            ImGui::CloseCurrentPopup();
+         }
+      }
+   }
+}
 
 
 #endif      // HACK_EMULATOR_PROJECT_2024_05_14_HACK_CPU_EMULATOR_UTILITIES_H

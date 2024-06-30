@@ -42,6 +42,7 @@ public:
    using Screen_const_iterator = Memory::Screen_const_iterator;
    using word_t                = std::uint16_t;
    using ROM_t                 = std::array<word_t, ROM_SIZE>;
+   using RAM_t                 = Memory;
 
    auto load_rom( std::span<word_t const> instructions ) -> void;
 

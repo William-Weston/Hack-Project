@@ -27,6 +27,8 @@ target_sources( Hack_CPU_Emulator_GUI
         src/Emulator.cpp
         src/Keyboard_Handler.h
         src/Keyboard_Handler.cpp
+        src/InternalsDisplay.h
+        src/InternalsDisplay.cpp
         src/Screen_Texture.h
         src/Screen_Texture.cpp
         src/TextAnimation.h

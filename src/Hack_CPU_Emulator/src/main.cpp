@@ -17,7 +17,6 @@
 #include <iostream>                   // for operator<<, basic_ostream, char_traits, cerr
 
 
-
 auto main( int, char*[] ) -> int
 {
     try

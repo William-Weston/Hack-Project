@@ -13,6 +13,7 @@
  */
 #include "Emulator.h"
 
+#include "DataDisplay.hpp"
 #include "Definitions.h"                      // for UserError, Error_t, RAM...
 #include "Utilities.h"                        // for FileError, open_asm_file
 
@@ -46,12 +47,7 @@
 
 namespace
 {
-   auto CentreTextUnformatted( std::string_view text, float alignment = 0.5f )  -> void;
-   auto CentreButton( std::string_view text, float alignment = 0.5f )           -> bool;
-
-   auto error_popup( std::string_view description, std::string_view msg  )      -> bool;
-
-   auto button_with_popup( std::string_view button_name, std::string_view popup_name, std::string_view text, auto action ) -> void;
+   
 }
 
 // -------------------------------------------- API -----------------------------------------------
@@ -59,7 +55,9 @@ namespace
 Hack::Emulator::Emulator( std::string_view title, int width, int height, bool fullscreen )
    :  core_( title, width, height, fullscreen ),
       screen_texture_( computer_.screen_cbegin(), computer_.screen_cend(), core_.renderer() )
-{}
+{
+   screen_display_.unhighlight();
+}
 
 
 auto
@@ -180,7 +178,6 @@ Hack::Emulator::update() -> void
 {   
    update_Hack_Computer();
    update_GUI_interface();
-
    screen_texture_.update();
 }
 
@@ -906,6 +903,7 @@ Hack::Emulator::update_Hack_Computer()       -> void
       else if ( step_ )
       {
          computer_.execute();
+         rom_display_.select( computer_.pc() );
          step_ = false;
       }
    }
@@ -940,106 +938,6 @@ Hack::Emulator::update_GUI_interface() -> void
       open_new_file_ = false;
       open_file( current_file_ );
    }
-}
-
-
-auto 
-Hack::Emulator::main_window()  -> void
-{
-   // Main Command Window ---------------------------------------------------------------------------
-   auto const options = command_GUI();
-
-   // ImGui::PushStyleVar( ImGuiStyleVar_ChildRounding, 15.0f );
-   set_StyleVar( ImGuiStyleVar_ChildRounding, 15.0f );
-
-   // Memory Displays --------------------------------------------------------------------------
-   auto const child_height = ImGui::GetContentRegionAvail().y - 85.0f;
-
-   with_Child( "##ROM Display", ImVec2( 225 , child_height), ImGuiChildFlags_Border  )
-   {
-      static auto find_idx = Uint8{};
-
-      ImGui::AlignTextToFramePadding();
-      ImGui::TextUnformatted( "Find:" );
-   
-      ImGui::SameLine();
-      ImGui::SetNextItemWidth( 55.0f );
-      with_Disabled( false )
-      ImGui::InputScalar( "##find", ImGuiDataType_U16, &find_idx );
-      find_idx = ( find_idx >= Computer::ROM_SIZE ) ? Computer::ROM_SIZE : find_idx;
-
-      if ( ImGui::IsItemDeactivated() && ImGui::IsKeyPressed(ImGuiKey_Enter, false) )
-      {
-         rom_display.display( find_idx );
-      }
-      ImGui::SetItemTooltip( "Press Enter to find" );
-
-      ImGui::SameLine();
-
-      button_with_popup( "Clear", "Clear ROM?", "This action cannot be undone", [&]
-      {
-         computer_.clear_rom();
-      } );
-
-      ImGui::SameLine();
-
-      static auto display_format = 0;
-      ImGui::SetNextItemWidth( 50.0 );
-      ImGui::Combo( "##Display", &display_format, "DEC\0HEX\0BIN\0ASM\0" );
-
-      ImGui::SeparatorText( "ROM" );
-
-      rom_display.update( static_cast<Format>( display_format ), ImGuiWindowFlags_None );
-   }
-
-   ImGui::SameLine();
-
-   with_Child( "##RAM Display", ImVec2( 225 , child_height), ImGuiChildFlags_Border  )
-   {
-      
-   }
-
-   ImGui::SameLine();
-
-   with_Child( "##Screen Display", ImVec2( 225 , child_height), ImGuiChildFlags_Border )
-   {  
-      
-   }
-
-   // Screen Area & CPU Display ----------------------------------------------------------------
-   ImGui::SameLine();
-
-   with_Group
-   {
-      with_Child( "##Hack Computer Screen", ImVec2( ImGui::GetContentRegionAvail().x , 300.0f ), ImGuiChildFlags_Border )
-      {  
-         with_StyleVar( ImGuiStyleVar_SeparatorTextAlign, ImVec2{ 0.5, 0.5 } )
-            ImGui::SeparatorText( "Hack Computer Screen" );
-        
-         ImGui::Spacing();
-
-         auto const indent = ( ImGui::GetContentRegionAvail().x - screen_texture_.width ) / 2 + ImGui::GetCursorPosX();
-         ImGui::SameLine( indent );
-           
-         ImGui::Image( (void*) screen_texture_.texture(), ImVec2( screen_texture_.width, screen_texture_.height ) );
-      }
-
-      with_Child( "##CPU", ImVec2( ImGui::GetContentRegionAvail().x , ImGui::GetContentRegionAvail().y - 85.0f ), ImGuiChildFlags_Border )
-      {
-         display_cpu();
-      }
-   }  
-
-   // Interals ------------------------------------------------------------------------------------
-   with_Child( "##Computer Internals", ImVec2( ImGui::GetContentRegionAvail().x , ImGui::GetContentRegionAvail().y  ), ImGuiChildFlags_Border )
-   {
-      ImGui::SeparatorText( "Internals" );
-
-      // Ensure enough space to draw table columns, else imgui will crash
-      if ( ImGui::GetContentRegionAvail().x > 50.0f )
-         internals();
-   }
-   
 }
 
 
@@ -1078,9 +976,81 @@ Hack::Emulator::menu_bar() -> void
 }
 
 
+auto 
+Hack::Emulator::main_window()  -> void
+{
+   // Main Command Window ---------------------------------------------------------------------------
+   [[maybe_unused]] auto const options = command_GUI();
+
+
+   // ImGui::PushStyleVar( ImGuiStyleVar_ChildRounding, 15.0f );
+   set_StyleVar( ImGuiStyleVar_ChildRounding, 15.0f );
+
+   // Memory Displays --------------------------------------------------------------------------
+   auto const child_height = ImGui::GetContentRegionAvail().y - 85.0f;
+
+   with_Child( "##ROM Display", ImVec2( 225 , child_height), ImGuiChildFlags_Border  )
+   {
+      if ( play_ || step_ || options.track_pc )
+      {
+         rom_display_.track();
+      }
+      display_ROM();
+   }
+
+   ImGui::SameLine();
+
+   with_Child( "##RAM Display", ImVec2( 225 , child_height), ImGuiChildFlags_Border  )
+   {
+      display_RAM( options.format );
+   }
+
+   ImGui::SameLine();
+
+   with_Child( "##Screen Display", ImVec2( 225 , child_height), ImGuiChildFlags_Border )
+   {  
+      display_screen( options.format );
+   }
+
+   // Screen Area & CPU Display ----------------------------------------------------------------
+   ImGui::SameLine();
+
+   with_Group
+   {
+      with_Child( "##Hack Computer Screen", ImVec2( ImGui::GetContentRegionAvail().x , 300.0f ), ImGuiChildFlags_Border )
+      {  
+         with_StyleVar( ImGuiStyleVar_SeparatorTextAlign, ImVec2{ 0.5, 0.5 } )
+            ImGui::SeparatorText( "Hack Computer Screen" );
+        
+         ImGui::Spacing();
+
+         auto const indent = ( ImGui::GetContentRegionAvail().x - screen_texture_.width ) / 2 + ImGui::GetCursorPosX();
+         ImGui::SameLine( indent );
+           
+         ImGui::Image( (void*) screen_texture_.texture(), ImVec2( screen_texture_.width, screen_texture_.height ) );
+      }
+
+      with_Child( "##CPU", ImVec2( ImGui::GetContentRegionAvail().x , ImGui::GetContentRegionAvail().y - 85.0f ), ImGuiChildFlags_Border )
+      {
+         display_cpu();
+      }
+   }  
+
+   // Interals ------------------------------------------------------------------------------------
+   with_Child( "##Computer Internals", ImVec2( ImGui::GetContentRegionAvail().x , ImGui::GetContentRegionAvail().y  ), ImGuiChildFlags_Border )
+   {
+      ImGui::SeparatorText( "Internals" );
+
+      internals_.update( options.format );
+   }
+}
+
+
 auto
 Hack::Emulator::command_GUI() -> main_options
 {
+   static auto display_format = 0;
+
    auto track_pc = false;
 
    with_Child( "##Menu Bar", ImVec2( ImGui::GetContentRegionAvail().x , 65.0f ), ImGuiChildFlags_Border ) 
@@ -1108,9 +1078,10 @@ Hack::Emulator::command_GUI() -> main_options
       }
 
       ImGui::SameLine();
+      with_Disabled( play_ )
       if ( ImGui::Button( "Step" ) )
-      {
-         step_  = true;
+      {  
+         step_ = true;
       }
 
       ImGui::SameLine();
@@ -1129,90 +1100,212 @@ Hack::Emulator::command_GUI() -> main_options
 
       if ( ImGui::Button( "Restart" ) )
       {
-            computer_.reset();
-            play_    = false;
-            step_    = false;
-            track_pc = true;
+         computer_.reset();
+         rom_display_.select( computer_.pc() );
+         rom_display_.track();
+         play_    = false;
+         step_    = false;
+         // track_pc = true;
       }
 
       ImGui::SameLine();
       ImGui::TextUnformatted( "  Speed:" );
       ImGui::SameLine();
-      ImGui::PushItemWidth( 200 );
+      ImGui::SetNextItemWidth( 200.0f );
       ImGui::SliderFloat( "##Speed", &speed_, 0.3F, 5'000'000.0F, "%.1f", ImGuiSliderFlags_Logarithmic );
-      ImGui::PopItemWidth();
+     
+      ImGui::SameLine();
+
+      ImGui::TextUnformatted( "  Format:" );
+      ImGui::SameLine();
+
+      ImGui::SetNextItemWidth( 75.0f );
+      ImGui::Combo( "##Display-Format", &display_format, "DECIMAL\0HEX\0BINARY\0" );
    }
  
-   return { track_pc, Format::DECIMAL };
+   return { track_pc, static_cast<Format>( display_format ) };
 }
 
 
-
+// TODO: window flags and with_Disabled argument must depend on whether animation is in progress
 auto
-Hack::Emulator::internals() -> void
+Hack::Emulator::display_ROM() -> void
 {
-   
-   auto const width = 160.0f;
-
-   ImGui::Columns( 5 );
-
-   auto const offset = ( ImGui::GetContentRegionAvail().x - width ) * 0.5f;
-
-   CentreTextUnformatted( "--- Program Counter ---" );
-   auto& pc = computer_.pc();
-   ImGui::SetNextItemWidth( width );
-   ImGui::SetCursorPosX( ImGui::GetCursorPosX() + offset );
-   ImGui::InputScalar( "##program_counter", ImGuiDataType_U16, &pc );
-
-   ImGui::NextColumn();
-
-   CentreTextUnformatted( "--- A Register ---" );
-
-   // TODO:: change to ImGuiDataType_S16 representation
-   auto& a_register = computer_.A_Register();
-   ImGui::SetNextItemWidth( width );
-   ImGui::SetCursorPosX( ImGui::GetCursorPosX() + offset );
-   ImGui::InputScalar( "##a_register", ImGuiDataType_U16, &a_register );
-
-   ImGui::NextColumn();
-
-   CentreTextUnformatted( "--- D Register ---" );
-
-   // TODO:: change to ImGuiDataType_S16 representation
-   auto& d_register = computer_.D_Register();
-   ImGui::SetNextItemWidth( width );
-   ImGui::SetCursorPosX( ImGui::GetCursorPosX() + offset );
-   ImGui::InputScalar( "##d_register", ImGuiDataType_U16, &d_register );
-
-   ImGui::NextColumn();
-
-   CentreTextUnformatted( "--- M Register ---" );
+   static auto find_idx = std::uint16_t{};
 
    ImGui::AlignTextToFramePadding();
+   ImGui::TextUnformatted( "Find:" );
+   ImGui::SameLine();
+   ImGui::SetNextItemWidth( 55.0f );
+   with_Disabled( false )
+   ImGui::InputScalar( "##find", ImGuiDataType_U16, &find_idx );
+   find_idx = ( find_idx >= Computer::ROM_SIZE ) ? Computer::ROM_SIZE : find_idx;   // validate user input
+   ImGui::SetItemTooltip( "Press Enter to find" );
+
+   if ( ImGui::IsItemDeactivated() && ImGui::IsKeyPressed(ImGuiKey_Enter, false) )
+   {
+      rom_display_.display( find_idx );
+   }
+   
+   ImGui::SameLine();
+
+   GUI::Utils::button_with_popup( "Clear", "Clear ROM?", "This action cannot be undone", [&]
+   {
+      computer_.clear_rom();
+   } );
+
+   ImGui::SameLine();
+
+   static auto display_format = 3;
+   ImGui::SetNextItemWidth( 50.0 );
+   ImGui::Combo( "##Display", &display_format, "DEC\0HEX\0BIN\0ASM\0" );
+
+   ImGui::SeparatorText( "ROM" );
+   
+   rom_display_.update( static_cast<Format>( display_format ), ImGuiWindowFlags_None );
+}
+
+
+// TODO: window flags and with_Disabled argument must depend on whether animation is in progress
+auto
+Hack::Emulator::display_RAM( Format fmt ) -> void
+{
+   static auto find_idx = std::uint16_t{};
+
+   ImGui::AlignTextToFramePadding();
+   ImGui::TextUnformatted( "Find:" );
+   ImGui::SameLine();
+   ImGui::SetNextItemWidth( 55.0f );
+   with_Disabled( false )
+   ImGui::InputScalar( "##find", ImGuiDataType_S16, &find_idx );
+   find_idx = ( find_idx >= Computer::RAM_SIZE ) ? Computer::RAM_SIZE : find_idx;   // validate user input
+   ImGui::SetItemTooltip( "Press Enter to find" );
+
+   if ( ImGui::IsItemDeactivated() && ImGui::IsKeyPressed(ImGuiKey_Enter, false) )
+   {
+      ram_display_.display( find_idx );
+   }
+   
+   ImGui::SameLine();
+
+   static constexpr auto dummy = ImVec2{ 50.0f, -1.0f };
+   ImGui::Dummy( dummy );
+
+   ImGui::SameLine();
+
+   GUI::Utils::button_with_popup( "Clear", "Clear RAM?", "This action cannot be undone", [&]
+   {
+      computer_.clear_ram();
+   } );
+
+   ImGui::SeparatorText( "RAM" );
+
+   ram_display_.update( fmt, ImGuiWindowFlags_None );
+}
+
+
+// TODO: window flags and with_Disabled argument must depend on whether animation is in progress
+auto
+Hack::Emulator::display_screen( Format fmt ) -> void
+{
+   static auto find_idx = Computer::screen_start_address;
+
+   ImGui::AlignTextToFramePadding();
+   ImGui::TextUnformatted( "Find:" );
+   ImGui::SameLine();
+   ImGui::SetNextItemWidth( 55.0f );
+   with_Disabled( false )
+   ImGui::InputScalar( "##find", ImGuiDataType_S16, &find_idx );
+
+   find_idx = [] 
+   {
+      if ( find_idx <  Computer::screen_start_address )  { return Computer::screen_start_address; }
+      if ( find_idx >= Computer::screen_end_address   )  { return static_cast<std::uint16_t>( Computer::screen_end_address - 1 ); }
+
+      return find_idx;
+   }();
+
+   ImGui::SetItemTooltip( "Press Enter to find" );
+
+   if ( ImGui::IsItemDeactivated() && ImGui::IsKeyPressed(ImGuiKey_Enter, false) )
+   {
+      screen_display_.display( find_idx );
+   }
+   
+   ImGui::SameLine();
+
+   static constexpr auto dummy = ImVec2{ 50.0f, -1.0f };
+   ImGui::Dummy( dummy );
+
+   ImGui::SameLine();
+
+   GUI::Utils::button_with_popup( "Clear", "Clear Screen Memory?", "This action cannot be undone", [&]
+   {
+      computer_.clear_screen();
+   } );
+
+   ImGui::SeparatorText( "Screen Memory" );
+
+   screen_display_.update( fmt, ImGuiWindowFlags_None );
+}
+
+
+auto
+Hack::Emulator::internals( Format fmt ) -> void
+{
+   ImGui::Columns( 5 );
+
+   auto const offset = ( ImGui::GetContentRegionAvail().x - ITEM_WIDTH ) * 0.5f; // must be after call to Columns
+
+   GUI::Utils::CentreTextUnformatted( "--- Program Counter ---" );
+
+   auto& pc = computer_.pc();
+   ImGui::SetCursorPosX( ImGui::GetCursorPosX() + offset );
+   Formats::update_item( pc, fmt );
+
+   ImGui::NextColumn();
+
+   GUI::Utils::CentreTextUnformatted( "--- A Register ---" );
+
+   auto& a_register = computer_.A_Register();
+   ImGui::SetCursorPosX( ImGui::GetCursorPosX() + offset );
+   Formats::update_item( a_register, fmt );
+
+   ImGui::NextColumn();
+
+   GUI::Utils::CentreTextUnformatted( "--- D Register ---" );
+
+   auto& d_register = computer_.D_Register();
+   ImGui::SetCursorPosX( ImGui::GetCursorPosX() + offset );
+   Formats::update_item( d_register, fmt );
+
+   ImGui::NextColumn();
+
+   GUI::Utils::CentreTextUnformatted( "--- M Register ---" );
+
    auto const label    = std::string( "RAM[" ) + std::to_string( a_register ) + std::string( "]:" );
-   auto const offset_m = ( ImGui::GetContentRegionAvail().x - width - ImGui::CalcTextSize( label.data() ).x - ImGui::GetStyle().ItemSpacing.x ) * 0.5f;
+   auto const offset_m = ( ImGui::GetContentRegionAvail().x - ITEM_WIDTH - ImGui::CalcTextSize( label.data() ).x - ImGui::GetStyle().ItemSpacing.x ) * 0.5f;
    
    ImGui::SetCursorPosX( ImGui::GetCursorPosX() + offset_m );
+   ImGui::AlignTextToFramePadding();
    ImGui::TextUnformatted( label.data() );
    ImGui::SameLine();
 
    if ( a_register < Computer::RAM_SIZE )
    {
-      // TODO:: change to ImGuiDataType_S16 representation
       auto& m_register = computer_.M_Register();
-      ImGui::SetNextItemWidth( width );
-      ImGui::InputScalar( "##m_register", ImGuiDataType_U16, &m_register ); 
+      Formats::update_item( m_register, fmt );
    }
    else
    {
-      ImGui::SetNextItemWidth( width );
+      ImGui::SetNextItemWidth( ITEM_WIDTH );
       ImGui::TextUnformatted( "N/A" );
    }
    
 
    ImGui::NextColumn();
 
-   CentreTextUnformatted( "--- Keyboard ---" );
+   GUI::Utils::CentreTextUnformatted( "--- Keyboard ---" );
    ImGui::Spacing();
    auto const keyboard = std::to_string( computer_.keyboard() );
    auto const kb_offset = ( ImGui::GetContentRegionAvail().x - ImGui::CalcTextSize( keyboard.data() ).x ) * 0.5f;
@@ -1301,7 +1394,7 @@ Hack::Emulator::display_cpu() -> void
    ImGui::NextColumn();
 
    {
-      CentreTextUnformatted( " --- Computation --- " );
+      GUI::Utils::CentreTextUnformatted( " --- Computation --- " );
       auto const avail  = ImGui::GetContentRegionAvail().y;
       auto const height = ImGui::GetFrameHeight();
       auto const offset = ( avail - height ) * 0.5f;
@@ -1312,9 +1405,9 @@ Hack::Emulator::display_cpu() -> void
       auto const comp_opt = Disassembler::computation( binary );
 
       if ( comp_opt )
-         CentreTextUnformatted( comp_opt->data() );
+         GUI::Utils::CentreTextUnformatted( comp_opt->data() );
       else
-         CentreTextUnformatted( "---" );
+         GUI::Utils::CentreTextUnformatted( "---" );
    }
 
    ImGui::NextColumn();
@@ -1328,7 +1421,6 @@ Hack::Emulator::display_cpu() -> void
       ImGui::TextUnformatted( "ALU Output:" );
       // TODO:: change to ImGuiDataType_S16 representation
       ImGui::InputText( "##alu_ouput", &alu_output, ImGuiInputTextFlags_ReadOnly );
-
    }
 }
 
@@ -1340,7 +1432,7 @@ Hack::Emulator::display_errors() -> void
    // has been closed by the user
    if ( user_error_ )
    {
-      if ( error_popup( user_error_->description, user_error_->msg  ) )
+      if ( GUI::Utils::error_popup( user_error_->description, user_error_->msg  ) )
       {
          user_error_ = std::nullopt;
       }
@@ -1354,6 +1446,7 @@ Hack::Emulator::display_errors() -> void
       user_error_->activate = false;
    }
 }
+
 
 // for testing
 auto
@@ -1374,101 +1467,5 @@ Hack::Emulator::blacken_screen() -> void
 namespace   // ------------------------------------------------------------------------------------
 {
 
-
-auto 
-error_popup( std::string_view description, std::string_view msg ) -> bool
-{
-   auto done       = false;
-   auto const width = std::max( ImGui::CalcTextSize( description.data() ).x, ImGui::CalcTextSize( msg.data() ).x ) + 15.0f;
-   ImGui::SetNextWindowSize( ImVec2{ width, 0.0 } );
-
-   with_StyleVar( ImGuiStyleVar_PopupRounding, 10.0 )
-   with_StyleVar( ImGuiStyleVar_WindowTitleAlign, ImVec2{ 0.5, 0.5 } )
-   {
-      auto popup_open = true;
-      with_PopupModal( "Error", &popup_open )
-      {
-         CentreTextUnformatted( description.data() );
-         ImGui::Spacing();
-         ImGui::TextUnformatted( msg.data() );
-
-         ImGui::Spacing();
-         ImGui::Spacing();
-         
-         if ( CentreButton( " Done " ) )
-         {
-            ImGui::CloseCurrentPopup();
-            done = true;
-         }
-      }
-   }
-   return done;
-}
-
-
-auto CentreTextUnformatted( std::string_view text, float alignment ) -> void
-{
-   auto const size   = ImGui::CalcTextSize( text.data() ).x;
-   auto const avail  = ImGui::GetContentRegionAvail().x;
-   auto const offset = ( avail - size ) * alignment;
-
-   if ( offset > 0.0 )
-   {
-      ImGui::SetCursorPosX( ImGui::GetCursorPosX() + offset );
-   }
-
-   ImGui::TextUnformatted( text.data() );
-}
-
-
-auto CentreButton( std::string_view text, float alignment ) -> bool
-{
-   auto const size   = ImGui::CalcTextSize( text.data() ).x + ImGui::GetStyle().FramePadding.x * 2.0f;
-   auto const avail  = ImGui::GetContentRegionAvail().x;
-   auto const offset = ( avail - size ) * alignment;
-
-   if ( offset > 0.0 )
-   {
-      ImGui::SetCursorPosX( ImGui::GetCursorPosX() + offset );
-   }
-
-   return ImGui::Button( text.data() );
-}
-
-
-auto 
-button_with_popup( std::string_view button_name, std::string_view popup_name, std::string_view text, auto action ) -> void
-{
-   if( ImGui::Button(  button_name.data() ) )
-   {
-      ImGui::OpenPopup( popup_name.data() );
-   }
-
-   // "Clear RAM?"" -------------------------------------------------------------------------------
-   with_StyleVar( ImGuiStyleVar_PopupRounding, 10.0 )
-   with_StyleVar( ImGuiStyleVar_WindowTitleAlign, ImVec2{ 0.5, 0.5 } )
-   {
-      auto popup_open = true;
-      with_PopupModal( popup_name.data(), &popup_open )
-      {
-         ImGui::TextUnformatted( text.data() );
-         ImGui::Spacing();
-         ImGui::Indent( 30.0 );
-         if ( ImGui::Button( "Confirm" ) )
-         {
-            action();
-            ImGui::CloseCurrentPopup();
-         }
-      
-         ImGui::SameLine( 120.0 ); 
-         
-         if ( ImGui::Button( "Cancel" ) )
-         {
-            ImGui::CloseCurrentPopup();
-         }
-      }
-   }
-   // ---------------------------------------------------------------------------------------------
-}
 
 }  // namespace -----------------------------------------------------------------------------------

@@ -44,7 +44,7 @@ private:
    std::string  label_{};
    float        alignment_{ 0.0f };
    DataLocation data_location_{};
-   Format       current_format_{ Format::DECIMAL };
+   Format       current_format_{ Format::SIGNED };
    bool         highlight_{ false };
 };
 

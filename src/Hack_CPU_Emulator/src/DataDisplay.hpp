@@ -27,6 +27,8 @@
 #include <imgui.h>                          // for ImVec2
 #include <imgui_stdlib.h>                   // for ImputText
 
+#include <SDL_log.h>  
+
 #include <string>
 #include <string_view>
 
@@ -47,8 +49,9 @@ namespace Hack
  *                container.at( Container::size_type ) = Container::value_type
  *                Container::value_type v = container.at( Container::size_type )
  *                Container::size_type  s = container.size();
- *            
+ *     
  */
+
 template <typename Container>
 class DataDisplay final
 {
@@ -79,6 +82,9 @@ public:
    // scroll to selected item
    auto track()                                        -> void;
 
+   // is selected item visible
+   auto is_selected_visible()                    const -> bool;
+
    // return selected item
    auto selected()                               const -> size_type;
 
@@ -97,6 +103,7 @@ private:
    bool         highlight_{ true };
    bool         track_selected_{ false };
    bool         track_displayed_{ false };
+   bool         is_selected_visible_{};
 };
 
 
@@ -141,6 +148,8 @@ DataDisplay<Container>::update( Format fmt, ImGuiWindowFlags flags )   -> void
          
             if ( selected )
             {
+               is_selected_visible_ = ImGui::IsItemVisible();
+              
                // TODO: covert value to string based fmt 
                data_location_ = { ImGui::GetItemRectMin(), ImGui::GetItemRectMax(), std::to_string( value ) };
 
@@ -204,6 +213,12 @@ DataDisplay<Container>::track()  -> void
    track_selected_ = true;
 }
 
+
+template <typename Container> auto
+DataDisplay<Container>::is_selected_visible() const -> bool
+{
+   return is_selected_visible_;
+}
 
 template <typename Container> auto
 DataDisplay<Container>::selected()  const -> size_type

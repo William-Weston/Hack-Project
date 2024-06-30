@@ -26,7 +26,6 @@ struct UserError
 };
 
 
-
 struct DataLocation
 {
    ImVec2      top_left{};
@@ -34,12 +33,14 @@ struct DataLocation
    std::string data{};
 };
 
+
 enum class Format
 {
-   DECIMAL,
+   SIGNED,
    HEX,
    BINARY,
    ASM,
+   UNSIGNED,
    NONE,
 };
 
@@ -49,7 +50,8 @@ struct main_options
    Format format;
 };
 
-inline constexpr auto ITEM_WIDTH = 130.0;
+inline constexpr auto ITEM_WIDTH = 130.0f;
+
 
 }     // namespace Hack 
 

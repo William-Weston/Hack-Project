@@ -30,11 +30,12 @@ namespace Hack::Formats
 
 auto update_item( auto& item, int index, bool highlight, Format fmt ) -> void;
 
-auto format_asm( auto& item )                              -> void;
-auto format_decimal( auto& item )                          -> void;
-auto format_hex( auto& item )                              -> void;
-auto format_binary( auto& item )                           -> void;
-auto format_none( int index )                                         -> void;
+auto format_signed   ( auto& item )                                     -> void;
+auto format_hex      ( auto& item )                                     -> void;
+auto format_binary   ( auto& item )                                     -> void;
+auto format_asm      ( auto& item )                                     -> void;
+auto format_unsigned ( auto& item )                                     -> void;
+auto format_none     (            )                                     -> void;
 
 
 // ------------------------------------------------------------------------------------------------
@@ -52,38 +53,29 @@ auto
 update_item( auto& item, int index, bool highlight, Format fmt ) -> void
 {  
    ImGui::AlignTextToFramePadding();
-   ImGui::Text( "%d", index );
+
+   if ( highlight )
+   {
+      with_StyleColor( ImGuiCol_Text, IM_COL32( 230, 255, 0, 255 ) )
+         ImGui::Text( "%d", index );
+   }
+   else { ImGui::Text( "%d", index ); }
+
    ImGui::SameLine( INDENT );
 
    switch ( fmt )
    {
-      case Format::ASM:
+      case Format::SIGNED:
       {
          if ( highlight )
          {
             with_StyleColor( ImGuiCol_FrameBg, IM_COL32( 230, 255, 0 , 255 ) )
             with_StyleColor( ImGuiCol_Text, IM_COL32( 0, 0, 0, 255 ) )
-               format_asm( item );
+               format_signed( item );
          }     
          else
          {
-            format_asm( item );
-         } 
-         
-         return;
-      }
-   
-      case Format::DECIMAL:
-      {
-         if ( highlight )
-         {
-            with_StyleColor( ImGuiCol_FrameBg, IM_COL32( 230, 255, 0 , 255 ) )
-            with_StyleColor( ImGuiCol_Text, IM_COL32( 0, 0, 0, 255 ) )
-               format_decimal( item );
-         }     
-         else
-         {
-            format_decimal( item );
+            format_signed( item );
          } 
 
          return;
@@ -121,12 +113,126 @@ update_item( auto& item, int index, bool highlight, Format fmt ) -> void
          return;
       }
 
+      case Format::ASM:
+      {
+         if ( highlight )
+         {
+            with_StyleColor( ImGuiCol_FrameBg, IM_COL32( 230, 255, 0 , 255 ) )
+            with_StyleColor( ImGuiCol_Text, IM_COL32( 0, 0, 0, 255 ) )
+               format_asm( item );
+         }     
+         else
+         {
+            format_asm( item );
+         } 
+         
+         return;
+      }
+
+      case Format::UNSIGNED:
+      {
+         if ( highlight )
+         {
+            with_StyleColor( ImGuiCol_FrameBg, IM_COL32( 230, 255, 0 , 255 ) )
+            with_StyleColor( ImGuiCol_Text, IM_COL32( 0, 0, 0, 255 ) )
+               format_unsigned( item );
+         }     
+         else
+         {
+            format_unsigned( item );
+         } 
+         return;
+      }
+
       case Format::NONE:
       {
-         format_none( index );
+         format_none();
+         return;
+      }
+   }  // switch( fmt )
+}
+
+
+auto
+update_item( auto& item, Format fmt ) -> void
+{
+   switch ( fmt )
+   {
+      case Format::SIGNED:
+      {
+         format_signed( item );
+         return;
+      }
+
+      case Format::HEX:
+      {
+         format_hex( item );
+         return;
+      }
+
+      case Format::BINARY:
+      {
+         format_binary( item );
+         return;
+      }
+
+      case Format::ASM:
+      {
+         format_asm( item );
+         return;
+      }
+
+      case Format::UNSIGNED:
+      {
+         format_unsigned( item );
+         return;
+      }
+
+      case Format::NONE:
+      {
+         format_none();
          return;
       }
    }   
+}
+
+
+auto 
+format_signed( auto& item ) -> void
+{
+   static constexpr auto data_format = EMULATOR::Utils::get_signed_ImGuiDataType<decltype( item )>();
+
+   ImGui::SetNextItemWidth( ITEM_WIDTH );
+   ImGui::InputScalar( "##format_signed", data_format, &item );
+}
+
+
+auto 
+format_hex( auto& item ) -> void
+{
+   static constexpr auto data_format = EMULATOR::Utils::get_unsigned_ImGuiDataType<decltype( item )>();
+   static constexpr auto hex_format  = EMULATOR::Utils::get_hex_format<decltype( item )>();
+
+   ImGui::SetNextItemWidth( ITEM_WIDTH );
+   ImGui::InputScalar( "##format_hex", data_format, &item, nullptr, nullptr, hex_format, ImGuiInputTextFlags_CharsUppercase );
+}
+
+
+auto 
+format_binary( auto& item )  -> void
+{
+   static_assert( EMULATOR::Utils::get_unsigned_ImGuiDataType<decltype( item )>() == ImGuiDataType_U16, 
+                  "Only supports 16 bit binary strings" );
+
+   auto binary = Utils::to_binary16_string( item );
+
+   ImGui::SetNextItemWidth( ITEM_WIDTH );
+   ImGui::InputText( "##format_binary", &binary );
+
+   if ( auto const value_opt = Utils::binary_to_uint16( binary ); value_opt )
+   {
+      item = value_opt.value();
+   }
 }
 
 
@@ -145,7 +251,6 @@ format_asm( auto& item ) -> void
    {
       asm_instruction = *asm_opt;
    }
-
    
    ImGui::SetNextItemWidth( ITEM_WIDTH );
    ImGui::InputText( "##format_asm", &asm_instruction );
@@ -156,60 +261,37 @@ format_asm( auto& item ) -> void
    static auto const asmblr = Assembler();
    auto const assembled_instruction_opt = asmblr.assemble( asm_instruction );
 
-   if ( !assembled_instruction_opt )   { return; }
+   if ( !assembled_instruction_opt )      { return; }
 
    auto const instruction_as_uint16_t_opt = Utils::binary_to_uint16( assembled_instruction_opt.value() );
 
-   if ( !instruction_as_uint16_t_opt ) { return; }
+   if ( !instruction_as_uint16_t_opt )    { return; }
 
    item = instruction_as_uint16_t_opt.value();
 }
 
 
 auto 
-format_decimal( auto& item ) -> void
+format_unsigned ( auto& item ) -> void
 {
-   static constexpr auto data_type = EMULATOR::Utils::get_ImGuiDataType<decltype( item )>();
+   static constexpr auto data_format = EMULATOR::Utils::get_unsigned_ImGuiDataType<decltype( item )>();
+
+   // TODO: implement conversion from signed to unsigned and back for each sizeof( std::remove_cvref_t<item> ) 
+   //       to prevent signed integer overflow, use bit_cast
+   assert ( std::is_unsigned_v< std::remove_cvref_t<decltype( item )> > && "Potential undefined behaviour: signed integer overflow" );
 
    ImGui::SetNextItemWidth( ITEM_WIDTH );
-   ImGui::InputScalar( "##value", data_type, &item );
+   ImGui::InputScalar( "##format_unsigned", data_format, &item );
 }
 
-
-auto 
-format_hex( auto& item )     -> void
-{
-   static constexpr auto data_type = EMULATOR::Utils::get_ImGuiDataType<decltype( item )>();
-   static constexpr auto hex_format = EMULATOR::Utils::get_hex_format<decltype( item )>();
-
-   ImGui::SetNextItemWidth( ITEM_WIDTH );
-   ImGui::InputScalar( "##ram", data_type, &item, nullptr, nullptr, hex_format, ImGuiInputTextFlags_CharsUppercase );
-}
-
-
-auto 
-format_binary( auto& item )  -> void
-{
-   static_assert( EMULATOR::Utils::get_ImGuiDataType<decltype( item )>() == ImGuiDataType_U16, 
-                  "Only supports 16 bit binary strings" );
-
-   auto binary = Utils::to_binary16_string( item );
-
-   ImGui::SetNextItemWidth( ITEM_WIDTH );
-   ImGui::InputText( "##format_asm", &binary );
-
-   if ( auto const value_opt = Utils::binary_to_uint16( binary ); value_opt )
-   {
-      item = value_opt.value();
-   }
-}
 
 inline auto 
-format_none( int index )  -> void
+format_none()  -> void
 {
-   ImGui::Text( "%d", index );
-   ImGui::SameLine( INDENT );
-   ImGui::TextUnformatted( " --- " );
+   static auto none = std::string( " --- " );   // InputText requires this to be non-const
+
+   ImGui::SetNextItemWidth( ITEM_WIDTH );
+   ImGui::InputText( "##format_none", &none, ImGuiInputTextFlags_ReadOnly );
 }
 
 } // namespace Hack::Formats
