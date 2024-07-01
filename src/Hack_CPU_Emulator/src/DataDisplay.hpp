@@ -49,7 +49,28 @@ namespace Hack
  *                container.at( Container::size_type ) = Container::value_type
  *                Container::value_type v = container.at( Container::size_type )
  *                Container::size_type  s = container.size();
- *     
+ *  
+ * Scroll bug: 
+ *    Occurs when 
+ *       • selected_item_ is highlighted and visible on screen 
+ *       • the user calls 'select' for item that is already visible on screen
+ *       • the user then calls 'track' 
+ *    
+ *    ie:
+ *       data.select( new_item );
+ *       data.track();
+ *    
+ *    A glitch appears where the newly selected item is highlighted for a single frame at its current location
+ *    and then on the next frame is moved to the scroll position.
+ *    This occurs because calls to SetScrollHereY only effect the next frame.
+ * 
+ * Fix:   
+ *    The fix is to make the 'select' function now conditionally scroll based on whether or not the newly selected item 
+ *    is currently visible.
+ *    Callers now just call 'select' and it will take care of tracking and scrolling
+ * 
+ * Remaining Bug:
+ *    Occurs when newly selected item is partially visible   
  */
 
 template <typename Container>
@@ -88,6 +109,9 @@ public:
    // return selected item
    auto selected()                               const -> size_type;
 
+   // set the position to scroll to, must be in the range (0.0f, 1.0f)
+   auto set_scroll( float scroll )                     -> void;
+
    // returns location and value of selected item
    [[nodiscard]]
    auto get_data_location()                      const -> DataLocation;
@@ -100,9 +124,11 @@ private:
    size_type    end_;                  // one past the last element of the container to display
    size_type    selected_item_{ 0 };
    size_type    display_item_{ 0 };
+   float        scroll_{ 0.25f };
    bool         highlight_{ true };
    bool         track_selected_{ false };
    bool         track_displayed_{ false };
+   bool         update_selected_{false };
    bool         is_selected_visible_{};
 };
 
@@ -122,10 +148,13 @@ DataDisplay<Container>::update( Format fmt, ImGuiWindowFlags flags )   -> void
 {
    with_Child( "##datadisplay_update", ImGui::GetContentRegionAvail(), ImGuiChildFlags_Border, flags )
    {
+      // used to check for visibility
+      auto const avail = ImGui::GetContentRegionAvail().y;
+
       auto clipper = ImGuiListClipper();
       clipper.Begin( static_cast<int>( end_ - start_ ) );
 
-      if ( track_selected_ )
+      if ( track_selected_ || update_selected_ )
       {
          clipper.IncludeItemByIndex( static_cast<int>( selected_item_ - start_) );
       }
@@ -136,10 +165,17 @@ DataDisplay<Container>::update( Format fmt, ImGuiWindowFlags flags )   -> void
 
       while( clipper.Step() )
       {
+         auto const scrollY = ImGui::GetScrollY();
+
          for ( auto idx = clipper.DisplayStart; idx < clipper.DisplayEnd; ++idx )
          {
-            auto  const real_index = idx + static_cast<int>( start_ );
-            auto  const selected  = real_index == static_cast<int>( selected_item_ );
+            auto const real_index = idx + static_cast<int>( start_ );
+            auto const selected   = real_index == static_cast<int>( selected_item_ );
+            auto const visible    = [&]
+            {
+               auto const tmp = ImGui::GetCursorPosY() - scrollY;
+               return ( tmp > 0.0f && tmp < avail ) ? true : false;
+            }();
 
             auto& value = data_.at( static_cast<DataDisplay::size_type>( real_index ) );
 
@@ -151,23 +187,25 @@ DataDisplay<Container>::update( Format fmt, ImGuiWindowFlags flags )   -> void
                is_selected_visible_ = ImGui::IsItemVisible();
               
                // TODO: covert value to string based fmt 
-               data_location_ = { ImGui::GetItemRectMin(), ImGui::GetItemRectMax(), std::to_string( value ) };
+               data_location_       = { ImGui::GetItemRectMin(), ImGui::GetItemRectMax(), std::to_string( value ) };
+               is_selected_visible_ = visible;
 
-               if ( track_selected_ )
+               if ( track_selected_ || ( !visible && update_selected_ ) )
                {
-                  ImGui::SetScrollHereY( 0.25f );
+                  ImGui::SetScrollHereY( scroll_ );
                   track_selected_ = false;
                }
             }
 
             if ( track_displayed_ && ( real_index == static_cast<int>( display_item_ ) ) )
             {
-               ImGui::SetScrollHereY( 0.25f );
+               ImGui::SetScrollHereY( scroll_ );
                track_displayed_ = false;
             }
          }
       }
    }
+   update_selected_ = false;
 }
 
 
@@ -181,7 +219,8 @@ DataDisplay<Container>::update_value( value_type value ) -> void
 template <typename Container> auto
 DataDisplay<Container>::select( size_type index )  -> void
 {
-   selected_item_ = index;
+   selected_item_   = index;
+   update_selected_ = true;
 }
 
 
@@ -224,6 +263,14 @@ template <typename Container> auto
 DataDisplay<Container>::selected()  const -> size_type
 {
    return selected_item_;
+}
+
+template <typename Container> auto
+DataDisplay<Container>::set_scroll( float scroll ) -> void
+{
+   if ( scroll < 0.0f || scroll > 1.0f ) return;
+
+   scroll_ = scroll;  
 }
 
 
