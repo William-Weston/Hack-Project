@@ -902,7 +902,9 @@ Hack::Emulator::update_Hack_Computer()       -> void
       }
       else if ( step_ )
       {
+         SDL_Log( "before execute: %u", computer_.pc() );
          computer_.execute();
+         SDL_Log( "after execute: %u", computer_.pc() );
          rom_display_.select( computer_.pc() );
          step_ = false;
       }
@@ -938,6 +940,8 @@ Hack::Emulator::update_GUI_interface() -> void
       open_new_file_ = false;
       open_file( current_file_ );
    }
+
+   // SDL_Log( "pc: %u", computer_.pc() );
 }
 
 
@@ -993,7 +997,7 @@ Hack::Emulator::main_window()  -> void
    {
       if ( play_ || step_ || options.track_pc )
       {
-         rom_display_.track();
+         
       }
       display_ROM();
    }
@@ -1032,7 +1036,7 @@ Hack::Emulator::main_window()  -> void
 
       with_Child( "##CPU", ImVec2( ImGui::GetContentRegionAvail().x , ImGui::GetContentRegionAvail().y - 85.0f ), ImGuiChildFlags_Border )
       {
-         display_cpu();
+         // display_cpu();
       }
    }  
 
@@ -1105,7 +1109,6 @@ Hack::Emulator::command_GUI() -> main_options
          rom_display_.track();
          play_    = false;
          step_    = false;
-         // track_pc = true;
       }
 
       ImGui::SameLine();
