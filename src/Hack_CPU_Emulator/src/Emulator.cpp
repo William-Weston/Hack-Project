@@ -1036,7 +1036,7 @@ Hack::Emulator::main_window()  -> void
 
       with_Child( "##CPU", ImVec2( ImGui::GetContentRegionAvail().x , ImGui::GetContentRegionAvail().y - 85.0f ), ImGuiChildFlags_Border )
       {
-         // display_cpu();
+         display_cpu();
       }
    }  
 
@@ -1333,7 +1333,8 @@ Hack::Emulator::display_cpu() -> void
    }
    if ( step_ || play_ )
    {
-      auto const from_m_register = Hack::Utils::is_a_bit_set( instruction );
+
+      auto const from_m_register = Hack::Utils::is_a_bit_set( instruction ) && !Hack::Utils::is_a_instruction( instruction );
 
       am_register = ( from_m_register ) ? computer_.M_Register() : computer_.A_Register();
       d_register  = computer_.D_Register();

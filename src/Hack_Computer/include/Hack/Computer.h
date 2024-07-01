@@ -96,7 +96,7 @@ private:
    Memory RAM_{};
    ROM_t  ROM_{};
    CPU    cpu_{ RAM_ };
-   word_t pc_{ 0 };     // program counter address of next instruction in ROM
+   // word_t pc_{ 0 };     // program counter address of next instruction in ROM
 
 };
 
@@ -106,6 +106,7 @@ private:
 template <Hack::RomIterator Iter> auto
 Hack::Computer::load_rom( Iter begin, Iter end ) -> void
 {
+   clear();
    auto count = 0uz;
 
    while ( begin != end )
@@ -114,7 +115,6 @@ Hack::Computer::load_rom( Iter begin, Iter end ) -> void
       ++count;
       ++begin;
    }
-   pc_ = 0;
 }
 
 
@@ -232,13 +232,13 @@ Hack::Computer::keyboard()       const noexcept -> word_t
 constexpr auto 
 Hack::Computer::pc()             const noexcept -> word_t
 {
-   return pc_;
+   return cpu_.PC();
 }
 
 constexpr auto 
 Hack::Computer::pc()                   noexcept -> word_t&
 {
-   return pc_;
+   return cpu_.PC();
 }
 
 constexpr auto 
@@ -293,7 +293,7 @@ Hack::Computer::clear_keyboard()       noexcept -> void
 constexpr auto 
 Hack::Computer::clear_pc()             noexcept -> void
 {
-   pc_ = 0;
+   cpu_.PC() = 0;
 }
 
 constexpr auto 

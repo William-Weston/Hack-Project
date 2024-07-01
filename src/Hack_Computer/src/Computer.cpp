@@ -17,6 +17,7 @@
 auto 
 Hack::Computer::load_rom( std::span<word_t const> instructions ) -> void
 {
+   clear();
    namespace rng = std::ranges;
    
    if ( instructions.size() > ROM_SIZE )
@@ -26,11 +27,10 @@ Hack::Computer::load_rom( std::span<word_t const> instructions ) -> void
 
    rng::copy( instructions, ROM_.begin() );
 
-   pc_ = 0;
 }
 
 auto 
 Hack::Computer::execute() -> void
 {  
-   pc_ = cpu_.execute_instruction( ROM_.at( pc_ ) );
+   cpu_.execute_instruction( ROM_.at( cpu_.PC() ) );
 }
