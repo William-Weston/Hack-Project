@@ -32,7 +32,7 @@ auto update_item( auto& item, int index, bool highlight, Format fmt ) -> void;
 
 auto format_signed   ( auto& item )                                     -> void;
 auto format_hex      ( auto& item )                                     -> void;
-auto format_binary   ( auto& item )                                     -> void;
+auto format_binary16 ( auto& item )                                     -> void;   // 16-bit binary format
 auto format_asm      ( auto& item )                                     -> void;
 auto format_unsigned ( auto& item )                                     -> void;
 auto format_none     (            )                                     -> void;
@@ -103,11 +103,11 @@ update_item( auto& item, int index, bool highlight, Format fmt ) -> void
          {
             with_StyleColor( ImGuiCol_FrameBg, IM_COL32( 230, 255, 0 , 255 ) )
             with_StyleColor( ImGuiCol_Text, IM_COL32( 0, 0, 0, 255 ) )
-               format_binary( item );
+               format_binary16( item );
          }     
          else
          {
-            format_binary( item );
+            format_binary16( item );
          }
 
          return;
@@ -172,7 +172,7 @@ update_item( auto& item, Format fmt ) -> void
 
       case Format::BINARY:
       {
-         format_binary( item );
+         format_binary16( item );
          return;
       }
 
@@ -219,7 +219,7 @@ format_hex( auto& item ) -> void
 
 
 auto 
-format_binary( auto& item )  -> void
+format_binary16( auto& item )  -> void
 {
    static_assert( EMULATOR::Utils::get_unsigned_ImGuiDataType<decltype( item )>() == ImGuiDataType_U16, 
                   "Only supports 16 bit binary strings" );
@@ -227,7 +227,7 @@ format_binary( auto& item )  -> void
    auto binary = Utils::to_binary16_string( item );
 
    ImGui::SetNextItemWidth( ITEM_WIDTH );
-   ImGui::InputText( "##format_binary", &binary );
+   ImGui::InputText( "##format_binary16", &binary );
 
    if ( auto const value_opt = Utils::binary_to_uint16( binary ); value_opt )
    {
