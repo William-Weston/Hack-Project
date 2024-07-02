@@ -11,7 +11,7 @@
 #ifndef HACK_EMULATOR_PROJECT_2024_05_14_HACK_CPU_EMULATOR_UTILITIES_H
 #define HACK_EMULATOR_PROJECT_2024_05_14_HACK_CPU_EMULATOR_UTILITIES_H
 
-#include "Utilities.h"                       // for Format
+#include "Definitions.h"                     // for Format
 
 #include "Hack/Utilities/exceptions.hpp"     // for Exception
 
@@ -252,7 +252,7 @@ Hack::EMULATOR::Utils::get_unsigned_ImGuiDataType() -> ImGuiDataType_
 }
 
 
-template <typename T> consteval auto 
+template <typename Type> consteval auto 
 Hack::EMULATOR::Utils::get_hex_format() -> char const *
 {
    using T = std::remove_cvref_t<Type>;

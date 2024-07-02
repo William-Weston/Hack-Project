@@ -186,7 +186,7 @@ DataDisplay<Container>::update( Format fmt, ImGuiWindowFlags flags )   -> void
             {
                is_selected_visible_ = ImGui::IsItemVisible();
               
-               data_location_       = { ImGui::GetItemRectMin(), ImGui::GetItemRectMax(), Hack::EMULATOR::Utils::to_string( value ) };
+               data_location_       = { ImGui::GetItemRectMin(), ImGui::GetItemRectMax(), Hack::EMULATOR::Utils::to_string( fmt, value ) };
                is_selected_visible_ = visible;
 
                if ( track_selected_ || ( !visible && update_selected_ ) )
