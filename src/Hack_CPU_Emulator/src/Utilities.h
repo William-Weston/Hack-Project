@@ -11,10 +11,12 @@
 #ifndef HACK_EMULATOR_PROJECT_2024_05_14_HACK_CPU_EMULATOR_UTILITIES_H
 #define HACK_EMULATOR_PROJECT_2024_05_14_HACK_CPU_EMULATOR_UTILITIES_H
 
+#include "Utilities.h"                       // for Format
+
 #include "Hack/Utilities/exceptions.hpp"     // for Exception
 
 #include "ImGuiSugar/imgui_sugar.hpp"        // for with_
-
+#include "Hack/Assembler.h"                  // for Assembler
 #include <imgui.h>                           // for ImGuiDataType_
 
 #include <cstdint>                           // for uint16_t
@@ -24,7 +26,7 @@
 #include <vector>                            // for vector
 
 
-
+// ------------------------------------------------------------------------------------------------
 namespace Hack::EMULATOR::Utils
 {
 
@@ -38,11 +40,86 @@ using unsupported_filetype_error = Hack::Utils::Exception<void*>;
 
 auto open_hack_file( std::string const& path ) -> std::vector<std::uint16_t>;
 auto open_asm_file( std::string const& path )  -> std::vector<std::uint16_t>;
-
+auto to_string( Hack::Format fmt, auto value ) -> std::string;
 
 // get the appropriate ImGuiDataType_ for a given integral type 
-template <typename T>
-consteval auto get_ImGuiDataType() -> ImGuiDataType_
+template <typename T> consteval 
+auto get_ImGuiDataType()                       -> ImGuiDataType_;
+
+template <typename T> consteval 
+auto get_signed_ImGuiDataType()                -> ImGuiDataType_;
+
+template <typename T> consteval 
+auto get_unsigned_ImGuiDataType()              -> ImGuiDataType_;
+
+template <typename Type> consteval 
+auto get_hex_format()                          -> char const *;
+
+}        // Hack::Emulator::Utils
+
+
+// ------------------------------------------------------------------------------------------------
+namespace Hack::GUI::Utils
+{
+
+auto CentreTextUnformatted( std::string_view text, float alignment = 0.5f )  -> void;
+auto CentreButton( std::string_view text, float alignment = 0.5f )           -> bool;
+auto error_popup( std::string_view description, std::string_view msg  )      -> bool;
+auto button_with_popup( std::string_view button_name, 
+                        std::string_view popup_name, 
+                        std::string_view text, 
+                        auto action                      )                   -> void;
+
+} // namespace Hack::GUI::Utils
+
+
+
+// --------------------------------------- Implementation -----------------------------------------
+
+auto 
+Hack::EMULATOR::Utils::to_string( Hack::Format fmt, auto value )       -> std::string
+{
+   switch ( fmt )
+   {
+      case Format::SIGNED:
+      {
+         return std::to_string( value );
+      }
+
+      case Format::HEX:
+      {
+         
+         return Hack::Utils::to_hex4_string( value );
+      }
+
+      case Format::BINARY:
+      {
+         return Hack::Utils::to_binary16_string( value );
+      }
+
+      case Format::ASM:
+      {
+         return "";
+      }
+
+      case Format::UNSIGNED:
+      {
+         return std::to_string( value );
+      }
+
+      case Format::NONE:
+      {
+         return "";
+      }
+
+   }  // switch ( fmt )
+
+   return "";
+}
+
+
+template <typename T> consteval auto 
+Hack::EMULATOR::Utils::get_ImGuiDataType() -> ImGuiDataType_
 {
    using U = std::remove_cvref_t<T>;
    if constexpr ( std::is_integral_v<U> )
@@ -103,8 +180,8 @@ consteval auto get_ImGuiDataType() -> ImGuiDataType_
 }
 
 
-template <typename T>
-consteval auto get_signed_ImGuiDataType() -> ImGuiDataType_
+template <typename T> consteval auto 
+Hack::EMULATOR::Utils::get_signed_ImGuiDataType() -> ImGuiDataType_
 {
    using U = std::remove_cvref_t<T>;
    if constexpr ( std::is_integral_v<U> )
@@ -138,8 +215,9 @@ consteval auto get_signed_ImGuiDataType() -> ImGuiDataType_
    return ImGuiDataType_COUNT;
 }
 
-template <typename T>
-consteval auto get_unsigned_ImGuiDataType() -> ImGuiDataType_
+
+template <typename T> consteval auto 
+Hack::EMULATOR::Utils::get_unsigned_ImGuiDataType() -> ImGuiDataType_
 {
    using U = std::remove_cvref_t<T>;
    if constexpr ( std::is_integral_v<U> )
@@ -173,8 +251,9 @@ consteval auto get_unsigned_ImGuiDataType() -> ImGuiDataType_
    return ImGuiDataType_COUNT;
 }
 
-template <typename Type>
-consteval auto get_hex_format() -> char const *
+
+template <typename T> consteval auto 
+Hack::EMULATOR::Utils::get_hex_format() -> char const *
 {
    using T = std::remove_cvref_t<Type>;
 
@@ -203,22 +282,6 @@ consteval auto get_hex_format() -> char const *
 
    return "";
 }
-
-}        // Hack::Emulator::Utils
-
-
-namespace Hack::GUI::Utils
-{
-auto CentreTextUnformatted( std::string_view text, float alignment = 0.5f )  -> void;
-auto CentreButton( std::string_view text, float alignment = 0.5f )           -> bool;
-auto error_popup( std::string_view description, std::string_view msg  )      -> bool;
-
-auto button_with_popup( std::string_view button_name, 
-                        std::string_view popup_name, 
-                        std::string_view text, 
-                        auto action                      )                   -> void;
-
-} // namespace Hack::GUI::Utils
 
 
 auto 
