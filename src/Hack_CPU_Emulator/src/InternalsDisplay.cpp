@@ -66,8 +66,7 @@ Hack::InternalsDisplay::do_update( Format fmt ) -> void
    with_ID( "pc" )
    Formats::update_item( pc, fmt );
 
-   // TODO:  update string based on format
-   pc_location_ = { ImGui::GetItemRectMin(), ImGui::GetItemRectMax(), std::to_string( pc ) };
+   pc_location_ = { ImGui::GetItemRectMin(), ImGui::GetItemRectMax(), EMULATOR::Utils::to_string( fmt, pc ) };
 
    ImGui::NextColumn();
 
@@ -78,8 +77,7 @@ Hack::InternalsDisplay::do_update( Format fmt ) -> void
    with_ID( "a_register" )
    Formats::update_item( a_register, fmt );
 
-   // TODO:  update string based on format
-   a_location_ = { ImGui::GetItemRectMin(), ImGui::GetItemRectMax(), std::to_string( pc ) };
+   a_location_ = { ImGui::GetItemRectMin(), ImGui::GetItemRectMax(), EMULATOR::Utils::to_string( fmt, a_register ) };
 
    ImGui::NextColumn();
 
@@ -90,8 +88,7 @@ Hack::InternalsDisplay::do_update( Format fmt ) -> void
    with_ID( "d_register" )
    Formats::update_item( d_register, fmt );
 
-   // TODO:  update string based on format
-   d_location_ = { ImGui::GetItemRectMin(), ImGui::GetItemRectMax(), std::to_string( pc ) };
+   d_location_ = { ImGui::GetItemRectMin(), ImGui::GetItemRectMax(), EMULATOR::Utils::to_string( fmt, d_register ) };
 
    ImGui::NextColumn();
 
@@ -105,9 +102,12 @@ Hack::InternalsDisplay::do_update( Format fmt ) -> void
    ImGui::TextUnformatted( label.data() );
    ImGui::SameLine();
 
+   auto m_register_string = std::string();
+
    if ( a_register < Computer::RAM_SIZE )
    {
       auto& m_register = computer_.M_Register();
+      m_register_string = EMULATOR::Utils::to_string( fmt, m_register );
       with_ID( "m_register" )
       Formats::update_item( m_register, fmt );
    }
@@ -116,10 +116,10 @@ Hack::InternalsDisplay::do_update( Format fmt ) -> void
       ImGui::SetNextItemWidth( ITEM_WIDTH );
       with_ID( "m_register" )
       ImGui::TextUnformatted( "N/A" );
+      m_register_string = "N/A";
    }
    
-   // TODO:  update string based on format
-   m_location_ = { ImGui::GetItemRectMin(), ImGui::GetItemRectMax(), std::to_string( pc ) };
+   m_location_ = { ImGui::GetItemRectMin(), ImGui::GetItemRectMax(), m_register_string };
 
    ImGui::NextColumn();
 
