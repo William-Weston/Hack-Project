@@ -78,7 +78,7 @@ private:
 
       virtual auto draw()               const -> void override
       {
-         animation_->draw();
+         animation_.draw();
       }
 
       T animation_;
