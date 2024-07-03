@@ -15,6 +15,8 @@ add_executable( Hack_CPU_Emulator_GUI )
 target_sources( Hack_CPU_Emulator_GUI
     PRIVATE 
         src/main.cpp
+        src/ALUDisplay.h
+        src/ALUDisplay.cpp
         src/AnimationHandler.h
         src/AnimationHandler.cpp
         src/animation_t.hpp
