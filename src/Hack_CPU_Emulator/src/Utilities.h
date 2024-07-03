@@ -14,6 +14,7 @@
 #include "Definitions.h"                     // for Format
 
 #include "Hack/Utilities/exceptions.hpp"     // for Exception
+#include "Hack/Utilities/utilities.hpp"      // for is_a_instruction
 
 #include "ImGuiSugar/imgui_sugar.hpp"        // for with_
 #include "Hack/Assembler.h"                  // for Assembler
@@ -99,6 +100,11 @@ Hack::EMULATOR::Utils::to_string( Hack::Format fmt, auto value )       -> std::s
 
       case Format::ASM:
       {
+         if ( Hack::Utils::is_a_instruction( value ) )
+         {
+            return std::to_string( value );
+         }
+         
          return "";
       }
 
