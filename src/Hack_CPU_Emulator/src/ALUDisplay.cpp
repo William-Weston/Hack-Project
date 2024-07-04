@@ -10,7 +10,7 @@
  */
 #include "ALUDisplay.h"
 
-#include "Definitions.h"                     // for Format
+#include "Definitions.h"                     // for Format, ITEM_WIDTH
 #include "Utilities.h"                       // for to_string
 
 #include "Hack/Disassembler.h"               // for disassemble
@@ -83,6 +83,12 @@ Hack::ALUDisplay::do_update( Format fmt ) -> void
 
    ImGui::Spacing(); ImGui::Spacing(); ImGui::Spacing();
    
+   auto const instruction_string = Hack::Utils::to_binary16_string( instruction_ );
+   ImGui::Text( "Instruction: %s", instruction_string.data() );
+
+   ImGui::Spacing(); ImGui::Spacing(); ImGui::Spacing();
+
+
    ImGui::Columns( 3 );
 
    {
@@ -93,6 +99,7 @@ Hack::ALUDisplay::do_update( Format fmt ) -> void
       auto d_input_string = EMULATOR::Utils::to_string( fmt, d_input_ );
 
       ImGui::TextUnformatted( "D Input:" );
+      ImGui::SetNextItemWidth( ITEM_WIDTH );
       ImGui::InputText( "##d input", &d_input_string, ImGuiInputTextFlags_ReadOnly );
 
       d_location_ = { ImGui::GetItemRectMin(), ImGui::GetItemRectMax(), std::move( d_input_string ) };
@@ -102,8 +109,9 @@ Hack::ALUDisplay::do_update( Format fmt ) -> void
       
       auto am_input_string = EMULATOR::Utils::to_string( fmt, am_input_ );
       
-      ImGui::TextUnformatted( "M/A Input:" );
-      ImGui::InputText( "##m/a input", &am_input_string, ImGuiInputTextFlags_ReadOnly );
+      ImGui::TextUnformatted( "A/M Input:" );
+      ImGui::SetNextItemWidth( ITEM_WIDTH );
+      ImGui::InputText( "##a/m input", &am_input_string, ImGuiInputTextFlags_ReadOnly );
 
       am_location_ = { ImGui::GetItemRectMin(), ImGui::GetItemRectMax(), std::move( am_input_string ) };
    }
@@ -138,6 +146,7 @@ Hack::ALUDisplay::do_update( Format fmt ) -> void
       ImGui::Indent( 20.0f );
       ImGui::TextUnformatted( "ALU Output:" );
       
+      ImGui::SetNextItemWidth( ITEM_WIDTH );
       ImGui::InputText( "##alu_ouput", &alu_output_string, ImGuiInputTextFlags_ReadOnly );
 
       alu_location_ = { ImGui::GetItemRectMin(), ImGui::GetItemRectMax(), std::move( alu_output_string ) };
