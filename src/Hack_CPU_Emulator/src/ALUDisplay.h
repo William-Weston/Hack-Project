@@ -30,6 +30,9 @@ public:
    // update GUI to reflect the last instruction executed
    auto next_instruction()           -> void;
 
+   // clear all inputs and output
+   auto clear()                      -> void;
+
    auto d_location()           const -> DataLocation;
    auto am_location()          const -> DataLocation;
    auto out_location()         const -> DataLocation;
@@ -45,10 +48,9 @@ private:
    word_t        am_input_     {};
    word_t        d_input_      {};
    word_t        alu_output_   {};
-   bool          update_alu_   { false };  // value from alu must be taken after the alu executes the instruction
 
    auto do_update( Format fmt ) -> void;
-   auto update_alu()            -> void;
+   auto update_inputs()         -> void;
 };
 
 }  // namespace Hack

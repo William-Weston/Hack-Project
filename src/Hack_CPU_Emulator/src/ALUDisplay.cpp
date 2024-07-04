@@ -40,25 +40,17 @@ Hack::ALUDisplay::update( Format fmt ) -> void
 auto 
 Hack::ALUDisplay::next_instruction() -> void
 {
-   auto const instruction = computer_.ROM().at( computer_.pc() );
-
-   if ( Utils::is_a_instruction( instruction ) )
-      return;
+   update_inputs();
+}
 
 
-   if ( Utils::is_a_bit_set( instruction ) )
-   {
-      am_input_ = computer_.M_Register();
-   }
-   else
-   {
-      am_input_ = computer_.A_Register();
-   }
-
-   d_input_     = computer_.D_Register();
-   instruction_ = instruction;
-   update_alu_  = true;
-   SDL_Log( "instruction: %u, d: %u, a/m: %u, alu out: %u", instruction_, d_input_, am_input_, alu_output_ );
+auto 
+Hack::ALUDisplay::clear() -> void
+{
+   instruction_ = word_t{};
+   am_input_    = word_t{};
+   d_input_     = word_t{};
+   alu_output_  = word_t{};
 }
 
 
@@ -86,8 +78,6 @@ Hack::ALUDisplay::out_location() const -> DataLocation
 auto 
 Hack::ALUDisplay::do_update( Format fmt ) -> void
 {
-   if ( update_alu_ ) { update_alu(); }
-
    with_StyleVar( ImGuiStyleVar_SeparatorTextAlign, ImVec2{ 0.5, 0.5 } )
       ImGui::SeparatorText( "Hack Computer ALU" );
 
@@ -157,19 +147,26 @@ Hack::ALUDisplay::do_update( Format fmt ) -> void
 
 
 auto 
-Hack::ALUDisplay::update_alu() -> void
+Hack::ALUDisplay::update_inputs() -> void
 {
-   static constexpr auto DELAY = 2;
-   
-   static auto delay_count = 0; 
+   auto const instruction = computer_.ROM().at( computer_.pc() );
 
-   if ( delay_count < DELAY )
-   { 
-      ++delay_count;
+   if ( Utils::is_a_instruction( instruction ) )
       return;
+
+
+   if ( Utils::is_a_bit_set( instruction ) )
+   {
+      am_input_ = computer_.M_Register();
+   }
+   else
+   {
+      am_input_ = computer_.A_Register();
    }
 
-   delay_count = 0;
-   update_alu_ = false;
-   alu_output_ = computer_.ALU_output();
+   d_input_     = computer_.D_Register();
+   instruction_ = instruction;
+   alu_output_  = Computer::evaluate( d_input_, am_input_, instruction_ );
+   SDL_Log( "instruction: %u, d: %u, a/m: %u, alu out: %u", instruction_, d_input_, am_input_, alu_output_ );
 }
+
