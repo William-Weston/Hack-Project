@@ -1041,7 +1041,6 @@ Hack::Emulator::main_window()  -> void
 
       with_Child( "##CPU", ImVec2( ImGui::GetContentRegionAvail().x , ImGui::GetContentRegionAvail().y - 85.0f ), ImGuiChildFlags_Border )
       {
-         // display_cpu();
          alu_display_.update( options.format );
       }
    }  
@@ -1115,7 +1114,8 @@ Hack::Emulator::command_GUI() -> main_options
       {
          computer_.reset();
          rom_display_.select( computer_.pc() );
-         rom_display_.track();
+         alu_display_.clear();
+
          play_    = false;
          step_    = false;
       }
