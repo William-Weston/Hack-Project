@@ -877,6 +877,20 @@ TEST_CASE( "Utilites: is_a_instruction" )
 }
 
 
+// TODO
+TEST_CASE( "Utilities: is_jump_instruction" )
+{
+
+}
+
+
+// TODO
+TEST_CASE( "Utilities: is_a_bit_set" )
+{
+
+}
+
+
 TEST_CASE( "Utilites: is_binary16_string" )
 {
    using namespace Hack::Utils;
