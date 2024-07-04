@@ -11,7 +11,8 @@
 #ifndef HACK_2024_03_15_EMULATOR_H
 #define HACK_2024_03_15_EMULATOR_H
 
-
+#include "ALUDisplay.h"         // for ALUDisplay
+#include "AnimationHandler.h"   // for AnimationHandler
 #include "Definitions.h"        // for UserError, Format
 #include "DataDisplay.hpp"
 #include "GUI_Core/GUI_Core.h"  // for GUI_Core
@@ -52,22 +53,28 @@ private:
    using RAMDisplay_t = DataDisplay<Computer::RAM_t>;
 
    GUI_Core           core_;
-   Computer           computer_{};              // must be initialized before screen_
-   Screen_Texture     screen_texture_;
-   ROMDisplay_t       rom_display_{ computer_.ROM(), 0, Computer::ROM_SIZE };
-   RAMDisplay_t       ram_display_{ computer_.RAM(), 0, Computer::RAM_SIZE };
-   RAMDisplay_t       screen_display_{ computer_.RAM(), Computer::screen_start_address, Computer::screen_end_address };
-   InternalsDisplay   internals_{ computer_ };
-   Assembler const    assembler_{};
-   Keyboard_Handler   keyboard_handler_{};
-   std::string        current_file_{};
-   UserError_t        user_error_{};
-   float              speed_{ 0.33F };            // instructions per second to execute on Hack Computer
-   bool               play_{ false };             // run the program in the Hack computer ROM
-   bool               step_{ false };             // execute the next instruction
-   bool               running_{ true };           // is the emulator running
-   bool               open_new_file_{ false };
-   bool               animating_{ false };
+   Computer           computer_         {};                    // must be initialized before screen_texture_
+   Screen_Texture     screen_texture_; 
+   ROMDisplay_t       rom_display_      { computer_.ROM(), 0, Computer::ROM_SIZE };
+   RAMDisplay_t       ram_display_      { computer_.RAM(), 0, Computer::RAM_SIZE };
+   RAMDisplay_t       screen_display_   { computer_.RAM(), Computer::screen_start_address, Computer::screen_end_address };
+   InternalsDisplay   internals_        { computer_ };
+   ALUDisplay         alu_display_      { computer_ };
+   Assembler const    assembler_        {};
+   Keyboard_Handler   keyboard_handler_ {};
+   AnimationHandler   animation_handler_{};
+   std::string        current_file_     {};
+   UserError_t        user_error_       {};
+   Format             format_           { Format::SIGNED };
+   Format             rom_format_       { Format::ASM };
+   float              speed_            { 200'000.0F };        // instructions per second to execute on Hack Computer
+   float              animation_speed_  { 5.0f  };
+   bool               play_             { false };             // step slowing through the program in the Hack computer ROM
+   bool               step_             { false };             // execute the next instruction
+   bool               run_              { false };             // run program 
+   bool               running_          { true  };             // is the emulator running
+   bool               open_new_file_    { false };
+   bool               animating_        { false };
 
    auto handle_events() -> void;
    auto update()        -> void;
@@ -96,6 +103,7 @@ private:
    auto display_cpu()                            -> void;
    auto display_errors()                         -> void;
    
+   auto launch_animations()                      -> void;
 
    auto blacken_screen() -> void;      // testing function
 };

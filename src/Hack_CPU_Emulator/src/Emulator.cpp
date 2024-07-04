@@ -16,6 +16,7 @@
 #include "DataDisplay.hpp"
 #include "Definitions.h"                      // for UserError, Error_t, RAM...
 #include "Utilities.h"                        // for FileError, open_asm_file
+#include "TextAnimation.h"                    // for TextAnimation
 
 #include "Hack/Assembler.h"                   // for Assembler
 #include "Hack/Disassembler.h"                // for Disassembler
@@ -56,6 +57,7 @@ Hack::Emulator::Emulator( std::string_view title, int width, int height, bool fu
    :  core_( title, width, height, fullscreen ),
       screen_texture_( computer_.screen_cbegin(), computer_.screen_cend(), core_.renderer() )
 {
+   ram_display_.unhighlight();
    screen_display_.unhighlight();
 }
 
@@ -179,12 +181,14 @@ Hack::Emulator::update() -> void
    update_Hack_Computer();
    update_GUI_interface();
    screen_texture_.update();
+   animation_handler_.update( animation_speed_ );
 }
 
 
 auto 
 Hack::Emulator::render() const -> void
 {
+   animation_handler_.draw();
 }
 
 
@@ -901,12 +905,13 @@ Hack::Emulator::update_Hack_Computer()       -> void
          }
       }
       else if ( step_ )
-      {
-         SDL_Log( "before execute: %u", computer_.pc() );
-         computer_.execute();
-         SDL_Log( "after execute: %u", computer_.pc() );
-         rom_display_.select( computer_.pc() );
-         step_ = false;
+      {  
+         if ( !animating_ || animation_handler_.is_done() )
+         {
+            computer_.execute();
+            rom_display_.select( computer_.pc() );
+            step_ = false;
+         }
       }
    }
 }
@@ -1036,7 +1041,8 @@ Hack::Emulator::main_window()  -> void
 
       with_Child( "##CPU", ImVec2( ImGui::GetContentRegionAvail().x , ImGui::GetContentRegionAvail().y - 85.0f ), ImGuiChildFlags_Border )
       {
-         display_cpu();
+         // display_cpu();
+         alu_display_.update( options.format );
       }
    }  
 
@@ -1045,7 +1051,12 @@ Hack::Emulator::main_window()  -> void
    {
       ImGui::SeparatorText( "Internals" );
 
+      auto const pc = computer_.pc();
       internals_.update( options.format );
+      if ( pc != computer_.pc() )
+      {
+         rom_display_.select( computer_.pc() );    // track pc if user made change
+      }
    }
 }
 
@@ -1056,16 +1067,26 @@ Hack::Emulator::command_GUI() -> main_options
    static auto display_format = 0;
 
    auto track_pc = false;
-
-   with_Child( "##Menu Bar", ImVec2( ImGui::GetContentRegionAvail().x , 65.0f ), ImGuiChildFlags_Border ) 
+   
+   with_Child( "##Command/Options Bar", ImVec2( ImGui::GetContentRegionAvail().x , 65.0f ), ImGuiChildFlags_Border ) 
    {
+
       // open File Dialog
-      if ( ImGui::Button( "Open File" ) )
+      with_Group
       {
-            auto config   = IGFD::FileDialogConfig();
-            config.flags  = ImGuiFileDialogFlags_Modal;
-            config.path   = "../";
-            ImGuiFileDialog::Instance()->OpenDialog( "ChooseFileDlgKey", "Open File", ".hack,.asm,.*", config );
+         if ( ImGui::Button( "Open File" ) )
+         {
+               auto config   = IGFD::FileDialogConfig();
+               config.flags  = ImGuiFileDialogFlags_Modal;
+               config.path   = "../";
+               ImGuiFileDialog::Instance()->OpenDialog( "ChooseFileDlgKey", "Open File", ".hack,.asm,.*", config );
+         }
+
+         ImGui::Spacing();
+         if ( ImGui::Button( "Load Script" ) )
+         {
+
+         }
       }
       
       if ( ImGuiFileDialog::Instance()->Display( "ChooseFileDlgKey", ImGuiWindowFlags_NoCollapse, ImVec2{ 720, 480 } ) )
@@ -1081,20 +1102,8 @@ Hack::Emulator::command_GUI() -> main_options
          ImGuiFileDialog::Instance()->Close();
       }
 
-      ImGui::SameLine();
-      with_Disabled( play_ )
-      if ( ImGui::Button( "Step" ) )
-      {  
-         step_ = true;
-      }
+      ImGui::SameLine( 125.0f );
 
-      ImGui::SameLine();
-      if ( ImGui::Button( "Play" ) )
-      {
-         play_ = true;
-      }
-
-      ImGui::SameLine();
       if ( ImGui::Button( "Stop" ) )
       {
          play_ = false;
@@ -1112,18 +1121,72 @@ Hack::Emulator::command_GUI() -> main_options
       }
 
       ImGui::SameLine();
-      ImGui::TextUnformatted( "  Speed:" );
+
+      
+      with_Disabled( play_ || step_ )
+      if ( ImGui::Button( "Step" ) )
+      {  
+         step_ = true;
+         alu_display_.next_instruction();
+         if ( animating_ )
+         {
+            launch_animations();
+         }
+      }
+      ImGui::SetItemTooltip( "Execute next instruction" );
+
       ImGui::SameLine();
-      ImGui::SetNextItemWidth( 200.0f );
-      ImGui::SliderFloat( "##Speed", &speed_, 0.3F, 5'000'000.0F, "%.1f", ImGuiSliderFlags_Logarithmic );
-     
+      if ( ImGui::ArrowButton( "Continue", ImGuiDir_Right ) )
+      {
+         play_ = true;
+      }
+      ImGui::SetItemTooltip( "Step through program instructions until 'Stop' button is clicked" );
+
+      ImGui::SameLine();
+
+      ImGui::AlignTextToFramePadding();
+      ImGui::TextUnformatted( "Speed:" );
+      ImGui::SameLine();
+      ImGui::SetNextItemWidth( 150.0f );
+      ImGui::SliderFloat( "##speed", &animation_speed_, 1.0, 10.0, "%.0f" );
+
+      ImGui::SameLine();
+      ImGui::Checkbox( "Animate", &animating_ );
+      ImGui::SetItemTooltip( "Animate Program Data Flow" );
+
       ImGui::SameLine();
 
       ImGui::TextUnformatted( "  Format:" );
       ImGui::SameLine();
 
       ImGui::SetNextItemWidth( 75.0f );
-      ImGui::Combo( "##Display-Format", &display_format, "DECIMAL\0HEX\0BINARY\0" );
+      ImGui::Combo( "##Display-Format", &display_format, "Decimal\0Hex\0Binary\0" );
+
+      // TODO: update to use class format_
+      format_ = static_cast<Format>( display_format );
+      ImGui::SameLine();
+
+      ImGui::TextUnformatted( "  View:" );
+      ImGui::SameLine();
+
+      ImGui::SetNextItemWidth( 75.0f );
+      static auto view = 0;
+      ImGui::Combo( "##View-Format", &view, "Screen\0Script\0Output\0Compare\0" );
+
+      ImGui::SameLine();
+      ImGui::SameLine( ImGui::GetCursorPosX() + 60.0f );
+      if ( ImGui::Button( "Run" ) )
+      {
+         run_ = true;
+      }
+      ImGui::SetItemTooltip( "Run Program" );
+      
+      ImGui::SameLine();
+      ImGui::AlignTextToFramePadding();
+      ImGui::TextUnformatted( "  Speed:" );
+      ImGui::SameLine();
+      ImGui::SetNextItemWidth( 150.0f );
+      ImGui::SliderFloat( "##Speed", &speed_, 200'000.0F, 5'000'000.0F, "" );
    }
  
    return { track_pc, static_cast<Format>( display_format ) };
@@ -1162,6 +1225,7 @@ Hack::Emulator::display_ROM() -> void
    static auto display_format = 3;
    ImGui::SetNextItemWidth( 50.0 );
    ImGui::Combo( "##Display", &display_format, "DEC\0HEX\0BIN\0ASM\0" );
+   rom_format_ = static_cast<Format>( display_format );
 
    ImGui::SeparatorText( "ROM" );
    
@@ -1333,8 +1397,9 @@ Hack::Emulator::display_cpu() -> void
    }
    if ( step_ || play_ )
    {
-
-      auto const from_m_register = Hack::Utils::is_a_bit_set( instruction ) && !Hack::Utils::is_a_instruction( instruction );
+      auto const from_m_register = !Hack::Utils::is_a_instruction( instruction )    &&
+                                    Hack::Utils::is_a_bit_set( instruction )        &&  
+                                    ( computer_.A_Register() < Computer::RAM_SIZE );
 
       am_register = ( from_m_register ) ? computer_.M_Register() : computer_.A_Register();
       d_register  = computer_.D_Register();
@@ -1392,7 +1457,6 @@ Hack::Emulator::display_cpu() -> void
       ImGui::TextUnformatted( "M/A Input:" );
       // TODO:: change to ImGuiDataType_S16 representation
       ImGui::InputText( "##m/a input", &a, ImGuiInputTextFlags_ReadOnly );
-
    }
 
    ImGui::NextColumn();
@@ -1451,6 +1515,43 @@ Hack::Emulator::display_errors() -> void
    }
 }
 
+
+
+auto
+Hack::Emulator::launch_animations() -> void
+{
+   auto const instruction = computer_.ROM().at( computer_.pc() );
+
+   if ( Utils::is_a_instruction( instruction ) )
+   {
+      animation_handler_.handle( [&] ( AnimationHandler& handler )
+      {
+         auto const source = rom_display_.get_data_location();
+         auto const dest   = internals_.a_location();
+
+         handler.add( TextAnimation( source.top_left, source.bottom_right, dest.top_left, source.data, animation_speed_ ) );
+      } );
+   }
+   else
+   {
+      auto const binary = Hack::Utils::to_binary16_string( instruction );
+      
+      auto const d_source  = internals_.d_location();
+      auto const am_source = Hack::Utils::is_a_bit_set( instruction ) ? internals_.m_location() : internals_.a_location();
+
+
+
+      // TODO
+      if ( Hack::Utils::is_jump_instruction( instruction ) )
+      {
+         // determine whether to jump by the output of the ALU and the specific jump instruction
+         // and if so the PC is set the value of the A Register
+      }
+   }
+   
+
+
+}
 
 // for testing
 auto
