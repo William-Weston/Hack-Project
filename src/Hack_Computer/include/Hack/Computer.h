@@ -52,6 +52,10 @@ public:
    // execute next instruction
    auto execute() -> void;
 
+   // evaluate an instruction on the ALU based on two inputs, does NOT effect current state of computer, 
+   // x would be d register, y would be a/m register
+   static auto evaluate( word_t x, word_t y, word_t instruction ) -> word_t;
+
    constexpr auto RAM()            const noexcept -> Memory const&;
    constexpr auto RAM()                  noexcept -> Memory&;
    constexpr auto ROM()            const noexcept -> ROM_t  const&;

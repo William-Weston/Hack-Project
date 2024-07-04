@@ -34,3 +34,11 @@ Hack::Computer::execute() -> void
 {  
    cpu_.execute_instruction( ROM_.at( cpu_.PC() ) );
 }
+
+
+// evaluate an instruction on the ALU based on two inputs, does not effect current state of computer, x would be d register, y would be a/m register
+auto 
+Hack::Computer::evaluate( word_t x, word_t y, word_t instruction ) -> word_t
+{
+   return CPU::evaluate( x, y, instruction );
+}

@@ -70,6 +70,10 @@ public:
    // returns address of next instruction to execute
    auto execute_instruction( word_t instruction ) -> word_t;
 
+   // evaluate an instruction on the ALU given two inputs
+   static auto evaluate( word_t x, word_t y, word_t instruction ) -> word_t;
+
+
    constexpr auto ALU_Output() const noexcept -> word_t;
    constexpr auto A_Register() const noexcept -> word_t;
    constexpr auto D_Register() const noexcept -> word_t;

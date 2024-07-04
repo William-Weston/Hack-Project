@@ -131,3 +131,25 @@ Hack::CPU::do_c_instruction( word_t instruction ) -> word_t
 
    return ++PC_;     // increment PC_ and return
 }
+
+
+// evaluate an instruction on the ALU given two inputs
+auto 
+Hack::CPU::evaluate( word_t x, word_t y, word_t instruction )  -> word_t
+{
+   // 1111'1100'0000'0000
+   // 5432'1098'7654'3210
+   // 111a'cccc'ccdd'djjj
+   auto const bits = std::bitset<16>( instruction );
+ 
+   auto const zx    = bits.test( 11 );
+   auto const nx    = bits.test( 10 );
+   auto const zy    = bits.test( 9 );
+   auto const ny    = bits.test( 8 );
+   auto const f     = bits.test( 7 );
+   auto const no    = bits.test( 6 );
+   
+   // ALU: x = D Register, y = A or M Register
+   //    in          x, y, zx, nx, zy, ny, f, no
+   return ALU( ALU_in{ x, y, zx, nx, zy, ny, f, no } ).out;
+}
