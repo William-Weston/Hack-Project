@@ -94,14 +94,17 @@ auto to_upper( std::string& str, std::in_place_t ) -> void;
 // ------------------------------------------------------------------------------------------------
 // Hack Code Utilities ----------------------------------------------------------------------------
 
-// A-instruction - Binary:     0vvvvvvvvvvvvvvv     •  vv ... v = 15-bit value of xxx
-constexpr auto is_a_instruction( std::uint16_t instruction ) -> bool;
+// A-instruction - Binary:  0vvvvvvvvvvvvvvv        •  vv ... v = 15-bit value of xxx
+constexpr auto is_a_instruction( std::uint16_t instruction )    -> bool;
+
+// C-instruction - Binary:  111 a cccccc ddd jjj    • jjj bits indicate this is a jump instruction
+constexpr auto is_jump_instruction( std::uint16_t instruction ) -> bool;
 
 // if the 'a' bit is set then the y input to the ALU comes from the M register (RAM_[A]), else from the A register
-constexpr auto is_a_bit_set( std::uint16_t instruction )     -> bool;
+constexpr auto is_a_bit_set( std::uint16_t instruction )       -> bool;
 
 // does the string represent a 16-bit binary number
-constexpr auto is_binary16_string( std::string_view str )    -> bool;
+constexpr auto is_binary16_string( std::string_view str )      -> bool;
 
 
 // ------------------------------------------------------------------------------------------------
@@ -130,7 +133,7 @@ auto number_of_digits( std::uint16_t value )   -> int;
 
 
 }  // namespace Hack::Utils -----------------------------------------------------------------------
-// ------------------------------------------------------------------------------------------------
+
 
 
 // ------------------------------------------------------------------------------------------------
@@ -143,6 +146,7 @@ Hack::Utils::signed_to_unsigned_16( std::int16_t value )  -> std::uint16_t
 {
    return std::bit_cast<std::uint16_t>( value );
 }
+
 
 constexpr auto 
 Hack::Utils::unsigned_to_signed_16( std::uint16_t value ) -> std::int16_t
@@ -226,6 +230,17 @@ Hack::Utils::is_a_instruction( std::uint16_t instruction ) -> bool
 
   return !( instruction & mask );
 }
+
+
+// C-instruction - Binary:  111 a cccccc ddd jjj    • jjj bits indicate this is a jump instruction
+constexpr auto 
+Hack::Utils::is_jump_instruction( std::uint16_t instruction ) -> bool
+{
+   constexpr auto mask = std::uint16_t{ 0b0000'0000'0000'0111 };
+
+   return instruction & mask;
+}
+
 
 constexpr auto 
 Hack::Utils::is_a_bit_set( std::uint16_t instruction )     -> bool
