@@ -169,3 +169,16 @@ TEST_CASE( "Disassembler: disassemble( string_view )" )
      
    }
 }
+
+
+// TODO
+TEST_CASE( "Disassembler: computation" )
+{
+   
+}
+
+// TODO
+TEST_CASE( "Disassembler: destination" )
+{
+   
+}

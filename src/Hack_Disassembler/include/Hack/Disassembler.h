@@ -30,6 +30,10 @@ public:
    static auto computation( std::string_view binary )   -> std::optional<std::string>;
    static auto computation( std::uint16_t instruction ) -> std::optional<std::string>;
 
+   // return the destinations for the ALU output of a given instruction
+   static auto destination( std::string_view binary )   -> std::optional<std::string>;
+   static auto destination( std::uint16_t instruction ) -> std::optional<std::string>;
+
 private:
    static constexpr auto INSTRUCTION_SIZE = 16zu;
 

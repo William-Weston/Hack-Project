@@ -73,6 +73,34 @@ Hack::Disassembler::computation( std::uint16_t instruction ) -> std::optional<st
    return computation( Hack::Utils::to_binary16_string( instruction ) );
 }
 
+
+auto 
+Hack::Disassembler::destination( std::string_view binary ) -> std::optional<std::string>
+{
+   if ( binary.size() != INSTRUCTION_SIZE || binary.front() == '0' )
+   {
+      return std::nullopt;
+   }
+
+   // Binary:     111 a cccccc ddd jjj
+   binary.remove_prefix( 10 );
+   binary.remove_suffix( 3 );
+
+   auto dest_iter = dest_table_.find( binary );
+
+   if ( dest_iter == dest_table_.end() )   { return std::nullopt; }
+
+   return { dest_iter->second };
+}
+
+
+auto 
+Hack::Disassembler::destination( std::uint16_t instruction ) -> std::optional<std::string>
+{
+   return destination( Hack::Utils::to_binary16_string( instruction ) );
+}
+
+
 // ------------------------------------------------------------------------------------------------
 // ------------------------------------- Implementation -------------------------------------------
 
