@@ -154,9 +154,6 @@ Hack::ALUDisplay::do_update( Format fmt ) -> void
       auto const top_left = ImGui::GetItemRectMin();
       auto const pos      = ImVec2{ top_left.x - ( ( ITEM_WIDTH - size.x ) / 2.0f ), top_left.y - ImGui::GetStyle().FramePadding.y };
       
-      // SDL_Log( "top left: %f, %f", top_left.x, top_left.y );
-      // SDL_Log( "pos:      %f, %f", pos.x, pos.y );
-      
       comp_location_ = { pos, {}, "" };  // DataLocation::bottom_right&  DataLocation::data is not needed, the values are never used
    }
 
@@ -201,6 +198,5 @@ Hack::ALUDisplay::update_inputs() -> void
    d_input_     = computer_.D_Register();
    instruction_ = instruction;
    alu_output_  = Computer::evaluate( d_input_, am_input_, instruction_ );
-   SDL_Log( "instruction: %u, d: %u, a/m: %u, alu out: %u", instruction_, d_input_, am_input_, alu_output_ );
 }
 

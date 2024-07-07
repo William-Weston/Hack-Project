@@ -158,9 +158,10 @@ DataDisplay<Container>::update( Format fmt, ImGuiWindowFlags flags )   -> void
 
       // TODO: Fix bug where is_selected_visible returns wrong value only while animating
       //       commenting this line out fixes it, not permanent solution
-   //   if ( track_selected_ || update_selected_ )
+      //       Bug info: when this line is uncommented, visible is only correct when the selected item has mouse focus
+      // if ( track_selected_ || update_selected_ )
       {
-         clipper.IncludeItemByIndex( static_cast<int>( selected_item_ - start_) );
+         clipper.IncludeItemByIndex( static_cast<int>( selected_item_ - start_ ) );
       }
       if ( track_displayed_ )
       {
@@ -190,7 +191,6 @@ DataDisplay<Container>::update( Format fmt, ImGuiWindowFlags flags )   -> void
             { 
                data_location_       = { ImGui::GetItemRectMin(), ImGui::GetItemRectMax(), Hack::EMULATOR::Utils::to_string( fmt, value ) };
                is_selected_visible_ = visible;
-
                if ( track_selected_ || ( !visible && update_selected_ ) )
                {
                   ImGui::SetScrollHereY( scroll_ );

@@ -913,12 +913,6 @@ Hack::Emulator::update_Hack_Computer()       -> void
             rom_display_.select( computer_.pc() );
             step_ = false;
          }
-
-         if ( animating_ )
-         {
-            // SDL_Log( "visible  %d", rom_display_.is_selected_visible() );
-            // SDL_Log( "selected %lu", rom_display_.selected() );
-         }
       }
    }
    SDL_Log( "visible  %d", rom_display_.is_selected_visible() );
@@ -1139,12 +1133,6 @@ Hack::Emulator::command_GUI() -> main_options
          step_ = true;
          if ( animating_ )
          {
-           
-            // if ( !rom_display_.is_selected_visible() )
-            // {
-            //    rom_display_.track();
-            //    SDL_Log( "Here" );
-            // }
             launch_animations();
          }
       }
@@ -1591,7 +1579,7 @@ Hack::Emulator::launch_animations() -> void
          {
             handler.next();
 
-            auto const out_source   = alu_display_.out_location();
+            auto const out_source = alu_display_.out_location();
 
             handler.add( TextAnimation( out_source.top_left, out_source.bottom_right, out_source.top_left, out_string, animation_speed_ ) );
 
