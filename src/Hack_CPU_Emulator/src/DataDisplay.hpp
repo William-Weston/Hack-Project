@@ -287,7 +287,7 @@ DataDisplay<Container>::reset()   -> void
 {
    selected_item_   = start_;
    display_item_    = start_;
-   track_selected_  = false;
+   track_selected_  = true;
    track_displayed_ = false;
    update_selected_ = false;
 }
