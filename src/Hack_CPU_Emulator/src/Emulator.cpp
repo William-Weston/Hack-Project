@@ -908,12 +908,21 @@ Hack::Emulator::update_Hack_Computer()       -> void
       {  
          if ( !animating_ || animation_handler_.is_done() )
          {
+            alu_display_.next_instruction();
             computer_.execute();
             rom_display_.select( computer_.pc() );
             step_ = false;
          }
+
+         if ( animating_ )
+         {
+            // SDL_Log( "visible  %d", rom_display_.is_selected_visible() );
+            // SDL_Log( "selected %lu", rom_display_.selected() );
+         }
       }
    }
+   SDL_Log( "visible  %d", rom_display_.is_selected_visible() );
+   SDL_Log( "selected %lu", rom_display_.selected() );
 }
 
 
@@ -943,10 +952,11 @@ Hack::Emulator::update_GUI_interface() -> void
    if ( open_new_file_ )
    {
       open_new_file_ = false;
+      rom_display_.reset();
+      ram_display_.reset();
+      screen_display_.reset();
       open_file( current_file_ );
    }
-
-   // SDL_Log( "pc: %u", computer_.pc() );
 }
 
 
@@ -1127,9 +1137,14 @@ Hack::Emulator::command_GUI() -> main_options
       if ( ImGui::Button( "Step" ) )
       {  
          step_ = true;
-         alu_display_.next_instruction();
          if ( animating_ )
          {
+           
+            // if ( !rom_display_.is_selected_visible() )
+            // {
+            //    rom_display_.track();
+            //    SDL_Log( "Here" );
+            // }
             launch_animations();
          }
       }
@@ -1520,6 +1535,11 @@ Hack::Emulator::display_errors() -> void
 auto
 Hack::Emulator::launch_animations() -> void
 {
+   if ( !rom_display_.is_selected_visible() )
+   {
+      rom_display_.track();
+   }
+
    auto const instruction = computer_.ROM().at( computer_.pc() );
 
    if ( Utils::is_a_instruction( instruction ) )
@@ -1534,23 +1554,89 @@ Hack::Emulator::launch_animations() -> void
    }
    else
    {
-      auto const binary = Hack::Utils::to_binary16_string( instruction );
-      
-      auto const d_source  = internals_.d_location();
-      auto const am_source = Hack::Utils::is_a_bit_set( instruction ) ? internals_.m_location() : internals_.a_location();
-
-
-
-      // TODO
-      if ( Hack::Utils::is_jump_instruction( instruction ) )
+      animation_handler_.handle( [&] ( AnimationHandler& handler )
       {
-         // determine whether to jump by the output of the ALU and the specific jump instruction
-         // and if so the PC is set the value of the A Register
-      }
+         auto const instruct   = computer_.ROM().at( computer_.pc() );
+         auto const rom_source = rom_display_.get_data_location();
+         auto const comp_dest  = alu_display_.comp_location();
+         auto const comp       = Disassembler::computation( instruct );
+         
+         handler.add( TextAnimation( rom_source.top_left, 
+                                     rom_source.bottom_right, 
+                                     comp_dest.top_left, 
+                                     comp ? comp.value() : "", 
+                                     animation_speed_ 
+                                    ) 
+                     );
+         
+         handler.next();
+
+         auto const d_source  = internals_.d_location();
+         auto const am_source = Hack::Utils::is_a_bit_set( instruct ) ? internals_.m_location() : internals_.a_location();
+         auto const d_dest    = alu_display_.d_location();
+         auto const am_dest   = alu_display_.am_location();
+
+         handler.add( TextAnimation( d_source.top_left, d_source.bottom_right, d_dest.top_left, d_source.data, animation_speed_ ) );
+         handler.add( TextAnimation( am_source.top_left, am_source.bottom_right, am_dest.top_left, am_source.data, animation_speed_ ) );
+         
+         auto const x            = computer_.D_Register();
+         auto const y            = Hack::Utils::is_a_bit_set( instruct ) ? computer_.M_Register() : computer_.A_Register();
+         auto const out          = Computer::evaluate( x, y, instruct );
+         auto const destinations = Disassembler::destination( instruct );
+         auto const out_string   = Hack::EMULATOR::Utils::to_string( alu_display_.format(), out );
+         
+         auto has_a_updated = false;
+
+         if ( destinations )
+         {
+            handler.next();
+
+            auto const out_source   = alu_display_.out_location();
+
+            handler.add( TextAnimation( out_source.top_left, out_source.bottom_right, out_source.top_left, out_string, animation_speed_ ) );
+
+            if ( destinations->contains( 'A' ) )
+            {
+               auto const a_dest = internals_.a_location();
+               handler.add( TextAnimation( out_source.top_left, out_source.bottom_right, a_dest.top_left, out_string, animation_speed_ ) );
+               has_a_updated = true;
+            }
+
+            if ( destinations->contains( 'D' ) )
+            {
+               auto const d_internals_dest = internals_.d_location();
+               handler.add( TextAnimation( out_source.top_left, out_source.bottom_right, d_internals_dest.top_left, out_string, animation_speed_ ) );
+            }
+
+            if ( destinations->contains( 'M' ) )
+            {
+               auto const m_dest = internals_.m_location();
+               handler.add( TextAnimation( out_source.top_left, out_source.bottom_right, m_dest.top_left, out_string, animation_speed_ ) );
+            }
+         }
+         
+         if ( Hack::Utils::is_jump_instruction( instruct ) )
+         {
+            // determine whether to jump by the output of the ALU and the specific jump instruction
+            // and if so the PC is set the value of the A Register
+            if ( Hack::Utils::jump( instruct, out ) )
+            {
+               handler.next();
+
+               auto const a_source = internals_.a_location();
+               auto const pc_dest  = internals_.pc_location();
+
+               handler.add( TextAnimation( a_source.top_left, 
+                                           a_source.bottom_right, 
+                                           pc_dest.top_left,  
+                                           has_a_updated ? out_string : a_source.data, 
+                                           animation_speed_ 
+                                          ) 
+                           );
+            }
+         }
+      } );
    }
-   
-
-
 }
 
 // for testing
