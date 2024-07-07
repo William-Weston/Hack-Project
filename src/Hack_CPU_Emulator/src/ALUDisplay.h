@@ -33,6 +33,10 @@ public:
    // clear all inputs and output
    auto clear()                      -> void;
 
+   // Get current Format
+   auto format()               const -> Format;
+   
+   auto comp_location()        const -> DataLocation;
    auto d_location()           const -> DataLocation;
    auto am_location()          const -> DataLocation;
    auto out_location()         const -> DataLocation;
@@ -41,13 +45,15 @@ private:
    using word_t = Hack::Computer::word_t;
 
    Computer&     computer_;
-   DataLocation  d_location_   {};
-   DataLocation  am_location_  {};
-   DataLocation  alu_location_ {};
-   word_t        instruction_  {};
-   word_t        am_input_     {};
-   word_t        d_input_      {};
-   word_t        alu_output_   {};
+   DataLocation  comp_location_ {};
+   DataLocation  d_location_    {};
+   DataLocation  am_location_   {};
+   DataLocation  alu_location_  {};
+   Format        format_        {};
+   word_t        instruction_   {};
+   word_t        am_input_      {};
+   word_t        d_input_       {};
+   word_t        alu_output_    {};
 
    auto do_update( Format fmt ) -> void;
    auto update_inputs()         -> void;

@@ -55,6 +55,20 @@ Hack::ALUDisplay::clear() -> void
 
 
 auto 
+Hack::ALUDisplay::format()  const -> Format
+{
+   return format_;
+}
+
+
+auto 
+Hack::ALUDisplay::comp_location() const -> DataLocation
+{
+   return comp_location_;
+}
+
+
+auto 
 Hack::ALUDisplay::d_location() const -> DataLocation
 {
    return d_location_;
@@ -78,6 +92,8 @@ Hack::ALUDisplay::out_location() const -> DataLocation
 auto 
 Hack::ALUDisplay::do_update( Format fmt ) -> void
 {
+   format_ = fmt;
+
    with_StyleVar( ImGuiStyleVar_SeparatorTextAlign, ImVec2{ 0.5, 0.5 } )
       ImGui::SeparatorText( "Hack Computer ALU" );
 
@@ -133,6 +149,15 @@ Hack::ALUDisplay::do_update( Format fmt ) -> void
          GUI::Utils::CentreTextUnformatted( comp_opt->data() );
       else
          GUI::Utils::CentreTextUnformatted( "---" );
+
+      auto const size     = ImGui::GetItemRectSize();
+      auto const top_left = ImGui::GetItemRectMin();
+      auto const pos      = ImVec2{ top_left.x - ( ( ITEM_WIDTH - size.x ) / 2.0f ), top_left.y - ImGui::GetStyle().FramePadding.y };
+      
+      // SDL_Log( "top left: %f, %f", top_left.x, top_left.y );
+      // SDL_Log( "pos:      %f, %f", pos.x, pos.y );
+      
+      comp_location_ = { pos, {}, "" };  // DataLocation::bottom_right&  DataLocation::data is not needed, the values are never used
    }
 
    ImGui::NextColumn();
