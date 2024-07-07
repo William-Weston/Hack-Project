@@ -99,8 +99,6 @@ private:
    auto display_RAM( Format fmt )                -> void;
    auto display_screen( Format fmt )             -> void;
 
-   auto internals( Format fmt )                  -> void;
-   auto display_cpu()                            -> void;
    auto display_errors()                         -> void;
    
    auto launch_animations()                      -> void;

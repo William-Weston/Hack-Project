@@ -873,7 +873,7 @@ Hack::Emulator::update_Hack_Computer()       -> void
          computer_.pc() = 0;
       }
 
-      if ( play_ )
+      if ( run_ )
       {
          step_ = false;
          auto const FPS = ImGui::GetIO().Framerate;
@@ -949,6 +949,7 @@ Hack::Emulator::update_GUI_interface() -> void
       rom_display_.reset();
       ram_display_.reset();
       screen_display_.reset();
+
       open_file( current_file_ );
    }
 }
@@ -1004,10 +1005,6 @@ Hack::Emulator::main_window()  -> void
 
    with_Child( "##ROM Display", ImVec2( 225 , child_height), ImGuiChildFlags_Border  )
    {
-      if ( play_ || step_ || options.track_pc )
-      {
-         
-      }
       display_ROM();
    }
 
@@ -1117,7 +1114,9 @@ Hack::Emulator::command_GUI() -> main_options
       if ( ImGui::Button( "Restart" ) )
       {
          computer_.reset();
-         rom_display_.select( computer_.pc() );
+         rom_display_.reset();
+         ram_display_.reset();
+         screen_display_.reset();
          alu_display_.clear();
 
          play_    = false;
@@ -1142,6 +1141,10 @@ Hack::Emulator::command_GUI() -> main_options
       if ( ImGui::ArrowButton( "Continue", ImGuiDir_Right ) )
       {
          play_ = true;
+         if ( animating_ )
+         {
+            launch_animations();
+         }
       }
       ImGui::SetItemTooltip( "Step through program instructions until 'Stop' button is clicked" );
 
@@ -1191,7 +1194,7 @@ Hack::Emulator::command_GUI() -> main_options
       ImGui::SetNextItemWidth( 150.0f );
       ImGui::SliderFloat( "##Speed", &speed_, 200'000.0F, 5'000'000.0F, "" );
    }
- 
+
    return { track_pc, static_cast<Format>( display_format ) };
 }
 
@@ -1319,181 +1322,6 @@ Hack::Emulator::display_screen( Format fmt ) -> void
    screen_display_.update( fmt, ImGuiWindowFlags_None );
 }
 
-
-auto
-Hack::Emulator::internals( Format fmt ) -> void
-{
-   ImGui::Columns( 5 );
-
-   auto const offset = ( ImGui::GetContentRegionAvail().x - ITEM_WIDTH ) * 0.5f; // must be after call to Columns
-
-   GUI::Utils::CentreTextUnformatted( "--- Program Counter ---" );
-
-   auto& pc = computer_.pc();
-   ImGui::SetCursorPosX( ImGui::GetCursorPosX() + offset );
-   Formats::update_item( pc, fmt );
-
-   ImGui::NextColumn();
-
-   GUI::Utils::CentreTextUnformatted( "--- A Register ---" );
-
-   auto& a_register = computer_.A_Register();
-   ImGui::SetCursorPosX( ImGui::GetCursorPosX() + offset );
-   Formats::update_item( a_register, fmt );
-
-   ImGui::NextColumn();
-
-   GUI::Utils::CentreTextUnformatted( "--- D Register ---" );
-
-   auto& d_register = computer_.D_Register();
-   ImGui::SetCursorPosX( ImGui::GetCursorPosX() + offset );
-   Formats::update_item( d_register, fmt );
-
-   ImGui::NextColumn();
-
-   GUI::Utils::CentreTextUnformatted( "--- M Register ---" );
-
-   auto const label    = std::string( "RAM[" ) + std::to_string( a_register ) + std::string( "]:" );
-   auto const offset_m = ( ImGui::GetContentRegionAvail().x - ITEM_WIDTH - ImGui::CalcTextSize( label.data() ).x - ImGui::GetStyle().ItemSpacing.x ) * 0.5f;
-   
-   ImGui::SetCursorPosX( ImGui::GetCursorPosX() + offset_m );
-   ImGui::AlignTextToFramePadding();
-   ImGui::TextUnformatted( label.data() );
-   ImGui::SameLine();
-
-   if ( a_register < Computer::RAM_SIZE )
-   {
-      auto& m_register = computer_.M_Register();
-      Formats::update_item( m_register, fmt );
-   }
-   else
-   {
-      ImGui::SetNextItemWidth( ITEM_WIDTH );
-      ImGui::TextUnformatted( "N/A" );
-   }
-   
-
-   ImGui::NextColumn();
-
-   GUI::Utils::CentreTextUnformatted( "--- Keyboard ---" );
-   ImGui::Spacing();
-   auto const keyboard = std::to_string( computer_.keyboard() );
-   auto const kb_offset = ( ImGui::GetContentRegionAvail().x - ImGui::CalcTextSize( keyboard.data() ).x ) * 0.5f;
-   ImGui::SetCursorPosX( ImGui::GetCursorPosX() + kb_offset );
-   ImGui::TextUnformatted( keyboard.data() );
-}
-
-
-auto
-Hack::Emulator::display_cpu() -> void
-{
-   static auto am_register = Hack::Computer::word_t{};
-   static auto d_register  = Hack::Computer::word_t{};
-   static auto out         = Hack::Computer::word_t{};
-   static auto instruction = Hack::Computer::word_t{};
-   static bool update_alu  = false;
-
-   if ( update_alu )
-   {
-      out        = computer_.ALU_output();
-      update_alu = false;
-   }
-   if ( step_ || play_ )
-   {
-      auto const from_m_register = !Hack::Utils::is_a_instruction( instruction )    &&
-                                    Hack::Utils::is_a_bit_set( instruction )        &&  
-                                    ( computer_.A_Register() < Computer::RAM_SIZE );
-
-      am_register = ( from_m_register ) ? computer_.M_Register() : computer_.A_Register();
-      d_register  = computer_.D_Register();
-      instruction = computer_.ROM().at( computer_.pc() );
-      update_alu  = true;
-   }
-
-   ImGui::Spacing(); ImGui::Spacing(); ImGui::Spacing();
-
-   with_StyleVar( ImGuiStyleVar_SeparatorTextAlign, ImVec2{ 0.5, 0.5 } )
-      ImGui::SeparatorText( "Hack Computer ALU" );
-
-   ImGui::Spacing(); ImGui::Spacing(); ImGui::Spacing();
-
-   ImGui::Indent( 20.0f );
-
-   // A-instruction
-   //    • Binary:     0vvvvvvvvvvvvvvv
-   // C-instruction
-   //    • Binary:     111accccccdddjjj
-   
-   auto const binary = Hack::Utils::to_binary16_string( instruction );
-
-   if ( binary.front() == '0' )
-      ImGui::Text( "Instruction: %s", " --- " );
-   else
-      ImGui::Text( "Instruction: %s", binary.data() );
-
-   
-   ImGui::Spacing(); ImGui::Spacing(); ImGui::Spacing();
-
-   // ensure sufficient space for columns, else imgui will crash
-   if ( ImGui::GetContentRegionAvail().x < 50.0f )
-   {
-      return;
-   }
-
-   ImGui::Columns( 3 );
-  
-   {
-      ImGui::Spacing(); ImGui::Spacing(); ImGui::Spacing();
-
-      ImGui::Indent( 20.0f );
-      ImGui::TextUnformatted( "D Input:" );
-      // TODO:: change to ImGuiDataType_S16 representation
-      auto d = std::to_string( d_register );
-      ImGui::InputText( "##d input", &d, ImGuiInputTextFlags_ReadOnly );
-
-      ImGui::Spacing(); ImGui::Spacing(); ImGui::Spacing();
-      ImGui::Spacing(); ImGui::Spacing(); ImGui::Spacing();
-      
-      
-      auto a = std::to_string( am_register );
-      
-      ImGui::TextUnformatted( "M/A Input:" );
-      // TODO:: change to ImGuiDataType_S16 representation
-      ImGui::InputText( "##m/a input", &a, ImGuiInputTextFlags_ReadOnly );
-   }
-
-   ImGui::NextColumn();
-
-   {
-      GUI::Utils::CentreTextUnformatted( " --- Computation --- " );
-      auto const avail  = ImGui::GetContentRegionAvail().y;
-      auto const height = ImGui::GetFrameHeight();
-      auto const offset = ( avail - height ) * 0.5f;
-
-      if ( offset > 0.0 )
-         ImGui::SetCursorPosY( ImGui::GetCursorPosY() + offset );
-
-      auto const comp_opt = Disassembler::computation( binary );
-
-      if ( comp_opt )
-         GUI::Utils::CentreTextUnformatted( comp_opt->data() );
-      else
-         GUI::Utils::CentreTextUnformatted( "---" );
-   }
-
-   ImGui::NextColumn();
-
-   {
-      ImGui::Spacing(); ImGui::Spacing(); ImGui::Spacing();
-
-      auto alu_output = std::to_string( out );
-
-      ImGui::Indent( 20.0f );
-      ImGui::TextUnformatted( "ALU Output:" );
-      // TODO:: change to ImGuiDataType_S16 representation
-      ImGui::InputText( "##alu_ouput", &alu_output, ImGuiInputTextFlags_ReadOnly );
-   }
-}
 
 
 auto
