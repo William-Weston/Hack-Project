@@ -14,6 +14,7 @@
 // ------------------------------------------ includes --------------------------------------------
 
 #include <bit>                // for bit_cast
+#include <bitset>             // for bitset
 #include <charconv>           // for from_chars, from_chars_result
 #include <cstddef>            // for size_t
 #include <cstdint>            // for uint16_t, int16_t
@@ -95,16 +96,19 @@ auto to_upper( std::string& str, std::in_place_t ) -> void;
 // Hack Code Utilities ----------------------------------------------------------------------------
 
 // A-instruction - Binary:  0vvvvvvvvvvvvvvv        •  vv ... v = 15-bit value of xxx
-constexpr auto is_a_instruction( std::uint16_t instruction )    -> bool;
+constexpr auto is_a_instruction( std::uint16_t instruction )        -> bool;
 
 // C-instruction - Binary:  111 a cccccc ddd jjj    • jjj bits indicate this is a jump instruction
-constexpr auto is_jump_instruction( std::uint16_t instruction ) -> bool;
+constexpr auto is_jump_instruction( std::uint16_t instruction )     -> bool;
+
+// does a jump result given the instruction and out value representing ALU output
+constexpr auto jump( std::uint16_t instruction, std::uint16_t out ) -> bool;
 
 // if the 'a' bit is set then the y input to the ALU comes from the M register (RAM_[A]), else from the A register
-constexpr auto is_a_bit_set( std::uint16_t instruction )       -> bool;
+constexpr auto is_a_bit_set( std::uint16_t instruction )            -> bool;
 
 // does the string represent a 16-bit binary number
-constexpr auto is_binary16_string( std::string_view str )      -> bool;
+constexpr auto is_binary16_string( std::string_view str )           -> bool;
 
 
 // ------------------------------------------------------------------------------------------------
@@ -241,6 +245,47 @@ Hack::Utils::is_jump_instruction( std::uint16_t instruction ) -> bool
    return instruction & mask;
 }
 
+// does a jump result given the instruction and out value representing ALU output
+constexpr auto 
+Hack::Utils::jump( std::uint16_t instruction, std::uint16_t out ) -> bool
+{
+   auto const signed_out = unsigned_to_signed_16( out );
+
+   // 1111'1100'0000'0000
+   // 5432'1098'7654'3210
+   // 111a'cccc'ccdd'djjj
+   auto const bits = std::bitset<16>( instruction );
+
+   auto const jmp_lt = bits.test( 2 );
+   auto const jmp_eq = bits.test( 1 );
+   auto const jmp_gt = bits.test( 0 );
+
+   if ( jmp_lt )
+   {
+      if ( signed_out < 0 )
+      {
+         return true;
+      }
+   }
+
+   if ( jmp_eq )
+   {
+      if ( signed_out == 0 )
+      {
+         return true;
+      }
+   }
+
+   if ( jmp_gt )
+   {
+      if ( signed_out > 0 )
+      {
+         return true;
+      }
+   }
+
+   return false;
+}
 
 constexpr auto 
 Hack::Utils::is_a_bit_set( std::uint16_t instruction )     -> bool
