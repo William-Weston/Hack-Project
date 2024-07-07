@@ -116,6 +116,8 @@ public:
    [[nodiscard]]
    auto get_data_location()                      const -> DataLocation;
  
+   // reset display 
+   auto reset()                                         -> void;
 
 private:
    Container&   data_;
@@ -154,7 +156,9 @@ DataDisplay<Container>::update( Format fmt, ImGuiWindowFlags flags )   -> void
       auto clipper = ImGuiListClipper();
       clipper.Begin( static_cast<int>( end_ - start_ ) );
 
-      if ( track_selected_ || update_selected_ )
+      // TODO: Fix bug where is_selected_visible returns wrong value only while animating
+      //       commenting this line out fixes it, not permanent solution
+   //   if ( track_selected_ || update_selected_ )
       {
          clipper.IncludeItemByIndex( static_cast<int>( selected_item_ - start_) );
       }
@@ -183,9 +187,7 @@ DataDisplay<Container>::update( Format fmt, ImGuiWindowFlags flags )   -> void
                Formats::update_item( value, real_index, selected && highlight_, fmt );
          
             if ( selected )
-            {
-               is_selected_visible_ = ImGui::IsItemVisible();
-              
+            { 
                data_location_       = { ImGui::GetItemRectMin(), ImGui::GetItemRectMax(), Hack::EMULATOR::Utils::to_string( fmt, value ) };
                is_selected_visible_ = visible;
 
@@ -278,6 +280,18 @@ DataDisplay<Container>::get_data_location()  const -> DataLocation
 {
    return data_location_;
 }
+
+
+template <typename Container> auto
+DataDisplay<Container>::reset()   -> void
+{
+   selected_item_   = start_;
+   display_item_    = start_;
+   track_selected_  = false;
+   track_displayed_ = false;
+   update_selected_ = false;
+}
+
 
 }  // namesoace Hack
 
