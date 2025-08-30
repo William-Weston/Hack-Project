@@ -1215,7 +1215,7 @@ Hack::Emulator::ROM_Display( ROMFormat const fmt, int const idx ) -> void
             ImGui::AlignTextToFramePadding();
             ImGui::Text( "%d", idx );
             ImGui::SameLine( 60 );
-            ImGui::InputText( "rom", &asm_instruction );
+            ImGui::InputText( "##romasm", &asm_instruction );
          }
       }
       else
@@ -1223,12 +1223,13 @@ Hack::Emulator::ROM_Display( ROMFormat const fmt, int const idx ) -> void
          ImGui::AlignTextToFramePadding();
          ImGui::Text( "%d", idx );
          ImGui::SameLine( 60 );
-         ImGui::InputText( "rom", &asm_instruction );
+         ImGui::InputText( "##romasm", &asm_instruction );
       }
 
       if ( asm_instruction ==  "---" )
          return;
-
+      
+      // has the user updated the instruction
       if ( asm_opt && *asm_opt == asm_instruction )
          return;
       
