@@ -53,8 +53,7 @@ CMakeUserPresets.json
 
 
 # VSCode 
-.vscode/settings.json
-.vsode/
+.vscode/
 
 # Backup files
 *.backup
